@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abhay Jain — Video Editor &amp; Motion Designer</title>
+<meta name="description" content="Abhay Jain — video editor, motion designer and storyteller. Commercials, music videos, cinematic shorts and brand films.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;overscroll-behavior:none}
+::selection{background:rgba(229,9,20,.45);color:#fff}
+@keyframes grain{0%,100%{transform:translate(0,0)}10%{transform:translate(-2%,-4%)}20%{transform:translate(-5%,3%)}30%{transform:translate(3%,-6%)}40%{transform:translate(-3%,5%)}50%{transform:translate(4%,2%)}60%{transform:translate(-4%,-2%)}70%{transform:translate(2%,4%)}80%{transform:translate(-1%,-3%)}90%{transform:translate(3%,1%)}}
+@keyframes spin360{from{transform:rotateY(0deg) rotateX(10deg)}to{transform:rotateY(360deg) rotateX(10deg)}}
+@keyframes pulseGlow{0%,100%{opacity:.45;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+@keyframes marqueeScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes ringSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes ringSpinRev{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+</style>
+</helmet>
+<div ref="{{rootRef}}" style="{{rootStyle}}">
+
+<div style="position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.05;background-image:radial-gradient(rgba(255,255,255,.9) 1px, transparent 1px);background-size:3px 3px;animation:grain 0.4s steps(2) infinite"></div>
+
+<sc-if value="{{loading}}" hint-placeholder-val="{{true}}">
+<div style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px">
+  <div style="font-family:'Anton',sans-serif;font-size:clamp(40px,7vw,90px);letter-spacing:2px;color:var(--text);opacity:.92">ABHAY JAIN</div>
+  <div style="width:min(60vw,420px);height:2px;background:rgba(255,255,255,.12);position:relative;overflow:hidden">
+    <div ref="{{loaderBarRef}}" style="position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--a),var(--b))"></div>
+  </div>
+  <div ref="{{loaderPctRef}}" style="font-family:'Manrope',sans-serif;font-size:13px;letter-spacing:3px;color:var(--muted)">00%</div>
+</div>
+</sc-if>
+
+<sc-if value="{{enableCursorFlag}}" hint-placeholder-val="{{true}}">
+<div ref="{{cursorDotRef}}" style="position:fixed;top:0;left:0;width:6px;height:6px;border-radius:50%;background:var(--a);z-index:9998;pointer-events:none;transform:translate(-50%,-50%);will-change:transform"></div>
+<div ref="{{cursorRingRef}}" style="position:fixed;top:0;left:0;width:44px;height:44px;border-radius:50%;border:1px solid var(--text);z-index:9997;pointer-events:none;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;transition:width .25s ease,height .25s ease,border-color .25s ease,background .25s ease;will-change:transform">
+  <span ref="{{cursorLabelRef}}" style="font-size:9px;letter-spacing:2px;font-weight:700;color:var(--text);opacity:0"></span>
+</div>
+</sc-if>
+
+<nav style="position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:22px clamp(20px,4vw,56px);backdrop-filter:blur(10px);background:linear-gradient(to bottom, rgba(0,0,0,.35), transparent)">
+  <a href="#top" style="font-family:'Anton',sans-serif;font-size:20px;letter-spacing:1px;color:var(--text);text-decoration:none">AJ<span style="color:var(--a)">.</span></a>
+  <div style="display:none;gap:34px;align-items:center" data-desktop-nav="1">
+    <sc-for list="{{navLinks}}" as="link" hint-placeholder-count="5">
+      <a href="{{link.href}}" style="font-size:13px;letter-spacing:.5px;color:var(--text);text-decoration:none;opacity:.85">{{link.label}}</a>
+    </sc-for>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div style="display:none;gap:8px" data-desktop-nav="1">
+      <sc-for list="{{themeSwatches}}" as="t" hint-placeholder-count="6">
+        <button onClick="{{t.onClick}}" title="{{t.name}}" style="width:16px;height:16px;border-radius:50%;border:1px solid rgba(255,255,255,.3);cursor:pointer;padding:0;background:linear-gradient(135deg,{{t.a}},{{t.b}})"></button>
+      </sc-for>
+    </div>
+    <sc-if value="{{enableMusicFlag}}" hint-placeholder-val="{{true}}">
+    <button onClick="{{toggleMusic}}" style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--text);cursor:pointer;font-size:13px">{{musicIcon}}</button>
+    </sc-if>
+    <button onClick="{{toggleMenu}}" style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--text);cursor:pointer;font-size:11px;letter-spacing:1px">{{menuLabel}}</button>
+  </div>
+</nav>
+
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+<div style="position:fixed;inset:0;z-index:600;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px">
+  <button onClick="{{toggleMenu}}" style="position:absolute;top:26px;right:clamp(20px,4vw,56px);width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--text);cursor:pointer">✕</button>
+  <sc-for list="{{navLinks}}" as="link" hint-placeholder-count="5">
+    <a href="{{link.href}}" onClick="{{toggleMenu}}" style="font-family:'Anton',sans-serif;font-size:clamp(30px,7vw,48px);color:var(--text);text-decoration:none">{{link.label}}</a>
+  </sc-for>
+  <div style="display:flex;gap:12px;margin-top:20px">
+    <sc-for list="{{themeSwatches}}" as="t" hint-placeholder-count="6">
+      <button onClick="{{t.onClick}}" title="{{t.name}}" style="width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.3);cursor:pointer;padding:0;background:linear-gradient(135deg,{{t.a}},{{t.b}})"></button>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<section id="top" style="position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;padding:120px clamp(20px,4vw,56px) 60px">
+  <div style="position:absolute;inset:0;background:radial-gradient(60% 50% at 30% 20%, color-mix(in oklab, var(--a) 25%, transparent), transparent),radial-gradient(50% 40% at 80% 80%, color-mix(in oklab, var(--b) 18%, transparent), transparent)"></div>
+
+  <sc-for list="{{particles}}" as="p" hint-placeholder-count="24">
+    <div style="{{p.style}}"></div>
+  </sc-for>
+
+  <div ref="{{heroObjRef}}" style="position:absolute;right:6%;top:18%;width:min(38vw,420px);height:min(38vw,420px);perspective:900px;transform-style:preserve-3d;pointer-events:none;opacity:.9">
+    <div style="position:absolute;inset:0;transform-style:preserve-3d;animation:spin360 14s linear infinite">
+      <div style="position:absolute;inset:8%;border-radius:50%;border:2px solid color-mix(in oklab, var(--a) 70%, transparent);transform:rotateX(70deg)"></div>
+      <div style="position:absolute;inset:18%;border-radius:50%;border:2px solid color-mix(in oklab, var(--b) 60%, transparent);transform:rotateY(70deg)"></div>
+      <div style="position:absolute;inset:32%;border-radius:50%;border:1px solid var(--text);opacity:.5"></div>
+      <div style="position:absolute;inset:44%;border-radius:50%;background:radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--a) 60%, white 10%), var(--surface));box-shadow:0 0 60px color-mix(in oklab, var(--a) 50%, transparent)"></div>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:0;right:0;top:8%;height:64px;opacity:.16;background-image:repeating-linear-gradient(90deg, var(--text) 0 6px, transparent 6px 26px);animation:floatY 7s ease-in-out infinite"></div>
+  <div style="position:absolute;left:0;right:0;bottom:16%;height:40px;opacity:.1;background-image:repeating-linear-gradient(90deg, var(--text) 0 4px, transparent 4px 20px);animation:floatY 9s ease-in-out infinite reverse"></div>
+
+  <div style="position:relative;z-index:2;max-width:1100px">
+    <div style="font-size:13px;letter-spacing:4px;color:var(--muted);margin-bottom:22px;display:flex;align-items:center;gap:10px" data-reveal="1">
+      <span style="width:34px;height:1px;background:var(--a)"></span>PORTFOLIO — 2026
+    </div>
+    <h1 style="font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(44px,9vw,132px);line-height:.96;letter-spacing:.5px;margin:0;text-wrap:pretty" data-reveal="1">
+      I DON'T JUST EDIT VIDEOS.<br>I CREATE <span style="color:var(--a);text-shadow:0 0 40px color-mix(in oklab, var(--a) 60%, transparent)">EXPERIENCES.</span>
+    </h1>
+    <div style="display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:30px" data-reveal="1">
+      <sc-for list="{{roles}}" as="r" hint-placeholder-count="3">
+        <span style="font-size:15px;color:var(--muted);letter-spacing:.3px">{{r}}</span>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:18px;margin-top:44px" data-reveal="1">
+      <a href="#work" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}" data-cursor="view" style="display:inline-flex;align-items:center;gap:10px;padding:18px 32px;background:var(--a);color:#fff;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:.5px;border-radius:100px">View Work →</a>
+      <a href="#contact" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}" style="display:inline-flex;align-items:center;gap:10px;padding:18px 32px;background:transparent;border:1px solid rgba(255,255,255,.3);color:var(--text);text-decoration:none;font-size:14px;font-weight:700;letter-spacing:.5px;border-radius:100px">Let's Work Together</a>
+    </div>
+  </div>
+
+  <div style="position:absolute;bottom:36px;left:clamp(20px,4vw,56px);display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:2px;color:var(--muted)">
+    <span style="width:1px;height:36px;background:linear-gradient(var(--muted),transparent);display:inline-block"></span>SCROLL
+  </div>
+</section>
+
+<div style="position:relative;padding:22px 0;background:var(--surface);overflow:hidden;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)">
+  <div style="display:flex;width:max-content;gap:60px;animation:marqueeScroll 22s linear infinite">
+    <sc-for list="{{marqueeWords}}" as="w" hint-placeholder-count="10">
+      <span style="font-family:'Anton',sans-serif;font-size:28px;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:16px">{{w}} <span style="width:6px;height:6px;border-radius:50%;background:var(--a)"></span></span>
+    </sc-for>
+  </div>
+</div>
+
+<section id="about" style="padding:160px clamp(20px,4vw,56px);display:grid;grid-template-columns:1fr;gap:60px;max-width:1400px;margin:0 auto">
+  <div style="display:grid;grid-template-columns:1fr;gap:16px" data-desktop-grid="about">
+    <div style="max-width:800px" data-reveal="1">
+      <div style="font-size:13px;letter-spacing:4px;color:var(--a);margin-bottom:20px">ABOUT</div>
+      <p style="font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(28px,4.2vw,56px);line-height:1.15;margin:0;text-wrap:pretty">
+        Every frame has purpose. Every cut tells a story. Every transition creates emotion.
+      </p>
+      <p style="font-size:17px;line-height:1.7;color:var(--muted);max-width:560px;margin-top:34px">Abhay Jain is a video editor and motion designer working across commercials, music videos, cinematic shorts and brand films — six years of turning raw footage into films people remember.</p>
+    </div>
+    <div style="position:relative;width:min(100%,420px);aspect-ratio:4/5;margin-top:20px" data-reveal="1">
+      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="about-portrait" shape="rounded" radius="18" placeholder="Drop portrait photo" style="width:100%;height:100%" hint-size="360px,450px"></x-import>
+    </div>
+  </div>
+</section>
+
+<section style="padding:0 clamp(20px,4vw,56px) 140px;max-width:1400px;margin:0 auto">
+  <div style="text-align:center;font-size:13px;letter-spacing:4px;color:var(--a);margin-bottom:26px" data-reveal="1">RAW → GRADED</div>
+  <div ref="{{baWrapRef}}" style="position:relative;width:100%;max-width:1000px;margin:0 auto;aspect-ratio:16/9;border-radius:16px;overflow:hidden;cursor:ew-resize" data-reveal="1" onMouseDown="{{baStart}}" onTouchStart="{{baStart}}">
+    <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="ba-raw" shape="rect" placeholder="Drop RAW footage still" style="position:absolute;inset:0;width:100%;height:100%" hint-size="100%,100%"></x-import>
+    <div ref="{{baOverlayRef}}" style="position:absolute;inset:0;width:50%;overflow:hidden">
+      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="ba-graded" shape="rect" placeholder="Drop GRADED still" style="position:absolute;top:0;left:0;height:100%;width:200%" hint-size="100%,100%"></x-import>
+    </div>
+    <div ref="{{baHandleRef}}" style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:#fff;pointer-events:none">
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;color:#111">↔</div>
+    </div>
+  </div>
+</section>
+
+<section ref="{{statsWrapRef}}" style="padding:80px clamp(20px,4vw,56px) 140px;display:grid;grid-template-columns:repeat(2,1fr);gap:40px;max-width:1200px;margin:0 auto">
+  <sc-for list="{{stats}}" as="s" hint-placeholder-count="4">
+    <div style="text-align:center;padding:30px 10px;border-radius:14px;background:var(--surface)" data-reveal="1">
+      <div style="font-family:'Anton',sans-serif;font-size:clamp(34px,5vw,58px);color:var(--a);display:flex;align-items:baseline;justify-content:center;gap:2px">
+        <span ref="{{s.ref}}">0</span><span>{{s.suffix}}</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);letter-spacing:.5px;margin-top:8px">{{s.label}}</div>
+    </div>
+  </sc-for>
+</section>
+
+<section id="work" style="padding:0 0 40px">
+  <div style="padding:0 clamp(20px,4vw,56px);margin-bottom:44px" data-reveal="1">
+    <div style="font-size:13px;letter-spacing:4px;color:var(--a);margin-bottom:20px">SELECTED WORK</div>
+    <p style="font-family:'Anton',sans-serif;font-size:clamp(30px,5vw,64px);margin:0">Projects worth pausing for.</p>
+  </div>
+  <div ref="{{horizWrapRef}}" style="position:relative;height:100vh;overflow:hidden">
+    <div ref="{{trackRef}}" style="display:flex;height:100%;width:max-content;will-change:transform">
+      <sc-for list="{{projects}}" as="pr" hint-placeholder-count="6">
+        <div data-cursor="view" onMouseMove="{{tiltMove}}" onMouseLeave="{{tiltLeave}}" style="position:relative;width:80vw;max-width:1100px;height:100%;flex-shrink:0;margin-right:3vw;border-radius:20px;overflow:hidden">
+          <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="project-{{pr.id}}" shape="rect" placeholder="Drop project still/thumbnail" style="position:absolute;inset:0;width:100%;height:100%" hint-size="100%,100%"></x-import>
+          <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,.15) 55%, transparent);pointer-events:none"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;padding:clamp(24px,4vw,56px);color:#fff">
+            <div style="display:flex;gap:16px;font-size:12px;letter-spacing:1.5px;color:rgba(255,255,255,.7);margin-bottom:14px">
+              <span>{{pr.category}}</span><span>{{pr.year}}</span><span>{{pr.software}}</span>
+            </div>
+            <div style="font-family:'Anton',sans-serif;font-size:clamp(28px,4.5vw,56px);line-height:1">{{pr.title}}</div>
+            <p style="max-width:560px;color:rgba(255,255,255,.75);font-size:15px;line-height:1.6;margin:16px 0">{{pr.desc}}</p>
+            <div style="display:flex;gap:20px;align-items:center;font-size:13px;color:rgba(255,255,255,.6)"><span>{{pr.role}}</span><span style="color:#fff;font-weight:700">View Case Study →</span></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="gallery" style="padding:160px clamp(20px,4vw,56px);max-width:1400px;margin:0 auto">
+  <div style="margin-bottom:40px" data-reveal="1">
+    <div style="font-size:13px;letter-spacing:4px;color:var(--a);margin-bottom:20px">VIDEO GALLERY</div>
+    <p style="font-family:'Anton',sans-serif;font-size:clamp(28px,4.5vw,56px);margin:0">Every format. Every story.</p>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px">
+    <sc-for list="{{filterTabs}}" as="f" hint-placeholder-count="9">
+      <button onClick="{{f.onClick}}" style="{{f.style}}">{{f.label}}</button>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px">
+    <sc-for list="{{galleryFiltered}}" as="g" hint-placeholder-count="9">
+      <div data-cursor="play" style="position:relative;border-radius:14px;overflow:hidden;aspect-ratio:{{g.ratio}}">
+        <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="gallery-{{g.id}}" shape="rect" placeholder="Drop clip thumbnail" style="width:100%;height:100%" hint-size="100%,100%"></x-import>
+        <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,.75), transparent 50%);pointer-events:none;display:flex;align-items:flex-end;padding:16px">
+          <div>
+            <div style="font-size:11px;letter-spacing:1.5px;color:var(--a);font-weight:700">{{g.tag}}</div>
+            <div style="font-size:16px;color:#fff;font-weight:600">{{g.title}}</div>
+          </div>
+        </div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;pointer-events:none">▶</div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section id="reel" style="position:relative;padding:0 clamp(20px,4vw,56px) 160px">
+  <div style="position:relative;max-width:1400px;margin:0 auto;aspect-ratio:21/9;border-radius:20px;overflow:hidden;background:repeating-linear-gradient(135deg, var(--surface) 0 22px, color-mix(in oklab, var(--surface) 80%, black) 22px 44px)">
+    <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 50%, transparent, rgba(0,0,0,.6))"></div>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px">
+      <button onClick="{{openReel}}" data-cursor="play" style="width:96px;height:96px;border-radius:50%;border:2px solid #fff;background:rgba(255,255,255,.08);color:#fff;font-size:24px;cursor:pointer;animation:pulseGlow 2.6s ease-in-out infinite">▶</button>
+      <div style="font-family:'Anton',sans-serif;font-size:clamp(24px,3.5vw,42px);color:#fff;letter-spacing:1px">2026 SHOWREEL</div>
+      <div style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,.5)">SHOWREEL.MP4 — DROP FILE TO REPLACE</div>
+    </div>
+  </div>
+</section>
+
+<sc-if value="{{reelOpen}}" hint-placeholder-val="{{false}}">
+<div style="position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:40px">
+  <button onClick="{{closeReel}}" style="position:absolute;top:26px;right:clamp(20px,4vw,56px);width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;cursor:pointer">✕</button>
+  <div style="width:min(1100px,90vw);aspect-ratio:16/9;border-radius:12px;background:repeating-linear-gradient(135deg, #151515 0 22px, #0c0c0c 22px 44px);display:flex;align-items:center;justify-content:center;font-family:ui-monospace,monospace;color:rgba(255,255,255,.6);font-size:13px;letter-spacing:1px">SHOWREEL.MP4 — DROP FILE TO REPLACE</div>
+</div>
+</sc-if>
+
+<section id="process" style="padding:160px clamp(20px,4vw,56px);max-width:1100px;margin:0 auto">
+  <div style="margin-bottom:60px" data-reveal="1">
+    <div style="font-size:13px;letter-spacing:4px;color:var(--a);margin-bottom:20px">HOW IT'S MADE</div>
+    <p style="font-family:'Anton',sans-serif;font-size:clamp(28px,4.5vw,56px);margin:0">The editing process.</p>
+  </div>
+  <div style="display:flex;flex-direction:column">
+    <sc-for list="{{timeline}}" as="step" hint-placeholder-count="6">
+      <div data-reveal="1" style="display:grid;grid-template-columns:70px 1fr;gap:24px;padding:26px 0;border-top:1px solid rgba(255,255,255,.1)">
+        <div style="font-family:'Anton',sans-serif;font-size:28px;color:var(--a)">{{step.n}}</div>
+        <div>
+          <div style="font-size:22px;font-weight:700">{{step.title}}</div>
+          <div style="font-size:15px;color:var(--muted);margin-top:6px;max-width:560px">{{step.desc}}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<div style="position:relative;padding:26px 0;background:var(--surface);overflow:hidden;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)">
+  <div style="display:flex;width:max-content;gap:70px;animation:marqueeScroll 26s linear infinite reverse;align-items:center">
+    <sc-for list="{{clientLogos}}" as="c" hint-placeholder-count="12">
+      <span style="font-family:'Anton',sans-serif;font-size:20px;letter-spacing:1px;color:var(--muted);white-space:nowrap;border:1px solid rgba(255,255,255,.15);padding:10px 22px;border-radius:8px">{{c}}</span>
+    </sc-for>
+  </div>
+</div>
+
+<section style="padding:160px clamp(20px,4vw,56px);max-width:900px;margin:0 auto;text-align:center">
+  <div style="font-size:13px;letter-spacing:4px;color:var(--a);margin-bottom:40px" data-reveal="1">CLIENT WORDS</div>
+  <div style="position:relative;min-height:260px;perspective:1200px">
+    <sc-for list="{{testimonialsRendered}}" as="t" hint-placeholder-count="4">
+      <div style="{{t.style}}">
+        <p style="font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(20px,2.6vw,32px);line-height:1.3;margin:0 0 22px">{{t.quote}}</p>
+        <div style="font-size:14px;font-weight:700">{{t.name}}</div>
+        <div style="font-size:13px;color:var(--muted)">{{t.role}}</div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:flex;justify-content:center;gap:10px;margin-top:30px">
+    <sc-for list="{{testDots}}" as="d" hint-placeholder-count="4">
+      <button onClick="{{d.onClick}}" style="{{d.style}}"></button>
+    </sc-for>
+  </div>
+</section>
+
+<section id="skills" style="padding:0 clamp(20px,4vw,56px) 160px;max-width:1300px;margin:0 auto">
+  <div style="margin-bottom:50px" data-reveal="1">
+    <div style="font-size:13px;letter-spacing:4px;color:var(--a);margin-bottom:20px">TOOLKIT</div>
+    <p style="font-family:'Anton',sans-serif;font-size:clamp(28px,4.5vw,56px);margin:0">Built with the right tools.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:28px">
+    <sc-for list="{{skillsRendered}}" as="sk" hint-placeholder-count="6">
+      <div data-reveal="1" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:26px 12px;border-radius:16px;background:var(--surface)">
+        <svg width="96" height="96" viewBox="0 0 96 96" style="transform:rotate(-90deg)">
+          <circle cx="48" cy="48" r="42" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="6"></circle>
+          <circle cx="48" cy="48" r="42" fill="none" stroke="var(--a)" stroke-width="6" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="{{sk.dashoffset}}"></circle>
+        </svg>
+        <div style="margin-top:-72px;font-family:'Anton',sans-serif;font-size:20px">{{sk.level}}%</div>
+        <div style="margin-top:44px;font-size:14px;font-weight:600;text-align:center">{{sk.name}}</div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section id="contact" style="position:relative;padding:180px clamp(20px,4vw,56px);text-align:center;overflow:hidden">
+  <div style="position:absolute;inset:0;background:radial-gradient(50% 50% at 50% 50%, color-mix(in oklab, var(--a) 18%, transparent), transparent)"></div>
+  <div style="position:relative" data-reveal="1">
+    <p style="font-family:'Anton',sans-serif;font-size:clamp(34px,7vw,96px);line-height:1;margin:0 0 44px;text-wrap:pretty">Let's create something<br>unforgettable.</p>
+    <a href="mailto:hello@abhayjain.com" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}" data-cursor="expand" style="display:inline-flex;align-items:center;gap:10px;padding:22px 46px;background:var(--a);color:#fff;text-decoration:none;font-size:16px;font-weight:700;border-radius:100px">Start a Project →</a>
+  </div>
+</section>
+
+<footer style="padding:60px clamp(20px,4vw,56px) 40px;border-top:1px solid rgba(255,255,255,.1);display:flex;flex-wrap:wrap;justify-content:space-between;gap:30px;max-width:1400px;margin:0 auto">
+  <div>
+    <div style="font-family:'Anton',sans-serif;font-size:22px">Abhay Jain</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:6px">hello@abhayjain.com — Based in Mumbai, IN</div>
+  </div>
+  <div style="display:flex;gap:22px;flex-wrap:wrap">
+    <sc-for list="{{socials}}" as="soc" hint-placeholder-count="4">
+      <a href="{{soc.href}}" style="font-size:13px;color:var(--muted);text-decoration:none">{{soc.label}}</a>
+    </sc-for>
+  </div>
+  <div style="font-family:'Anton',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted)">© 2026 — CUT WITH PURPOSE</div>
+</footer>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: {&quot;width&quot;: 1600, &quot;height&quot;: 1000},
+  &quot;defaultTheme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;crimson&quot;, &quot;options&quot;: [&quot;crimson&quot;,&quot;arctic&quot;,&quot;cyber&quot;,&quot;emerald&quot;,&quot;sunset&quot;,&quot;mono&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Behavior&quot;},
+  &quot;enableMusic&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Behavior&quot;},
+  &quot;enableCursor&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Behavior&quot;}
+}">
+class Component extends DCLogic {
+  themesData = {
+    crimson: {name:'Crimson Cinema', bg:'#050505', surface:'#111111', text:'#FFFFFF', muted:'rgba(255,255,255,.55)', a:'#E50914', b:'#FF4D5A'},
+    arctic: {name:'Arctic Minimal', bg:'#F7F7F5', surface:'#FFFFFF', text:'#111111', muted:'#666666', a:'#4A90E2', b:'#7BB0EA'},
+    cyber: {name:'Cyber Neon', bg:'#060B16', surface:'#101827', text:'#EAF6FF', muted:'rgba(234,246,255,.55)', a:'#00F5FF', b:'#FF00C8'},
+    emerald: {name:'Emerald Luxe', bg:'#08110E', surface:'#12221A', text:'#F8F8F8', muted:'rgba(248,248,248,.55)', a:'#2ECC71', b:'#D4AF37'},
+    sunset: {name:'Sunset Gold', bg:'#1A0F07', surface:'#2C1A10', text:'#FFE8C7', muted:'rgba(255,232,199,.55)', a:'#FF7A00', b:'#FFD700'},
+    mono: {name:'Monochrome Editorial', bg:'#000000', surface:'#1A1A1A', text:'#FFFFFF', muted:'#888888', a:'#CCCCCC', b:'#CCCCCC'}
+  };
+
+  navLinksData = [
+    {label:'Work',href:'#work'},{label:'Gallery',href:'#gallery'},{label:'Reel',href:'#reel'},
+    {label:'Process',href:'#process'},{label:'Contact',href:'#contact'}
+  ];
+
+  rolesData = ['Professional Video Editor','Motion Designer','Storyteller'];
+  marqueeWordsData = ['COMMERCIAL','CINEMATIC','MUSIC VIDEOS','SOCIAL','SPORTS','REAL ESTATE','WEDDING','CORPORATE','GAMING','COMMERCIAL','CINEMATIC','MUSIC VIDEOS','SOCIAL','SPORTS','REAL ESTATE','WEDDING','CORPORATE','GAMING'];
+
+  projectsData = [
+    {id:1,title:'Midnight Run',category:'Commercial',year:'2025',software:'Premiere Pro · DaVinci Resolve',role:'Lead Editor',desc:"A high-octane spot cut for speed — every transition timed to the engine's rhythm."},
+    {id:2,title:'Echoes',category:'Music Video',year:'2024',software:'After Effects · Premiere Pro',role:'Editor & Colorist',desc:'A single-take performance reimagined through layered color and light.'},
+    {id:3,title:'Skyline Stories',category:'Real Estate',year:'2025',software:'DaVinci Resolve',role:'Editor',desc:"Aerial footage turned into a slow, confident walkthrough of the city's best address."},
+    {id:4,title:'Nightfall',category:'Cinematic Short',year:'2024',software:'Premiere Pro · After Effects · Blender',role:'Editor / VFX',desc:"A three-minute short built in the edit, with VFX filling in what the camera couldn't."},
+    {id:5,title:'Fueled',category:'Sports',year:'2025',software:'Premiere Pro',role:'Editor',desc:'Match-day chaos cut into a two-minute highlight reel that never lets up.'},
+    {id:6,title:'Threadbare',category:'Corporate',year:'2023',software:'DaVinci Resolve · After Effects',role:'Lead Editor',desc:'A brand film about craft, told through the hands that make it.'}
+  ];
+
+  galleryData = [
+    {id:1,title:'Velocity',tag:'Sports',ratio:'16/9'},
+    {id:2,title:'Golden Hour',tag:'Wedding',ratio:'9/16'},
+    {id:3,title:'Skyline',tag:'Real Estate',ratio:'16/9'},
+    {id:4,title:'Neon Pulse',tag:'Music Videos',ratio:'1/1'},
+    {id:5,title:'Founders',tag:'Corporate',ratio:'16/9'},
+    {id:6,title:'After Dark',tag:'Cinematic',ratio:'16/9'},
+    {id:7,title:'Quick Cuts',tag:'Social Media',ratio:'9/16'},
+    {id:8,title:'Launch Day',tag:'Commercial',ratio:'16/9'},
+    {id:9,title:'Overtime',tag:'Sports',ratio:'9/16'},
+    {id:10,title:'Vows',tag:'Wedding',ratio:'16/9'},
+    {id:11,title:'Respawn',tag:'Gaming',ratio:'16/9'},
+    {id:12,title:'Rooftop',tag:'Commercial',ratio:'1/1'}
+  ];
+
+  filterTabsData = ['All','Commercial','Cinematic','Music Videos','Social Media','Sports','Real Estate','Wedding','Corporate','Gaming'];
+
+  timelineData = [
+    {n:'01',title:'Idea',desc:'Every project starts with a spark — a concept worth chasing.'},
+    {n:'02',title:'Planning',desc:'Shot lists, references, a plan tight enough to move fast on set.'},
+    {n:'03',title:'Editing',desc:'The story gets built in the timeline, frame by frame.'},
+    {n:'04',title:'Color Grading',desc:'Mood and tone locked in — light becomes feeling.'},
+    {n:'05',title:'Sound Design',desc:'Music, mix and effects that make the cut breathe.'},
+    {n:'06',title:'Final Delivery',desc:'Polished, exported, and ready for its audience.'}
+  ];
+
+  clientLogosData = ['NORTHPEAK','LOOPLINE','VANTAGE','STUDIO NINE','NIGHTSHIFT CO.','ORBIT MEDIA','FIELD & CO','HALCYON'];
+
+  testimonialsData = [
+    {quote:"“Abhay doesn't just cut footage — he finds the emotion hiding inside it.”",name:'Riya Malhotra',role:'Brand Director, Studio Nine'},
+    {quote:'"Fast, precise, and always one step ahead creatively."',name:'Karan Bhatt',role:'Founder, Loopline Films'},
+    {quote:'"Every delivery feels like a finished film, not just an edit."',name:'Meera Kapoor',role:'Producer, Vantage Media'},
+    {quote:'"He turned three hours of raw footage into ninety seconds of pure tension."',name:'Dev Anand',role:'Creative Lead, Nightshift Co.'}
+  ];
+
+  skillsData = [
+    {name:'Premiere Pro',level:95},{name:'After Effects',level:90},{name:'DaVinci Resolve',level:88},
+    {name:'Photoshop',level:80},{name:'Blender',level:65},{name:'Illustrator',level:70}
+  ];
+
+  statsData = [
+    {value:120,suffix:'+',label:'Projects Delivered'},
+    {value:24,suffix:'M+',label:'Views Generated'},
+    {value:6,suffix:'+',label:'Years Experience'},
+    {value:98,suffix:'%',label:'Client Satisfaction'}
+  ];
+
+  socialsData = [{label:'Instagram',href:'#'},{label:'YouTube',href:'#'},{label:'Vimeo',href:'#'},{label:'LinkedIn',href:'#'}];
+
+  rootRef = React.createRef();
+  loaderBarRef = React.createRef();
+  loaderPctRef = React.createRef();
+  cursorDotRef = React.createRef();
+  cursorRingRef = React.createRef();
+  cursorLabelRef = React.createRef();
+  heroObjRef = React.createRef();
+  horizWrapRef = React.createRef();
+  trackRef = React.createRef();
+  statsWrapRef = React.createRef();
+  baWrapRef = React.createRef();
+  baOverlayRef = React.createRef();
+  baHandleRef = React.createRef();
+  numRefs = this.statsData.map(() => React.createRef());
+
+  particlesData = Array.from({length:24}).map(() => ({
+    left: Math.random()*100, top: Math.random()*100, size: 1+Math.random()*2.5,
+    dur: 5+Math.random()*8, delay: Math.random()*6
+  }));
+
+  state = { themeKey: null, loading: true, filter: 'All', testIdx: 0, musicOn: false, menuOpen: false, reelOpen: false, isTouch: false, isDesktop: true };
+
+  constructor(props) {
+    super(props);
+    this.state.themeKey = props.defaultTheme || 'crimson';
+    this.magnetMove = this.magnetMove.bind(this);
+    this.magnetLeave = this.magnetLeave.bind(this);
+    this.tiltMove = this.tiltMove.bind(this);
+    this.tiltLeave = this.tiltLeave.bind(this);
+    this.baStart = this.baStart.bind(this);
+    this.baMove = this.baMove.bind(this);
+    this.baEnd = this.baEnd.bind(this);
+    this.onPointerMove = this.onPointerMove.bind(this);
+    this.onPointerOver = this.onPointerOver.bind(this);
+  }
+
+  componentDidMount() {
+    this.runPreloader();
+    document.addEventListener('mousemove', this.onPointerMove);
+    document.addEventListener('mouseover', this.onPointerOver);
+    document.addEventListener('mousemove', this.onHeroParallax = (e) => this.heroParallax(e));
+    if (window.matchMedia && window.matchMedia('(hover: none)').matches) this.setState({ isTouch: true });
+    const checkDesktop = () => this.setState({ isDesktop: window.innerWidth > 860 });
+    checkDesktop();
+    window.addEventListener('resize', this.onDesktopResize = checkDesktop);
+
+    const els = this.rootRef.current ? this.rootRef.current.querySelectorAll('[data-reveal]') : [];
+    els.forEach((el) => { el.style.opacity = 0; el.style.transform = 'translateY(40px)'; el.style.transition = 'opacity 1s ease, transform 1s ease'; });
+    this.io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) { en.target.style.opacity = 1; en.target.style.transform = 'translateY(0)'; this.io.unobserve(en.target); }
+      });
+    }, { threshold: 0.15 });
+    els.forEach((el) => this.io.observe(el));
+
+    this.statsIO = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { this.runCounters(); this.statsIO.disconnect(); } });
+    }, { threshold: 0.3 });
+    if (this.statsWrapRef.current) this.statsIO.observe(this.statsWrapRef.current);
+
+    this.testInterval = setInterval(() => {
+      this.setState((s) => ({ testIdx: (s.testIdx + 1) % this.testimonialsData.length }));
+    }, 6000);
+
+    setTimeout(() => this.setupHorizontalScroll(), 400);
+    window.addEventListener('resize', this.onResize = () => { if (window.ScrollTrigger) window.ScrollTrigger.refresh(); });
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mousemove', this.onPointerMove);
+    document.removeEventListener('mouseover', this.onPointerOver);
+    document.removeEventListener('mousemove', this.onHeroParallax);
+    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('resize', this.onDesktopResize);
+    if (this.io) this.io.disconnect();
+    if (this.statsIO) this.statsIO.disconnect();
+    if (this.testInterval) clearInterval(this.testInterval);
+    if (this.loaderTimer) clearInterval(this.loaderTimer);
+    if (this.horizTween && this.horizTween.scrollTrigger) this.horizTween.scrollTrigger.kill();
+    if (this.audio && this.audio.ctx) this.audio.ctx.close();
+  }
+
+  runPreloader() {
+    let pct = 0;
+    this.loaderTimer = setInterval(() => {
+      pct = Math.min(100, pct + 4 + Math.random() * 8);
+      if (this.loaderBarRef.current) this.loaderBarRef.current.style.width = pct + '%';
+      if (this.loaderPctRef.current) this.loaderPctRef.current.textContent = Math.round(pct) + '%';
+      if (pct >= 100) {
+        clearInterval(this.loaderTimer);
+        setTimeout(() => this.setState({ loading: false }), 400);
+      }
+    }, 120);
+  }
+
+  runCounters() {
+    this.statsData.forEach((s, i) => {
+      const ref = this.numRefs[i];
+      const start = performance.now();
+      const dur = 1500;
+      const tick = (now) => {
+        const p = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        if (ref.current) ref.current.textContent = Math.round(eased * s.value);
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+
+  setupHorizontalScroll() {
+    const wrap = this.horizWrapRef.current, track = this.trackRef.current;
+    if (!wrap || !track || !window.gsap || !window.ScrollTrigger) { setTimeout(() => this.setupHorizontalScroll(), 500); return; }
+    window.gsap.registerPlugin(window.ScrollTrigger);
+    const getDistance = () => Math.max(0, track.scrollWidth - window.innerWidth);
+    this.horizTween = window.gsap.to(track, {
+      x: () => -getDistance(), ease: 'none',
+      scrollTrigger: { trigger: wrap, start: 'top top', end: () => '+=' + getDistance(), scrub: 1, pin: true, invalidateOnRefresh: true, anticipatePin: 1 }
+    });
+  }
+
+  onPointerMove(e) {
+    if (this.cursorDotRef.current) this.cursorDotRef.current.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%,-50%)`;
+    if (!this._rx) this._rx = e.clientX; if (!this._ry) this._ry = e.clientY;
+    this._tx = e.clientX; this._ty = e.clientY;
+    if (!this._raf) {
+      const loop = () => {
+        this._rx += (this._tx - this._rx) * 0.18; this._ry += (this._ty - this._ry) * 0.18;
+        if (this.cursorRingRef.current) this.cursorRingRef.current.style.transform = `translate(${this._rx}px, ${this._ry}px) translate(-50%,-50%)`;
+        this._raf = requestAnimationFrame(loop);
+      };
+      this._raf = requestAnimationFrame(loop);
+    }
+  }
+
+  onPointerOver(e) {
+    const target = e.target.closest && e.target.closest('[data-cursor]');
+    const ring = this.cursorRingRef.current, label = this.cursorLabelRef.current;
+    if (!ring || !label) return;
+    const map = { play: '▶ PLAY', view: 'VIEW', expand: 'EXPAND' };
+    if (target && map[target.getAttribute('data-cursor')]) {
+      ring.style.width = '84px'; ring.style.height = '84px'; ring.style.background = 'rgba(255,255,255,.06)';
+      label.style.opacity = 1; label.textContent = map[target.getAttribute('data-cursor')];
+    } else {
+      ring.style.width = '44px'; ring.style.height = '44px'; ring.style.background = 'transparent';
+      label.style.opacity = 0; label.textContent = '';
+    }
+  }
+
+  heroParallax(e) {
+    const el = this.heroObjRef.current;
+    if (!el) return;
+    const rx = (e.clientY / window.innerHeight - 0.5) * -14;
+    const ry = (e.clientX / window.innerWidth - 0.5) * 14;
+    el.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+  }
+
+  magnetMove(e) {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left - r.width / 2) * 0.3;
+    const y = (e.clientY - r.top - r.height / 2) * 0.3;
+    el.style.transform = `translate(${x}px, ${y}px)`;
+  }
+  magnetLeave(e) { e.currentTarget.style.transform = 'translate(0,0)'; }
+
+  tiltMove(e) {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transform = `perspective(900px) rotateX(${py * -6}deg) rotateY(${px * 6}deg) scale(1.02)`;
+  }
+  tiltLeave(e) { e.currentTarget.style.transform = 'perspective(900px) rotateX(0) rotateY(0) scale(1)'; }
+
+  baSetFromClientX(clientX) {
+    const wrap = this.baWrapRef.current;
+    if (!wrap) return;
+    const r = wrap.getBoundingClientRect();
+    let pct = ((clientX - r.left) / r.width) * 100;
+    pct = Math.max(0, Math.min(100, pct));
+    if (this.baOverlayRef.current) this.baOverlayRef.current.style.width = pct + '%';
+    if (this.baHandleRef.current) this.baHandleRef.current.style.left = pct + '%';
+  }
+  baStart(e) {
+    this.baSetFromClientX(e.touches ? e.touches[0].clientX : e.clientX);
+    window.addEventListener('mousemove', this.baMove); window.addEventListener('mouseup', this.baEnd);
+    window.addEventListener('touchmove', this.baMove); window.addEventListener('touchend', this.baEnd);
+  }
+  baMove(e) { this.baSetFromClientX(e.touches ? e.touches[0].clientX : e.clientX); }
+  baEnd() {
+    window.removeEventListener('mousemove', this.baMove); window.removeEventListener('mouseup', this.baEnd);
+    window.removeEventListener('touchmove', this.baMove); window.removeEventListener('touchend', this.baEnd);
+  }
+
+  initAudio() {
+    if (this.audio) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+    const o1 = ctx.createOscillator(); o1.type = 'sine'; o1.frequency.value = 110;
+    const o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.value = 164.8;
+    const lfo = ctx.createOscillator(); lfo.frequency.value = 0.08;
+    const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.03;
+    lfo.connect(lfoGain); lfoGain.connect(master.gain);
+    o1.connect(master); o2.connect(master);
+    o1.start(); o2.start(); lfo.start();
+    this.audio = { ctx, master };
+  }
+
+  toggleMusic() {
+    this.initAudio();
+    const on = !this.state.musicOn;
+    this.audio.master.gain.linearRampToValueAtTime(on ? 0.05 : 0, this.audio.ctx.currentTime + 0.6);
+    this.setState({ musicOn: on });
+  }
+
+  renderVals() {
+    const theme = this.themesData[this.state.themeKey];
+    const enableCursorFlag = (this.props.enableCursor ?? true) && !this.state.isTouch;
+    const rootStyle = {
+      '--bg': theme.bg, '--surface': theme.surface, '--text': theme.text, '--muted': theme.muted, '--a': theme.a, '--b': theme.b,
+      background: 'var(--bg)', color: 'var(--text)', fontFamily: "'Manrope', sans-serif", position: 'relative', overflowX: 'hidden', minHeight: '100vh',
+      cursor: enableCursorFlag ? 'none' : 'auto'
+    };
+
+    const themeSwatches = Object.keys(this.themesData).map((key) => ({
+      key, name: this.themesData[key].name, a: this.themesData[key].a, b: this.themesData[key].b,
+      onClick: () => this.setState({ themeKey: key })
+    }));
+
+    const filterTabs = this.filterTabsData.map((f) => ({
+      label: f,
+      onClick: () => this.setState({ filter: f }),
+      style: {
+        padding: '10px 20px', borderRadius: '100px', fontSize: '13px', cursor: 'pointer',
+        border: f === this.state.filter ? '1px solid transparent' : '1px solid rgba(255,255,255,.2)',
+        background: f === this.state.filter ? 'var(--a)' : 'transparent',
+        color: f === this.state.filter ? '#fff' : 'var(--text)'
+      }
+    }));
+
+    const galleryFiltered = this.state.filter === 'All' ? this.galleryData : this.galleryData.filter((g) => g.tag === this.state.filter);
+
+    const circumference = 263.9;
+    const skillsRendered = this.skillsData.map((s) => ({ ...s, dashoffset: circumference * (1 - s.level / 100) }));
+
+    const stats = this.statsData.map((s, i) => ({ ...s, ref: this.numRefs[i] }));
+
+    const testimonialsRendered = this.testimonialsData.map((t, i) => {
+      let offset = i - this.state.testIdx;
+      const n = this.testimonialsData.length;
+      if (offset > n / 2) offset -= n; if (offset < -n / 2) offset += n;
+      const abs = Math.abs(offset);
+      return {
+        ...t,
+        style: {
+          position: abs === 0 ? 'relative' : 'absolute', left: 0, right: 0, top: 0,
+          transform: `translateX(${offset * 40}px) translateZ(${-abs * 120}px) rotateY(${offset * -12}deg)`,
+          opacity: abs === 0 ? 1 : 0, zIndex: 10 - abs, transition: 'all .7s cubic-bezier(.16,1,.3,1)', pointerEvents: abs === 0 ? 'auto' : 'none'
+        }
+      };
+    });
+
+    const testDots = this.testimonialsData.map((_, i) => ({
+      onClick: () => this.setState({ testIdx: i }),
+      style: { width: 8, height: 8, borderRadius: '50%', border: 'none', cursor: 'pointer', background: i === this.state.testIdx ? 'var(--a)' : 'rgba(255,255,255,.25)' }
+    }));
+
+    const particles = this.particlesData.map((p) => ({
+      style: {
+        position: 'absolute', left: p.left + '%', top: p.top + '%', width: p.size + 'px', height: p.size + 'px',
+        borderRadius: '50%', background: 'var(--text)', opacity: 0.35, animation: `floatY ${p.dur}s ease-in-out ${p.delay}s infinite`
+      }
+    }));
+
+    return {
+      rootRef: this.rootRef, rootStyle, loading: this.state.loading, loaderBarRef: this.loaderBarRef, loaderPctRef: this.loaderPctRef,
+      enableCursorFlag, cursorDotRef: this.cursorDotRef, cursorRingRef: this.cursorRingRef, cursorLabelRef: this.cursorLabelRef,
+      navLinks: this.navLinksData, themeSwatches,
+      enableMusicFlag: this.props.enableMusic ?? true, toggleMusic: () => this.toggleMusic(), musicIcon: this.state.musicOn ? '♪' : '♫',
+      toggleMenu: () => this.setState((s) => ({ menuOpen: !s.menuOpen })), menuLabel: this.state.menuOpen ? '✕' : '☰', menuOpen: this.state.menuOpen,
+      heroObjRef: this.heroObjRef, particles, roles: this.rolesData, marqueeWords: this.marqueeWordsData,
+      magnetMove: this.magnetMove, magnetLeave: this.magnetLeave,
+      statsWrapRef: this.statsWrapRef, stats,
+      baWrapRef: this.baWrapRef, baOverlayRef: this.baOverlayRef, baHandleRef: this.baHandleRef, baStart: this.baStart,
+      horizWrapRef: this.horizWrapRef, trackRef: this.trackRef, projects: this.projectsData, tiltMove: this.tiltMove, tiltLeave: this.tiltLeave,
+      filterTabs, galleryFiltered,
+      reelOpen: this.state.reelOpen, openReel: () => this.setState({ reelOpen: true }), closeReel: () => this.setState({ reelOpen: false }),
+      timeline: this.timelineData, clientLogos: this.clientLogosData,
+      testimonialsRendered, testDots,
+      skillsRendered, socials: this.socialsData
+    };
+  }
+}
+</script>
+</body>
+</html>
