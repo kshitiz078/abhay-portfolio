@@ -231,7 +231,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none}
     <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px">
       <button onClick="{{openReel}}" data-cursor="play" style="width:96px;height:96px;border-radius:50%;border:2px solid #fff;background:rgba(255,255,255,.08);color:#fff;font-size:24px;cursor:pointer;animation:pulseGlow 2.6s ease-in-out infinite">▶</button>
       <div style="font-family:'Anton',sans-serif;font-size:clamp(24px,3.5vw,42px);color:#fff;letter-spacing:1px">2026 SHOWREEL</div>
-      <div style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,.5)">SHOWREEL.MP4 — DROP FILE TO REPLACE</div>
+      <div style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,.5)">CLICK TO WATCH — 2026</div>
     </div>
   </div>
 </section>
@@ -239,7 +239,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none}
 <sc-if value="{{reelOpen}}" hint-placeholder-val="{{false}}">
 <div style="position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:40px">
   <button onClick="{{closeReel}}" style="position:absolute;top:26px;right:clamp(20px,4vw,56px);width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;cursor:pointer">✕</button>
-  <div style="width:min(1100px,90vw);aspect-ratio:16/9;border-radius:12px;background:repeating-linear-gradient(135deg, #151515 0 22px, #0c0c0c 22px 44px);display:flex;align-items:center;justify-content:center;font-family:ui-monospace,monospace;color:rgba(255,255,255,.6);font-size:13px;letter-spacing:1px">SHOWREEL.MP4 — DROP FILE TO REPLACE</div>
+  <iframe
+    src="https://drive.google.com/file/d/1hu4Bza2xuI2tlwMJsRXr_8shluFD-q-w/preview"
+    style="width:min(1100px,90vw);aspect-ratio:16/9;border-radius:12px;border:none;display:block"
+    allow="autoplay; fullscreen"
+    allowfullscreen
+    loading="lazy"
+    title="2026 Showreel — Abhay Jain"
+  ></iframe>
 </div>
 </sc-if>
 
