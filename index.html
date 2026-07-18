@@ -34,7 +34,6 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 @keyframes pulseGlow{0%,100%{opacity:.45;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
 @keyframes marqueeScroll{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
 @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
-@keyframes starDash{to{stroke-dashoffset:-400}}
 
 /* ---------- scroll-overlap panel stack ---------- */
 .stack{position:relative;isolation:isolate}
@@ -190,29 +189,22 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 }
 .tools-content{position:relative;z-index:3}
 
-.star-stage{
-  position:relative;width:min(86vw,640px);aspect-ratio:1;margin:10px auto 0;
+/* two well-spaced groups: AI tools, then software */
+.tool-group{margin-top:clamp(48px,7vw,84px)}
+.tool-group-head{display:flex;align-items:center;gap:18px;margin-bottom:clamp(22px,3vw,34px)}
+.tool-group-label{font-size:12px;letter-spacing:4px;font-weight:700;color:var(--a);white-space:nowrap}
+.tool-group-rule{flex:1;height:1px;background:linear-gradient(to right, color-mix(in oklab, var(--text) 22%, transparent), transparent)}
+.tool-group-count{font-family:'Anton',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted)}
+.tool-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(122px,1fr));
+  gap:clamp(16px,2.2vw,28px);
 }
-.star-outline{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.star-outline polygon{
-  fill:color-mix(in oklab, var(--a) 5%, transparent);
-  stroke:color-mix(in oklab, var(--a) 45%, transparent);
-  stroke-width:.35;stroke-linejoin:round;
-  stroke-dasharray:6 5;animation:starDash 26s linear infinite;
-}
-.star-halo{
-  position:absolute;left:50%;top:50%;width:78%;height:78%;transform:translate(-50%,-50%);
-  border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle, color-mix(in oklab, var(--a) 26%, transparent), transparent 68%);
-  filter:blur(26px);
-}
-.tool-slot{position:absolute;transform:translate(-50%,-50%)}
-.tool-slot--center{left:50%;top:50%}
 
 .tool-card{
   position:relative;overflow:hidden;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-  width:clamp(88px,12vw,112px);padding:15px 8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  width:100%;padding:22px 12px;
   border-radius:22px;
   background:linear-gradient(150deg,
     color-mix(in oklab, var(--text) 15%, transparent),
@@ -239,7 +231,6 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
              inset 0 1px 0 color-mix(in oklab, var(--text) 34%, transparent);
 }
 .tool-card:hover::after{transform:translate3d(14%,10%,0);opacity:.9}
-.tool-card--center{width:clamp(112px,15vw,146px);padding:20px 12px;border-radius:26px}
 
 .tool-logo{
   display:flex;align-items:center;justify-content:center;
@@ -249,23 +240,36 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   transition:transform .6s var(--ease-spring), box-shadow .6s var(--ease);
 }
 .tool-card:hover .tool-logo{transform:scale(1.16) rotate(-3deg);box-shadow:inset 0 0 0 1px rgba(255,255,255,.3), 0 14px 26px -10px rgba(0,0,0,.95)}
-.tool-card--center .tool-logo{width:clamp(56px,7vw,72px);border-radius:17px;font-size:clamp(20px,2.6vw,26px)}
-.tool-name{font-size:11.5px;font-weight:600;letter-spacing:.2px;text-align:center;line-height:1.25;color:var(--text);opacity:.86}
-.tool-card--center .tool-name{font-size:13px;opacity:1}
-.tool-role{font-size:9.5px;letter-spacing:2px;color:var(--a);font-weight:700}
+.tool-name{font-size:12px;font-weight:600;letter-spacing:.2px;text-align:center;line-height:1.3;color:var(--text);opacity:.86}
 
-/* mobile / tablet fallback: graceful responsive grid instead of the star */
-@media (max-width:899px){
-  .star-stage{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:14px;
-    width:100%;aspect-ratio:auto;place-items:center;
-  }
-  .star-outline,.star-halo{display:none}
-  .tool-slot{position:static;transform:none;width:100%}
-  .tool-slot--center{grid-column:1/-1}
-  .tool-card{width:100%}
-  .tool-card--center{width:100%;flex-direction:row;gap:16px;justify-content:flex-start;padding:16px 20px}
+/* ---------- selected work cards ---------- */
+.project-card{
+  position:relative;flex-shrink:0;overflow:hidden;display:block;
+  width:80vw;max-width:1100px;height:100%;margin-right:3vw;
+  padding:0;border:none;background:var(--surface);cursor:pointer;font-family:inherit;
+  border-radius:22px;transition:transform .8s var(--ease);will-change:transform;
 }
+.project-card:focus-visible{outline:2px solid var(--a);outline-offset:3px}
+.project-thumb{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transition:transform 1.2s var(--ease);
+}
+.project-card:hover .project-thumb{transform:scale(1.04)}
+
+/* ---------- contact ---------- */
+.contact-lines{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:14px 34px;margin-top:44px;
+}
+.contact-line{
+  position:relative;font-size:15px;color:var(--muted);text-decoration:none;letter-spacing:.3px;
+  transition:color .4s var(--ease);
+}
+.contact-line::after{
+  content:"";position:absolute;left:0;right:0;bottom:-5px;height:1px;background:var(--a);
+  transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--ease);
+}
+.contact-line:hover{color:var(--text)}
+.contact-line:hover::after{transform:scaleX(1)}
 
 /* ---------- video lightbox ---------- */
 .lightbox{
@@ -288,6 +292,26 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   .about-grid{grid-template-columns:1.15fr .85fr;gap:60px}
   .stats-grid{grid-template-columns:repeat(4,1fr);gap:30px}
   .timeline-row{grid-template-columns:70px 1fr;gap:24px}
+}
+
+/* ---------- mobile / touch performance ---------- */
+/* backdrop-filter and large blurs are the expensive parts of this design;
+   dial them back where the GPU budget is smallest. */
+@media (max-width:900px){
+  .tools-bg{filter:blur(16px) saturate(115%)}
+  .tool-card{-webkit-backdrop-filter:blur(9px) saturate(135%);backdrop-filter:blur(9px) saturate(135%)}
+  .lightbox{-webkit-backdrop-filter:none;backdrop-filter:none}
+  .nav{backdrop-filter:blur(8px)}
+  .panel-inner{box-shadow:0 -18px 40px -18px rgba(0,0,0,.7)}
+}
+/* Touch devices latch :hover after a tap — keep transforms off so cards
+   don't stay lifted, and drop the sheen animation entirely. */
+@media (hover:none){
+  .tool-card:hover,.gallery-card:hover,.stat-card:hover,.project-card:hover{transform:none}
+  .tool-card:hover .tool-logo{transform:none}
+  .tool-card:hover::after{transform:none;opacity:.5}
+  .gallery-card:hover .gallery-thumb,.project-card:hover .project-thumb{transform:none}
+  .gallery-card:hover .gallery-play{transform:translate(-50%,-50%) scale(.9);background:rgba(255,255,255,.16)}
 }
 
 /* ---------- reduced motion ---------- */
@@ -335,7 +359,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
       </sc-for>
     </div>
     <sc-if value="{{enableMusicFlag}}" hint-placeholder-val="{{true}}">
-    <button onClick="{{toggleMusic}}" class="icon-btn" aria-label="{{musicLabel}}" aria-pressed="{{musicOn}}">{{musicIcon}}</button>
+    <button onClick="{{toggleSound}}" data-sound-toggle="" class="icon-btn" aria-label="{{soundLabel}}" aria-pressed="{{soundOn}}" title="{{soundLabel}}">{{soundIcon}}</button>
     </sc-if>
     <button onClick="{{toggleMenu}}" class="icon-btn" aria-label="{{menuAria}}" aria-expanded="{{menuOpen}}">{{menuLabel}}</button>
   </div>
@@ -469,18 +493,15 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
     <div ref="{{horizWrapRef}}" style="position:relative;height:100vh;overflow:hidden">
       <div ref="{{trackRef}}" style="display:flex;height:100%;width:max-content;will-change:transform">
         <sc-for list="{{projects}}" as="pr" hint-placeholder-count="6">
-          <div data-cursor="view" onMouseMove="{{tiltMove}}" onMouseLeave="{{tiltLeave}}" style="position:relative;width:80vw;max-width:1100px;height:100%;flex-shrink:0;margin-right:3vw;border-radius:22px;overflow:hidden;transition:transform .8s var(--ease);will-change:transform">
-            <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="project-{{pr.id}}" shape="rect" placeholder="Drop project still/thumbnail" style="position:absolute;inset:0;width:100%;height:100%" hint-size="100%,100%"></x-import>
-            <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,.15) 55%, transparent);pointer-events:none"></div>
-            <div style="position:absolute;left:0;right:0;bottom:0;padding:clamp(24px,4vw,56px);color:#fff">
-              <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:12px;letter-spacing:1.5px;color:rgba(255,255,255,.7);margin-bottom:14px">
-                <span>{{pr.category}}</span><span>{{pr.year}}</span><span>{{pr.software}}</span>
-              </div>
-              <div class="display" style="font-size:clamp(28px,4.5vw,56px);line-height:1">{{pr.title}}</div>
-              <p style="max-width:560px;color:rgba(255,255,255,.75);font-size:15px;line-height:1.6;margin:16px 0">{{pr.desc}}</p>
-              <div style="display:flex;gap:20px;align-items:center;font-size:13px;color:rgba(255,255,255,.6)"><span>{{pr.role}}</span><span style="color:#fff;font-weight:700">View Case Study →</span></div>
-            </div>
-          </div>
+          <button onClick="{{pr.onClick}}" data-cursor="play" onMouseMove="{{tiltMove}}" onMouseLeave="{{tiltLeave}}" class="project-card" aria-label="{{pr.aria}}">
+            <img src="{{pr.thumb}}" alt="" loading="lazy" decoding="async" class="project-thumb">
+            <span style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,.15) 55%, transparent);pointer-events:none"></span>
+            <span style="position:absolute;left:0;right:0;bottom:0;padding:clamp(24px,4vw,56px);color:#fff;text-align:left;display:block">
+              <span style="display:block;font-size:12px;letter-spacing:1.5px;color:var(--a);font-weight:700;margin-bottom:12px">{{pr.category}}</span>
+              <span class="display" style="display:block;font-size:clamp(26px,4.2vw,54px);line-height:1.05">{{pr.title}}</span>
+              <span style="display:inline-flex;align-items:center;gap:10px;margin-top:18px;font-size:14px;color:#fff;font-weight:700">▶ Watch film</span>
+            </span>
+          </button>
         </sc-for>
       </div>
     </div>
@@ -597,32 +618,38 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
     <div class="reveal" style="margin-bottom:clamp(40px,6vw,64px);text-align:center">
       <div class="eyebrow">TOOLKIT</div>
       <p class="display" style="font-size:clamp(28px,4.5vw,56px)">Built with the right tools.</p>
-      <p style="font-size:15px;color:var(--muted);max-width:520px;margin:18px auto 0;line-height:1.7">The software behind every cut, grade and composite — arranged the way they actually work: one core, many satellites.</p>
+      <p style="font-size:15px;color:var(--muted);max-width:540px;margin:18px auto 0;line-height:1.7">The AI stack and the editing suite behind every cut, grade and composite.</p>
     </div>
 
-    <div class="star-stage reveal">
-      <div class="star-halo" aria-hidden="true"></div>
-      <svg class="star-outline" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-        <polygon points="{{starPoints}}"></polygon>
-      </svg>
-
-      <sc-for list="{{starTools}}" as="t" hint-placeholder-count="10">
-        <div class="tool-slot" style="{{t.slotStyle}}">
+    <div class="tool-group reveal">
+      <div class="tool-group-head">
+        <span class="tool-group-label">AI TOOLS</span>
+        <span class="tool-group-rule" aria-hidden="true"></span>
+        <span class="tool-group-count">{{aiCount}}</span>
+      </div>
+      <div class="tool-grid">
+        <sc-for list="{{aiTools}}" as="t" hint-placeholder-count="12">
           <div class="tool-card" data-cursor="expand">
             <span class="tool-logo" style="{{t.logoStyle}}">{{t.mono}}</span>
             <span class="tool-name">{{t.name}}</span>
           </div>
-        </div>
-      </sc-for>
+        </sc-for>
+      </div>
+    </div>
 
-      <div class="tool-slot tool-slot--center">
-        <div class="tool-card tool-card--center" data-cursor="expand">
-          <span class="tool-logo" style="{{centerTool.logoStyle}}">{{centerTool.mono}}</span>
-          <span>
-            <span class="tool-role">DAILY DRIVER</span>
-            <span class="tool-name" style="display:block;margin-top:4px">{{centerTool.name}}</span>
-          </span>
-        </div>
+    <div class="tool-group reveal">
+      <div class="tool-group-head">
+        <span class="tool-group-label">SOFTWARE</span>
+        <span class="tool-group-rule" aria-hidden="true"></span>
+        <span class="tool-group-count">{{swCount}}</span>
+      </div>
+      <div class="tool-grid">
+        <sc-for list="{{software}}" as="t" hint-placeholder-count="6">
+          <div class="tool-card" data-cursor="expand">
+            <span class="tool-logo" style="{{t.logoStyle}}">{{t.mono}}</span>
+            <span class="tool-name">{{t.name}}</span>
+          </div>
+        </sc-for>
       </div>
     </div>
   </section>
@@ -637,18 +664,23 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
     <div style="position:absolute;inset:0;background:radial-gradient(50% 50% at 50% 50%, color-mix(in oklab, var(--a) 18%, transparent), transparent)"></div>
     <div class="reveal" style="position:relative">
       <p class="display" style="font-size:clamp(34px,7vw,96px);line-height:1;margin:0 0 44px">Let's create something<br>unforgettable.</p>
-      <a href="mailto:hello@abhayjain.com" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}" data-cursor="expand" class="btn btn--solid btn--lg">Start a Project →</a>
+      <a href="{{contact.mailto}}" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}" data-cursor="expand" class="btn btn--solid btn--lg">Start a Project →</a>
+      <div class="contact-lines">
+        <a href="{{contact.mailto}}" class="contact-line">{{contact.email}}</a>
+        <a href="{{contact.phoneHref}}" class="contact-line">{{contact.phoneDisplay}}</a>
+        <a href="{{contact.instagram}}" target="_blank" rel="noopener noreferrer" class="contact-line">@abhayy_jain</a>
+      </div>
     </div>
   </section>
 
   <footer style="padding:60px clamp(20px,4vw,56px) 40px;border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent);display:flex;flex-wrap:wrap;justify-content:space-between;gap:30px;max-width:1400px;margin:0 auto">
     <div>
       <div class="display" style="font-size:22px">Abhay Jain</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:6px">hello@abhayjain.com — Based in Mumbai, IN</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:6px">{{contact.email}}</div>
     </div>
     <div style="display:flex;gap:22px;flex-wrap:wrap">
-      <sc-for list="{{socials}}" as="soc" hint-placeholder-count="4">
-        <a href="{{soc.href}}" class="nav-link" style="font-size:13px;color:var(--muted)">{{soc.label}}</a>
+      <sc-for list="{{socials}}" as="soc" hint-placeholder-count="3">
+        <a href="{{soc.href}}" target="{{soc.target}}" rel="{{soc.rel}}" class="nav-link" style="font-size:13px;color:var(--muted)">{{soc.label}}</a>
       </sc-for>
     </div>
     <div class="display" style="font-size:13px;letter-spacing:1px;color:var(--muted)">© 2026 — CUT WITH PURPOSE</div>
@@ -703,31 +735,44 @@ class Component extends DCLogic {
 
   marqueeWordsData = ['BANKING','AI AVATAR','INSURANCE','REAL ESTATE','CORPORATE','EXPLAINER','WALKTHROUGH','TUTORIAL','SHORTS'];
 
+  // Selected Work — the long-form landscape pieces, which suit the wide
+  // horizontal cards. The vertical Shorts live in the gallery mosaic instead,
+  // so nothing is duplicated between the two sections.
+  // `res` is pinned per video: YouTube only generates maxresdefault for some
+  // uploads, and when it's missing it serves a 120x90 grey placeholder rather
+  // than failing cleanly — so the resolution is resolved here, not at runtime.
   projectsData = [
-    {id:1,title:'Midnight Run',category:'Commercial',year:'2025',software:'Premiere Pro · DaVinci Resolve',role:'Lead Editor',desc:"A high-octane spot cut for speed — every transition timed to the engine's rhythm."},
-    {id:2,title:'Echoes',category:'Music Video',year:'2024',software:'After Effects · Premiere Pro',role:'Editor & Colorist',desc:'A single-take performance reimagined through layered color and light.'},
-    {id:3,title:'Skyline Stories',category:'Real Estate',year:'2025',software:'DaVinci Resolve',role:'Editor',desc:"Aerial footage turned into a slow, confident walkthrough of the city's best address."},
-    {id:4,title:'Nightfall',category:'Cinematic Short',year:'2024',software:'Premiere Pro · After Effects · Blender',role:'Editor / VFX',desc:"A three-minute short built in the edit, with VFX filling in what the camera couldn't."},
-    {id:5,title:'Fueled',category:'Sports',year:'2025',software:'Premiere Pro',role:'Editor',desc:'Match-day chaos cut into a two-minute highlight reel that never lets up.'},
-    {id:6,title:'Threadbare',category:'Corporate',year:'2023',software:'DaVinci Resolve · After Effects',role:'Lead Editor',desc:'A brand film about craft, told through the hands that make it.'}
+    {id:'ixtIMhxnopc', title:'AU 0101 App',                  category:'Banking',     res:'maxresdefault'},
+    {id:'tFHynWyOXL4', title:'AU Internal Banking Videos',   category:'Banking',     res:'maxresdefault'},
+    {id:'FcElozarGMQ', title:'AI Property Walkthrough',      category:'Real Estate', res:'maxresdefault'},
+    {id:'zxlLW2z173M', title:'AI Avatar Videos for Village', category:'AI Avatar',   res:'maxresdefault'},
+    {id:'3048QDb_1qQ', title:'RMIB — Insurance Company',     category:'Insurance',   res:'maxresdefault'},
+    {id:'pqpBMIMMnsQ', title:'AU App Tutorial',              category:'Banking',     res:'sddefault'}
   ];
 
-  // `short: true` marks a YouTube Short — rendered as a 9:16 tile and played
-  // back in a portrait lightbox.
+  // Every gallery item is a vertical YouTube Short — rendered as a 9:16 tile
+  // and played back in a portrait lightbox. The long-form landscape pieces
+  // live in Selected Work above.
   galleryData = [
-    {id:'ixtIMhxnopc', title:'AU 0101 App',                 tag:'Banking'},
-    {id:'pqpBMIMMnsQ', title:'AU App Tutorial',             tag:'Banking'},
-    {id:'3048QDb_1qQ', title:'RMIB — Insurance Company',    tag:'Insurance'},
-    {id:'zxlLW2z173M', title:'AI Avatar Videos for Village', tag:'AI Avatar'},
-    {id:'FcElozarGMQ', title:'AI Property Walkthrough',     tag:'Real Estate'},
-    {id:'tFHynWyOXL4', title:'AU Internal Banking Videos',  tag:'Banking'},
-    {id:'9M-rrLLq3w0', title:'AKFI',                        tag:'Corporate',  short:true},
-    {id:'nfuTLsVh8js', title:'Kedia Avatar 1',              tag:'AI Avatar',  short:true},
-    {id:'qXeN2d_a13U', title:'Kedia Avatar 2',              tag:'AI Avatar',  short:true},
-    {id:'__SuGTaeS7M', title:'Client Work Avatar',          tag:'AI Avatar',  short:true}
+    {id:'9M-rrLLq3w0', title:'AKFI',                       tag:'AI Avatar'},
+    {id:'nfuTLsVh8js', title:'Kedia Avatar 1',             tag:'AI Avatar'},
+    {id:'qXeN2d_a13U', title:'Kedia Avatar 2',             tag:'AI Avatar'},
+    {id:'__SuGTaeS7M', title:'Client Work Avatar',         tag:'AI Avatar'},
+    {id:'BV-kK9gRfdw', title:'Burger Farm — Mushroom Burger Ad', tag:'Food & Drink'},
+    {id:'B50yAVoXgcA', title:'Burger Farm — Offer Ad',      tag:'Food & Drink'},
+    {id:'_Hs0op6CpnA', title:'Burger Farm — Summer Drink Ad', tag:'Food & Drink'},
+    {id:'I33g-4XQ-ns', title:'Burger Farm — Product Launch Ad', tag:'Food & Drink'},
+    {id:'ahDOh2CvhG8', title:'Burger Farm — Influencer Shoot', tag:'Food & Drink'},
+    {id:'kevGT2c_laY', title:'Sarovar Portico Reel',        tag:'Hospitality'},
+    {id:'3dRUl37EcfM', title:'HOP Reel',                    tag:'Hospitality'},
+    {id:'OSfA37xDSgw', title:'The Woods',                   tag:'Hospitality'},
+    {id:'arySkq5MQNM', title:'Cholis',                      tag:'Fashion'},
+    {id:'QWmnq4IKlhQ', title:'AU Bank Podcast Intro',       tag:'Podcast'},
+    {id:'XXeoA9wgxtk', title:'Kedia Pavitra Podcast Intro', tag:'Podcast'},
+    {id:'gA5k82e4pjs', title:'Short Podcast Intro',         tag:'Podcast'}
   ];
 
-  filterTabsData = ['All','Banking','AI Avatar','Insurance','Real Estate','Corporate'];
+  filterTabsData = ['All','AI Avatar','Food & Drink','Hospitality','Podcast','Fashion'];
 
   timelineData = [
     {n:'01',title:'Idea',desc:'Every project starts with a spark — a concept worth chasing.'},
@@ -747,22 +792,31 @@ class Component extends DCLogic {
     {quote:'"He turned three hours of raw footage into ninety seconds of pure tension."',name:'Dev Anand',role:'Creative Lead, Nightshift Co.'}
   ];
 
-  // Featured tool at the centre of the star.
-  centerToolData = {name:'Premiere Pro', mono:'Pr', c1:'#2A0634', c2:'#8A2BE2', fg:'#EAC8FF'};
+  // Two labelled groups of glass cards. A 5-pointed star only has 10 vertices,
+  // so it can't hold 19 tools with the breathing room asked for — the star
+  // outline is kept as a background motif behind the AI group instead.
+  aiToolsData = [
+    {name:'Grok',         mono:'Gk', c1:'#0B0B0D', c2:'#43434D', fg:'#FFFFFF'},
+    {name:'Google Flow Veo', mono:'Veo', c1:'#0A1F52', c2:'#4285F4', fg:'#CFE0FF'},
+    {name:'Claude',       mono:'Cl', c1:'#2A1810', c2:'#D97757', fg:'#FFE6D8'},
+    {name:'ChatGPT',      mono:'Gp', c1:'#04150F', c2:'#10A37F', fg:'#B4F0DC'},
+    {name:'ElevenLabs',   mono:'11', c1:'#0C0C10', c2:'#45454F', fg:'#FFFFFF'},
+    {name:'HeyGen',       mono:'Hg', c1:'#160A33', c2:'#7C3AED', fg:'#DCCBFF'},
+    {name:'Higgsfield',   mono:'Hf', c1:'#1B0B2E', c2:'#A855F7', fg:'#EBD6FF'},
+    {name:'Runway',       mono:'Rw', c1:'#0D0D10', c2:'#4A4A55', fg:'#F2F2F5'},
+    {name:'Kling AI',     mono:'Kl', c1:'#061B2E', c2:'#1E88E5', fg:'#BFE2FF'},
+    {name:'Veed.io',      mono:'Vd', c1:'#150725', c2:'#B14BF4', fg:'#EBD2FF'},
+    {name:'Gamma AI',     mono:'Ga', c1:'#2A1206', c2:'#E0653A', fg:'#FFD6C2'},
+    {name:'Captions.ai',  mono:'Cp', c1:'#0E0E14', c2:'#4B4B5C', fg:'#EDEDF5'}
+  ];
 
-  // 10 star vertices, clockwise from the top. Even indices land on the outer
-  // points, odd indices on the inner ones.
-  toolsData = [
-    {name:'After Effects',   mono:'Ae', c1:'#10023A', c2:'#4B2FD6', fg:'#C7BCFF'},
-    {name:'Audition',        mono:'Au', c1:'#00231C', c2:'#0E8F73', fg:'#8CF5DC'},
+  softwareData = [
+    {name:'Premiere Pro',    mono:'Pr', c1:'#2A0634', c2:'#8A2BE2', fg:'#EAC8FF'},
     {name:'DaVinci Resolve', mono:'Dv', c1:'#101013', c2:'#3D4149', fg:'#EDEDF2'},
     {name:'Media Encoder',   mono:'Me', c1:'#170338', c2:'#5A2BC9', fg:'#CFC2FF'},
-    {name:'Photoshop',       mono:'Ps', c1:'#001427', c2:'#0F6FCB', fg:'#9BD7FF'},
-    {name:'Lightroom',       mono:'Lr', c1:'#04182B', c2:'#1287C4', fg:'#A8E0FF'},
-    {name:'Illustrator',     mono:'Ai', c1:'#2B0B00', c2:'#C25A00', fg:'#FFC680'},
-    {name:'Cinema 4D',       mono:'C4', c1:'#04162E', c2:'#1E5FC4', fg:'#A6C8FF'},
-    {name:'Blender',         mono:'Bl', c1:'#241100', c2:'#D0620E', fg:'#FFCB9B'},
-    {name:'Figma',           mono:'Fg', c1:'#1A1A1D', c2:'#B33A17', fg:'#FFB9A4'}
+    {name:'CapCut PC',       mono:'Cc', c1:'#0E0E16', c2:'#3B3B52', fg:'#F0F0FA'},
+    {name:'Canva',           mono:'Cv', c1:'#062B45', c2:'#00C4CC', fg:'#C2F5F8'},
+    {name:'Filmora',         mono:'Fl', c1:'#07203A', c2:'#00A5E0', fg:'#BEE9FF'}
   ];
 
   statsData = [
@@ -772,13 +826,21 @@ class Component extends DCLogic {
     {value:98,suffix:'%',label:'Client Satisfaction'}
   ];
 
-  socialsData = [{label:'Instagram',href:'#'},{label:'YouTube',href:'#'},{label:'Vimeo',href:'#'},{label:'LinkedIn',href:'#'}];
+  contactData = {
+    email: 'abhayyjain31@gmail.com',
+    phone: '7976916245',
+    phoneHref: 'tel:+917976916245',
+    instagram: 'https://www.instagram.com/abhayy_jain'
+  };
+
+  socialsData = [
+    {label:'Instagram', href:'https://www.instagram.com/abhayy_jain'},
+    {label:'abhayyjain31@gmail.com', href:'mailto:abhayyjain31@gmail.com'},
+    {label:'+91 79769 16245', href:'tel:+917976916245'}
+  ];
 
   // Star geometry, shared by the SVG outline and the card positions so the two
   // can never drift apart. Percentages of the square stage.
-  starOuterR = 39;
-  starInnerR = 21;
-
   rootRef = React.createRef();
   loaderBarRef = React.createRef();
   loaderPctRef = React.createRef();
@@ -801,7 +863,7 @@ class Component extends DCLogic {
   }));
 
   // `video` holds the currently open lightbox clip: { src, title, short }.
-  state = { themeKey: null, loading: true, filter: 'All', testIdx: 0, musicOn: false, menuOpen: false, video: null, isTouch: false };
+  state = { themeKey: null, loading: true, filter: 'All', testIdx: 0, soundOn: false, menuOpen: false, video: null, isTouch: false };
 
   constructor(props) {
     super(props);
@@ -826,6 +888,11 @@ class Component extends DCLogic {
     this.onKeyDown = this.onKeyDown.bind(this);
     this.closeVideo = this.closeVideo.bind(this);
     this.onLightboxClick = this.onLightboxClick.bind(this);
+    this.onPointerOverSfx = this.onPointerOverSfx.bind(this);
+    this.onClickSfx = this.onClickSfx.bind(this);
+    try {
+      this.state.soundOn = localStorage.getItem('aj-sound') === '1';
+    } catch (e) { /* private mode — stay silent */ }
   }
 
   // ---------------------------------------------------------------- lifecycle
@@ -851,7 +918,13 @@ class Component extends DCLogic {
     this.horizTimer = setTimeout(() => this.setupHorizontalScroll(), 400);
     document.addEventListener('visibilitychange', this.onVisibility);
     document.addEventListener('keydown', this.onKeyDown);
+    document.addEventListener('pointerover', this.onPointerOverSfx, { passive: true });
+    document.addEventListener('click', this.onClickSfx, { passive: true });
   }
+
+  // YouTube only generates maxresdefault for some uploads. When it's missing
+  // it serves a 120x90 grey placeholder with HTTP 200 rather than a 404, so a
+  // load event is not proof the rendition exists — check the size too.
 
   onKeyDown(e) {
     if (e.key !== 'Escape') return;
@@ -859,8 +932,14 @@ class Component extends DCLogic {
     else if (this.state.menuOpen) this.setState({ menuOpen: false });
   }
 
-  openVideo(src, title, short) { this.setState({ video: { src, title, short: !!short } }); }
-  closeVideo() { this.setState({ video: null }); }
+  openVideo(src, title, short) {
+    this.playSfx('open');
+    this.setState({ video: { src, title, short: !!short } });
+  }
+  closeVideo() {
+    if (this.state.video) this.playSfx('close');
+    this.setState({ video: null });
+  }
   // Close when the backdrop is clicked, but not the player or its chrome.
   onLightboxClick(e) { if (e.target === e.currentTarget) this.closeVideo(); }
 
@@ -898,6 +977,8 @@ class Component extends DCLogic {
     document.documentElement.removeEventListener('mouseenter', this.onCursorEnter);
     document.removeEventListener('visibilitychange', this.onVisibility);
     document.removeEventListener('keydown', this.onKeyDown);
+    document.removeEventListener('pointerover', this.onPointerOverSfx);
+    document.removeEventListener('click', this.onClickSfx);
     this.baEnd();
     if (this.cursorRaf) cancelAnimationFrame(this.cursorRaf);
     if (this.stackRaf) cancelAnimationFrame(this.stackRaf);
@@ -991,10 +1072,13 @@ class Component extends DCLogic {
   setupPanelStack() {
     const root = this.rootRef.current;
     if (!root) return;
+    this.stackEl = root.querySelector('.stack');
     this.panels = [...root.querySelectorAll('[data-panel]')];
-    if (!this.panels.length) return;
+    if (!this.panels.length || !this.stackEl) return;
     this.panelInners = this.panels.map((p) => p.querySelector('[data-panel-inner]'));
     this.panelScrims = this.panels.map((p) => p.querySelector('[data-panel-scrim]'));
+    this.panelCrossed = this.panels.map(() => false);
+    this.toolsPanelIndex = this.panels.findIndex((p) => p.querySelector('.tools-bg'));
 
     this.layoutPanels();
     window.addEventListener('resize', this.layoutPanels);
@@ -1009,14 +1093,30 @@ class Component extends DCLogic {
     }
   }
 
+  // Reads first, then writes — interleaving them forces a layout per panel.
+  // Panel document offsets are derived from cumulative heights rather than
+  // getBoundingClientRect, because a *stuck* sticky panel reports its pinned
+  // position, not its position in flow. This also means updateStack needs no
+  // layout reads at all, so the scroll loop stays cheap at 120Hz.
   measurePanelTops() {
-    if (!this.panels) return;
+    if (!this.panels || !this.stackEl) return;
     const vh = window.innerHeight;
-    this.panels.forEach((p) => {
-      if (p.dataset.panel === 'flow') return;
-      const h = p.offsetHeight;
-      p.style.top = (h > vh ? Math.round(vh - h) : 0) + 'px';
-    });
+
+    const heights = this.panels.map((p) => p.offsetHeight);
+    const stackTop = this.stackEl.getBoundingClientRect().top + window.scrollY;
+
+    this.panelStarts = [];
+    let y = stackTop;
+    for (let i = 0; i < this.panels.length; i++) {
+      this.panelStarts.push(y);
+      y += heights[i];
+    }
+
+    for (let i = 0; i < this.panels.length; i++) {
+      const p = this.panels[i];
+      if (p.dataset.panel === 'flow') continue;
+      p.style.top = (heights[i] > vh ? Math.round(vh - heights[i]) : 0) + 'px';
+    }
     this.updateStack();
   }
 
@@ -1031,8 +1131,9 @@ class Component extends DCLogic {
   }
 
   updateStack() {
-    if (!this.panels) return;
+    if (!this.panels || !this.panelStarts) return;
     const vh = window.innerHeight;
+    const scrollY = window.scrollY;
 
     for (let i = 0; i < this.panels.length - 1; i++) {
       const inner = this.panelInners[i];
@@ -1040,10 +1141,17 @@ class Component extends DCLogic {
       if (!inner) continue;
 
       // How far the *next* panel has travelled across the viewport, 0 → 1.
-      const nextTop = this.panels[i + 1].getBoundingClientRect().top;
+      const nextTop = this.panelStarts[i + 1] - scrollY;
       let p = 1 - nextTop / vh;
       p = p < 0 ? 0 : p > 1 ? 1 : p;
       const eased = p * p * (3 - 2 * p);
+
+      // One whoosh per boundary, when the incoming panel is halfway across.
+      const crossed = p > 0.45;
+      if (crossed !== !!this.panelCrossed[i]) {
+        this.panelCrossed[i] = crossed;
+        if (crossed && this.stackReady) this.playSfx('panel');
+      }
 
       if (scrim) scrim.style.opacity = (eased * 0.62).toFixed(3);
       // Panels holding a GSAP pin must stay transform-free: a transformed
@@ -1052,13 +1160,18 @@ class Component extends DCLogic {
       inner.style.transform = 'scale(' + (1 - 0.07 * eased).toFixed(4) + ')';
     }
 
-    // Parallax the toolkit backdrop against its own panel.
+    // Parallax the toolkit backdrop, derived from its panel's known offset.
     const bg = this.toolsBgRef.current;
-    if (bg && !this.reduceMotion) {
-      const r = bg.parentElement.getBoundingClientRect();
-      const prog = (vh - r.top) / (vh + r.height); // 0 → 1 across the panel's travel
-      bg.style.transform = 'translate3d(0,' + ((prog - 0.5) * 14).toFixed(2) + '%,0) scale(1.08)';
+    if (bg && !this.reduceMotion && this.toolsPanelIndex >= 0) {
+      const top = this.panelStarts[this.toolsPanelIndex] - scrollY;
+      const prog = (vh - top) / (vh * 2);
+      const clamped = prog < 0 ? 0 : prog > 1 ? 1 : prog;
+      bg.style.transform = 'translate3d(0,' + ((clamped - 0.5) * 14).toFixed(2) + '%,0) scale(1.08)';
     }
+
+    // Suppress the whoosh for the initial layout pass so loading the page
+    // mid-document doesn't fire a burst of them.
+    this.stackReady = true;
   }
 
   // ---------------------------------------------------------------- horizontal work scroll
@@ -1219,42 +1332,164 @@ class Component extends DCLogic {
     window.removeEventListener('touchend', this.baEnd);
   }
 
-  // ---------------------------------------------------------------- ambient audio
-  initAudio() {
-    if (this.audio) return;
+  // ---------------------------------------------------------------- sound
+  // Everything is synthesised with WebAudio — no audio files, so this adds no
+  // network weight. Sound is opt-in and off by default: browsers block audio
+  // before a user gesture anyway, and unannounced sound is hostile.
+  ensureAudio() {
+    if (this.audio) return this.audio;
     const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return;
+    if (!Ctx) return null;
     const ctx = new Ctx();
-    const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+
+    // A compressor keeps overlapping blips from stacking into clipping.
+    const master = ctx.createGain();
+    master.gain.value = 1;
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -18;
+    comp.ratio.value = 12;
+    master.connect(comp);
+    comp.connect(ctx.destination);
+
+    // Reused noise buffer for the whoosh/click textures.
+    const len = Math.floor(ctx.sampleRate * 0.5);
+    const noise = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = noise.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+
+    this.audio = { ctx, master, noise };
+    return this.audio;
+  }
+
+  // Low, slow pad that sits under the SFX when sound is enabled.
+  startAmbient(a) {
+    if (this.ambient) return;
+    const { ctx, master } = a;
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(master);
     const o1 = ctx.createOscillator(); o1.type = 'sine'; o1.frequency.value = 110;
     const o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.value = 164.8;
     const lfo = ctx.createOscillator(); lfo.frequency.value = 0.08;
-    const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.03;
-    lfo.connect(lfoGain); lfoGain.connect(master.gain);
-    o1.connect(master); o2.connect(master);
+    const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.012;
+    lfo.connect(lfoGain); lfoGain.connect(gain.gain);
+    o1.connect(gain); o2.connect(gain);
     o1.start(); o2.start(); lfo.start();
-    this.audio = { ctx, master };
+    this.ambient = { gain };
   }
 
-  toggleMusic() {
-    this.initAudio();
-    if (!this.audio) return;
-    if (this.audio.ctx.state === 'suspended') this.audio.ctx.resume();
-    const on = !this.state.musicOn;
-    this.audio.master.gain.linearRampToValueAtTime(on ? 0.05 : 0, this.audio.ctx.currentTime + 0.6);
-    this.setState({ musicOn: on });
+  tone(a, opts) {
+    const { ctx, master } = a;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = opts.type || 'sine';
+    osc.frequency.setValueAtTime(opts.from, t);
+    if (opts.to) osc.frequency.exponentialRampToValueAtTime(opts.to, t + opts.dur);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(opts.gain, t + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + opts.dur);
+    osc.connect(gain); gain.connect(master);
+    osc.start(t); osc.stop(t + opts.dur + 0.02);
+  }
+
+  whoosh(a, gainVal, dur) {
+    const { ctx, master, noise } = a;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const band = ctx.createBiquadFilter();
+    band.type = 'bandpass';
+    band.Q.value = 1.1;
+    band.frequency.setValueAtTime(320, t);
+    band.frequency.exponentialRampToValueAtTime(1900, t + dur);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(gainVal, t + dur * 0.35);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(band); band.connect(gain); gain.connect(master);
+    src.start(t); src.stop(t + dur + 0.02);
+  }
+
+  playSfx(name) {
+    if (!this.state.soundOn) return;
+    const a = this.ensureAudio();
+    if (!a) return;
+    if (a.ctx.state === 'suspended') a.ctx.resume();
+
+    switch (name) {
+      case 'hover': {
+        // Rate-limited so sweeping across a grid doesn't machine-gun.
+        const now = performance.now();
+        if (now - (this.lastHoverSfx || 0) < 80) return;
+        this.lastHoverSfx = now;
+        this.tone(a, { type: 'triangle', from: 880, to: 1280, dur: 0.07, gain: 0.022 });
+        break;
+      }
+      case 'click':
+        this.tone(a, { type: 'sine', from: 620, to: 320, dur: 0.11, gain: 0.05 });
+        break;
+      case 'tick':
+        this.tone(a, { type: 'square', from: 1180, dur: 0.035, gain: 0.018 });
+        break;
+      case 'open':
+        this.tone(a, { type: 'sine', from: 300, to: 880, dur: 0.24, gain: 0.05 });
+        this.whoosh(a, 0.035, 0.3);
+        break;
+      case 'close':
+        this.tone(a, { type: 'sine', from: 760, to: 260, dur: 0.2, gain: 0.045 });
+        break;
+      case 'panel':
+        this.whoosh(a, 0.04, 0.42);
+        break;
+      case 'on':
+        this.tone(a, { type: 'sine', from: 660, dur: 0.16, gain: 0.05 });
+        this.tone(a, { type: 'sine', from: 990, dur: 0.26, gain: 0.035 });
+        break;
+      default:
+        break;
+    }
+  }
+
+  toggleSound() {
+    const on = !this.state.soundOn;
+    this.setState({ soundOn: on });
+    try { localStorage.setItem('aj-sound', on ? '1' : '0'); } catch (e) { /* private mode */ }
+
+    const a = this.ensureAudio();
+    if (!a) return;
+    if (a.ctx.state === 'suspended') a.ctx.resume();
+    this.startAmbient(a);
+    const t = a.ctx.currentTime;
+    this.ambient.gain.gain.linearRampToValueAtTime(on ? 0.022 : 0, t + 0.7);
+    if (on) {
+      // setState hasn't flushed yet, so play directly rather than via playSfx.
+      this.tone(a, { type: 'sine', from: 660, dur: 0.16, gain: 0.05 });
+      this.tone(a, { type: 'sine', from: 990, dur: 0.26, gain: 0.035 });
+    }
+  }
+
+  // Delegated so every link, button and card gets sound without per-element wiring.
+  onPointerOverSfx(e) {
+    if (!this.state.soundOn) return;
+    const el = e.target.closest ? e.target.closest('a,button,.tool-card,.gallery-card') : null;
+    if (!el || el === this.lastSfxHoverEl) return;
+    this.lastSfxHoverEl = el;
+    this.playSfx('hover');
+  }
+
+  onClickSfx(e) {
+    if (!this.state.soundOn) return;
+    const el = e.target.closest ? e.target.closest('a,button') : null;
+    if (!el) return;
+    // The sound toggle plays its own confirmation.
+    if (el.getAttribute('data-sound-toggle') !== null) return;
+    this.playSfx('click');
   }
 
   // nocookie host so embeds don't set tracking cookies before playback.
   youtubeEmbed(id) {
     return 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
-  }
-
-  // ---------------------------------------------------------------- star geometry
-  starPoint(i) {
-    const rad = i % 2 === 0 ? this.starOuterR : this.starInnerR;
-    const a = (-90 + i * 36) * Math.PI / 180;
-    return { x: 50 + rad * Math.cos(a), y: 50 + rad * Math.sin(a) };
   }
 
   // ---------------------------------------------------------------- render
@@ -1285,7 +1520,7 @@ class Component extends DCLogic {
     const filterTabs = this.filterTabsData.map((f) => ({
       label: f,
       active: f === this.state.filter,
-      onClick: () => this.setState({ filter: f }),
+      onClick: () => { this.playSfx('tick'); this.setState({ filter: f }); },
       style: {
         border: f === this.state.filter ? '1px solid transparent' : '1px solid color-mix(in oklab, var(--text) 20%, transparent)',
         background: f === this.state.filter ? 'var(--a)' : 'transparent',
@@ -1298,30 +1533,26 @@ class Component extends DCLogic {
       : this.galleryData.filter((g) => g.tag === this.state.filter)
     ).map((g) => ({
       ...g,
-      style: { aspectRatio: g.short ? '9/16' : '16/9' },
+      style: { aspectRatio: '9/16' },
       // hqdefault always exists for every video id, including Shorts.
       thumb: 'https://i.ytimg.com/vi/' + g.id + '/hqdefault.jpg',
       aria: 'Play ' + g.title,
-      onClick: () => this.openVideo(this.youtubeEmbed(g.id), g.title, g.short)
+      onClick: () => this.openVideo(this.youtubeEmbed(g.id), g.title, true)
     }));
 
-    const stats = this.statsData.map((s, i) => ({ ...s, ref: this.numRefs[i] }));
+    const projects = this.projectsData.map((pr) => ({
+      ...pr,
+      // Big 80vw cards need better than hqdefault; `res` is pinned per video.
+      thumb: 'https://i.ytimg.com/vi/' + pr.id + '/' + pr.res + '.jpg',
+      aria: 'Play ' + pr.title,
+      onClick: () => this.openVideo(this.youtubeEmbed(pr.id), pr.title, false)
+    }));
 
-    const starTools = this.toolsData.map((t, i) => {
-      const pt = this.starPoint(i);
-      return {
-        ...t,
-        slotStyle: { left: pt.x.toFixed(3) + '%', top: pt.y.toFixed(3) + '%' },
-        logoStyle: { background: 'linear-gradient(145deg,' + t.c1 + ',' + t.c2 + ')', color: t.fg }
-      };
-    });
-    const starPoints = this.toolsData
-      .map((_, i) => { const p = this.starPoint(i); return p.x.toFixed(2) + ',' + p.y.toFixed(2); })
-      .join(' ');
-    const centerTool = {
-      ...this.centerToolData,
-      logoStyle: { background: 'linear-gradient(145deg,' + this.centerToolData.c1 + ',' + this.centerToolData.c2 + ')', color: this.centerToolData.fg }
-    };
+    const logoStyle = (t) => ({ background: 'linear-gradient(145deg,' + t.c1 + ',' + t.c2 + ')', color: t.fg });
+    const aiTools = this.aiToolsData.map((t) => ({ ...t, logoStyle: logoStyle(t) }));
+    const software = this.softwareData.map((t) => ({ ...t, logoStyle: logoStyle(t) }));
+
+    const stats = this.statsData.map((s, i) => ({ ...s, ref: this.numRefs[i] }));
 
     const testimonialsRendered = this.testimonialsData.map((t, i) => {
       let offset = i - this.state.testIdx;
@@ -1352,7 +1583,8 @@ class Component extends DCLogic {
       }
     }));
 
-    const particles = this.particlesData.map((p) => ({
+    // Fewer animated nodes on phones — each one is its own composited layer.
+    const particles = this.particlesData.slice(0, this.state.isTouch ? 10 : 22).map((p) => ({
       style: {
         position: 'absolute', left: p.left + '%', top: p.top + '%', width: p.size + 'px', height: p.size + 'px',
         borderRadius: '50%', background: 'var(--text)', opacity: 0.35,
@@ -1366,10 +1598,10 @@ class Component extends DCLogic {
       enableCursorFlag, cursorDotRef: this.cursorDotRef, cursorRingRef: this.cursorRingRef, cursorLabelRef: this.cursorLabelRef,
       navLinks: this.navLinksData, themeSwatches,
       enableMusicFlag: this.props.enableMusic ?? true,
-      toggleMusic: () => this.toggleMusic(),
-      musicIcon: this.state.musicOn ? '♪' : '♫',
-      musicOn: this.state.musicOn,
-      musicLabel: this.state.musicOn ? 'Mute ambient audio' : 'Play ambient audio',
+      toggleSound: () => this.toggleSound(),
+      soundIcon: this.state.soundOn ? '🔊' : '🔇',
+      soundOn: this.state.soundOn,
+      soundLabel: this.state.soundOn ? 'Turn sound off' : 'Turn sound on',
       toggleMenu: () => this.setState((s) => ({ menuOpen: !s.menuOpen })),
       menuLabel: this.state.menuOpen ? '✕' : '☰',
       menuAria: this.state.menuOpen ? 'Close menu' : 'Open menu',
@@ -1381,7 +1613,7 @@ class Component extends DCLogic {
       magnetMove: this.magnetMove, magnetLeave: this.magnetLeave,
       statsWrapRef: this.statsWrapRef, stats,
       baWrapRef: this.baWrapRef, baOverlayRef: this.baOverlayRef, baHandleRef: this.baHandleRef, baStart: this.baStart,
-      horizWrapRef: this.horizWrapRef, trackRef: this.trackRef, projects: this.projectsData,
+      horizWrapRef: this.horizWrapRef, trackRef: this.trackRef, projects,
       tiltMove: this.tiltMove, tiltLeave: this.tiltLeave,
       filterTabs, galleryFiltered,
       videoOpen: !!this.state.video,
@@ -1400,8 +1632,22 @@ class Component extends DCLogic {
       ),
       timeline: this.timelineData,
       testimonialsRendered, testDots,
-      toolsBgRef: this.toolsBgRef, starTools, starPoints, centerTool,
-      socials: this.socialsData
+      toolsBgRef: this.toolsBgRef,
+      aiTools, software,
+      aiCount: String(aiTools.length).padStart(2, '0'),
+      swCount: String(software.length).padStart(2, '0'),
+      contact: {
+        email: this.contactData.email,
+        mailto: 'mailto:' + this.contactData.email,
+        phoneDisplay: '+91 79769 16245',
+        phoneHref: this.contactData.phoneHref,
+        instagram: this.contactData.instagram
+      },
+      socials: this.socialsData.map((s) => ({
+        ...s,
+        target: s.href.startsWith('http') ? '_blank' : undefined,
+        rel: s.href.startsWith('http') ? 'noopener noreferrer' : undefined
+      }))
     };
   }
 }
