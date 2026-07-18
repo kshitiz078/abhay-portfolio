@@ -135,8 +135,32 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 }
 .stat-card:hover{transform:translateY(-6px);border-color:color-mix(in oklab, var(--a) 45%, transparent)}
 .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
-.gallery-card{position:relative;border-radius:16px;overflow:hidden;transition:transform .7s var(--ease)}
-.gallery-card:hover{transform:translateY(-8px) scale(1.015)}
+.gallery-card{
+  position:relative;border-radius:16px;overflow:hidden;display:block;width:100%;
+  padding:0;border:none;background:var(--surface);cursor:pointer;font-family:inherit;
+  transition:transform .7s var(--ease), box-shadow .7s var(--ease);
+}
+.gallery-card:hover{transform:translateY(-8px) scale(1.015);box-shadow:0 26px 50px -22px rgba(0,0,0,.85)}
+.gallery-card:focus-visible{outline:2px solid var(--a);outline-offset:3px}
+.gallery-thumb{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform 1s var(--ease), filter .7s var(--ease);
+  filter:saturate(.92);
+}
+.gallery-card:hover .gallery-thumb{transform:scale(1.06);filter:saturate(1.05)}
+.gallery-meta{
+  position:absolute;inset:0;pointer-events:none;text-align:left;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:2px;padding:16px;
+  background:linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,.1) 46%, transparent);
+}
+.gallery-play{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);
+  width:52px;height:52px;border-radius:50%;pointer-events:none;
+  background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;
+  opacity:.85;transition:transform .5s var(--ease-spring), opacity .5s var(--ease), background .5s var(--ease);
+}
+.gallery-card:hover .gallery-play{transform:translate(-50%,-50%) scale(1.1);opacity:1;background:color-mix(in oklab, var(--a) 80%, transparent)}
 .filter-btn{padding:10px 20px;border-radius:100px;font-size:13px;cursor:pointer;font-family:inherit;transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease)}
 .timeline-row{display:grid;grid-template-columns:56px 1fr;gap:20px;padding:26px 0;border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent);transition:padding-left .6s var(--ease)}
 .timeline-row:hover{padding-left:10px}
@@ -241,6 +265,21 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   .tool-slot--center{grid-column:1/-1}
   .tool-card{width:100%}
   .tool-card--center{width:100%;flex-direction:row;gap:16px;justify-content:flex-start;padding:16px 20px}
+}
+
+/* ---------- video lightbox ---------- */
+.lightbox{
+  position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.93);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  padding:clamp(20px,5vw,56px);
+}
+.lightbox-frame{
+  position:relative;border-radius:14px;overflow:hidden;background:#000;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9);
+}
+.lightbox-title{
+  font-size:14px;letter-spacing:.4px;color:rgba(255,255,255,.8);text-align:center;max-width:90vw;
 }
 
 /* ---------- desktop breakpoints ---------- */
@@ -464,17 +503,15 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
       </sc-for>
     </div>
     <div class="gallery-grid">
-      <sc-for list="{{galleryFiltered}}" as="g" hint-placeholder-count="12">
-        <div data-cursor="play" class="gallery-card reveal" style="{{g.style}}">
-          <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="gallery-{{g.id}}" shape="rect" placeholder="Drop clip thumbnail" style="width:100%;height:100%" hint-size="100%,100%"></x-import>
-          <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,.78), transparent 52%);pointer-events:none;display:flex;align-items:flex-end;padding:16px">
-            <div>
-              <div style="font-size:11px;letter-spacing:1.5px;color:var(--a);font-weight:700">{{g.tag}}</div>
-              <div style="font-size:16px;color:#fff;font-weight:600">{{g.title}}</div>
-            </div>
-          </div>
-          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;pointer-events:none">▶</div>
-        </div>
+      <sc-for list="{{galleryFiltered}}" as="g" hint-placeholder-count="10">
+        <button onClick="{{g.onClick}}" data-cursor="play" class="gallery-card reveal" aria-label="{{g.aria}}" style="{{g.style}}">
+          <img src="{{g.thumb}}" alt="" loading="lazy" decoding="async" class="gallery-thumb">
+          <span class="gallery-meta">
+            <span style="font-size:11px;letter-spacing:1.5px;color:var(--a);font-weight:700">{{g.tag}}</span>
+            <span style="font-size:16px;color:#fff;font-weight:600;line-height:1.3">{{g.title}}</span>
+          </span>
+          <span class="gallery-play">▶</span>
+        </button>
       </sc-for>
     </div>
   </section>
@@ -621,17 +658,19 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 
 </div>
 
-<sc-if value="{{reelOpen}}" hint-placeholder-val="{{false}}">
-<div style="position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:40px">
-  <button onClick="{{closeReel}}" class="icon-btn" aria-label="Close showreel" style="position:absolute;top:26px;right:clamp(20px,4vw,56px);width:40px;height:40px;color:#fff;border-color:rgba(255,255,255,.3)">✕</button>
-  <iframe
-    src="https://drive.google.com/file/d/1hu4Bza2xuI2tlwMJsRXr_8shluFD-q-w/preview"
-    style="width:min(1100px,90vw);aspect-ratio:16/9;border-radius:12px;border:none;display:block"
-    allow="autoplay; fullscreen"
-    allowfullscreen
-    loading="lazy"
-    title="2026 Showreel — Abhay Jain"
-  ></iframe>
+<sc-if value="{{videoOpen}}" hint-placeholder-val="{{false}}">
+<div class="lightbox" onClick="{{onLightboxClick}}" role="dialog" aria-modal="true" aria-label="{{videoTitle}}">
+  <button onClick="{{closeVideo}}" class="icon-btn" aria-label="Close video" style="position:absolute;top:26px;right:clamp(20px,4vw,56px);width:40px;height:40px;color:#fff;border-color:rgba(255,255,255,.3);z-index:2">✕</button>
+  <div class="lightbox-frame" style="{{videoFrameStyle}}">
+    <iframe
+      src="{{videoSrc}}"
+      style="position:absolute;inset:0;width:100%;height:100%;border:none;display:block"
+      allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+      allowfullscreen
+      title="{{videoTitle}}"
+    ></iframe>
+  </div>
+  <div class="lightbox-title">{{videoTitle}}</div>
 </div>
 </sc-if>
 
@@ -662,7 +701,7 @@ class Component extends DCLogic {
 
   rolesData = ['Professional Video Editor','Motion Designer','Storyteller'];
 
-  marqueeWordsData = ['COMMERCIAL','CINEMATIC','MUSIC VIDEOS','SOCIAL','SPORTS','REAL ESTATE','WEDDING','CORPORATE','GAMING'];
+  marqueeWordsData = ['BANKING','AI AVATAR','INSURANCE','REAL ESTATE','CORPORATE','EXPLAINER','WALKTHROUGH','TUTORIAL','SHORTS'];
 
   projectsData = [
     {id:1,title:'Midnight Run',category:'Commercial',year:'2025',software:'Premiere Pro · DaVinci Resolve',role:'Lead Editor',desc:"A high-octane spot cut for speed — every transition timed to the engine's rhythm."},
@@ -673,22 +712,22 @@ class Component extends DCLogic {
     {id:6,title:'Threadbare',category:'Corporate',year:'2023',software:'DaVinci Resolve · After Effects',role:'Lead Editor',desc:'A brand film about craft, told through the hands that make it.'}
   ];
 
+  // `short: true` marks a YouTube Short — rendered as a 9:16 tile and played
+  // back in a portrait lightbox.
   galleryData = [
-    {id:1,title:'Velocity',tag:'Sports',ratio:'16/9'},
-    {id:2,title:'Golden Hour',tag:'Wedding',ratio:'9/16'},
-    {id:3,title:'Skyline',tag:'Real Estate',ratio:'16/9'},
-    {id:4,title:'Neon Pulse',tag:'Music Videos',ratio:'1/1'},
-    {id:5,title:'Founders',tag:'Corporate',ratio:'16/9'},
-    {id:6,title:'After Dark',tag:'Cinematic',ratio:'16/9'},
-    {id:7,title:'Quick Cuts',tag:'Social Media',ratio:'9/16'},
-    {id:8,title:'Launch Day',tag:'Commercial',ratio:'16/9'},
-    {id:9,title:'Overtime',tag:'Sports',ratio:'9/16'},
-    {id:10,title:'Vows',tag:'Wedding',ratio:'16/9'},
-    {id:11,title:'Respawn',tag:'Gaming',ratio:'16/9'},
-    {id:12,title:'Rooftop',tag:'Commercial',ratio:'1/1'}
+    {id:'ixtIMhxnopc', title:'AU 0101 App',                 tag:'Banking'},
+    {id:'pqpBMIMMnsQ', title:'AU App Tutorial',             tag:'Banking'},
+    {id:'3048QDb_1qQ', title:'RMIB — Insurance Company',    tag:'Insurance'},
+    {id:'zxlLW2z173M', title:'AI Avatar Videos for Village', tag:'AI Avatar'},
+    {id:'FcElozarGMQ', title:'AI Property Walkthrough',     tag:'Real Estate'},
+    {id:'tFHynWyOXL4', title:'AU Internal Banking Videos',  tag:'Banking'},
+    {id:'9M-rrLLq3w0', title:'AKFI',                        tag:'Corporate',  short:true},
+    {id:'nfuTLsVh8js', title:'Kedia Avatar 1',              tag:'AI Avatar',  short:true},
+    {id:'qXeN2d_a13U', title:'Kedia Avatar 2',              tag:'AI Avatar',  short:true},
+    {id:'__SuGTaeS7M', title:'Client Work Avatar',          tag:'AI Avatar',  short:true}
   ];
 
-  filterTabsData = ['All','Commercial','Cinematic','Music Videos','Social Media','Sports','Real Estate','Wedding','Corporate','Gaming'];
+  filterTabsData = ['All','Banking','AI Avatar','Insurance','Real Estate','Corporate'];
 
   timelineData = [
     {n:'01',title:'Idea',desc:'Every project starts with a spark — a concept worth chasing.'},
@@ -761,7 +800,8 @@ class Component extends DCLogic {
     dur: 5+Math.random()*8, delay: Math.random()*6
   }));
 
-  state = { themeKey: null, loading: true, filter: 'All', testIdx: 0, musicOn: false, menuOpen: false, reelOpen: false, isTouch: false };
+  // `video` holds the currently open lightbox clip: { src, title, short }.
+  state = { themeKey: null, loading: true, filter: 'All', testIdx: 0, musicOn: false, menuOpen: false, video: null, isTouch: false };
 
   constructor(props) {
     super(props);
@@ -783,6 +823,9 @@ class Component extends DCLogic {
     this.requestStackUpdate = this.requestStackUpdate.bind(this);
     this.layoutPanels = this.layoutPanels.bind(this);
     this.onVisibility = this.onVisibility.bind(this);
+    this.onKeyDown = this.onKeyDown.bind(this);
+    this.closeVideo = this.closeVideo.bind(this);
+    this.onLightboxClick = this.onLightboxClick.bind(this);
   }
 
   // ---------------------------------------------------------------- lifecycle
@@ -807,7 +850,19 @@ class Component extends DCLogic {
 
     this.horizTimer = setTimeout(() => this.setupHorizontalScroll(), 400);
     document.addEventListener('visibilitychange', this.onVisibility);
+    document.addEventListener('keydown', this.onKeyDown);
   }
+
+  onKeyDown(e) {
+    if (e.key !== 'Escape') return;
+    if (this.state.video) this.closeVideo();
+    else if (this.state.menuOpen) this.setState({ menuOpen: false });
+  }
+
+  openVideo(src, title, short) { this.setState({ video: { src, title, short: !!short } }); }
+  closeVideo() { this.setState({ video: null }); }
+  // Close when the backdrop is clicked, but not the player or its chrome.
+  onLightboxClick(e) { if (e.target === e.currentTarget) this.closeVideo(); }
 
   // A rAF scheduled just before the tab is backgrounded never runs, which would
   // otherwise leave the `stackRaf` / `cursorRaf` guards latched and freeze the
@@ -842,6 +897,7 @@ class Component extends DCLogic {
     document.documentElement.removeEventListener('mouseleave', this.onCursorLeave);
     document.documentElement.removeEventListener('mouseenter', this.onCursorEnter);
     document.removeEventListener('visibilitychange', this.onVisibility);
+    document.removeEventListener('keydown', this.onKeyDown);
     this.baEnd();
     if (this.cursorRaf) cancelAnimationFrame(this.cursorRaf);
     if (this.stackRaf) cancelAnimationFrame(this.stackRaf);
@@ -1189,6 +1245,11 @@ class Component extends DCLogic {
     this.setState({ musicOn: on });
   }
 
+  // nocookie host so embeds don't set tracking cookies before playback.
+  youtubeEmbed(id) {
+    return 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+  }
+
   // ---------------------------------------------------------------- star geometry
   starPoint(i) {
     const rad = i % 2 === 0 ? this.starOuterR : this.starInnerR;
@@ -1235,7 +1296,14 @@ class Component extends DCLogic {
     const galleryFiltered = (this.state.filter === 'All'
       ? this.galleryData
       : this.galleryData.filter((g) => g.tag === this.state.filter)
-    ).map((g) => ({ ...g, style: { aspectRatio: g.ratio } }));
+    ).map((g) => ({
+      ...g,
+      style: { aspectRatio: g.short ? '9/16' : '16/9' },
+      // hqdefault always exists for every video id, including Shorts.
+      thumb: 'https://i.ytimg.com/vi/' + g.id + '/hqdefault.jpg',
+      aria: 'Play ' + g.title,
+      onClick: () => this.openVideo(this.youtubeEmbed(g.id), g.title, g.short)
+    }));
 
     const stats = this.statsData.map((s, i) => ({ ...s, ref: this.numRefs[i] }));
 
@@ -1316,9 +1384,20 @@ class Component extends DCLogic {
       horizWrapRef: this.horizWrapRef, trackRef: this.trackRef, projects: this.projectsData,
       tiltMove: this.tiltMove, tiltLeave: this.tiltLeave,
       filterTabs, galleryFiltered,
-      reelOpen: this.state.reelOpen,
-      openReel: () => this.setState({ reelOpen: true }),
-      closeReel: () => this.setState({ reelOpen: false }),
+      videoOpen: !!this.state.video,
+      videoSrc: this.state.video ? this.state.video.src : '',
+      videoTitle: this.state.video ? this.state.video.title : '',
+      // Shorts are height-driven (portrait), standard clips width-driven.
+      videoFrameStyle: this.state.video && this.state.video.short
+        ? { height: 'min(74vh, 760px)', aspectRatio: '9/16', maxWidth: '92vw' }
+        : { width: 'min(1100px, 92vw)', aspectRatio: '16/9', maxHeight: '74vh' },
+      closeVideo: this.closeVideo,
+      onLightboxClick: this.onLightboxClick,
+      openReel: () => this.openVideo(
+        'https://drive.google.com/file/d/1hu4Bza2xuI2tlwMJsRXr_8shluFD-q-w/preview',
+        '2026 Showreel — Abhay Jain',
+        false
+      ),
       timeline: this.timelineData,
       testimonialsRendered, testDots,
       toolsBgRef: this.toolsBgRef, starTools, starPoints, centerTool,
