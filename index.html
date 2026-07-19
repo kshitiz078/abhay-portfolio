@@ -126,7 +126,38 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 
 /* ---------- layout grids ---------- */
 .about-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center}
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+/* ---------- stats band ---------- */
+.stats-band{
+  position:relative;isolation:isolate;overflow:hidden;
+  padding:clamp(80px,10vw,120px) clamp(20px,4vw,56px) clamp(100px,12vw,160px);
+}
+.stats-grid{position:relative;z-index:2;display:grid;grid-template-columns:1fr;gap:20px;max-width:1200px;margin:0 auto}
+
+/* Radial sunburst backdrop. Themed rays by default so it adapts to all six
+   palettes; set --backdrop on .stats-band to use a real image instead, e.g.
+   style="--backdrop:url('./bg-sunburst.jpg')". */
+.sunburst{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.sunburst::before{
+  content:"";position:absolute;left:50%;top:100%;
+  width:min(200vw,2200px);aspect-ratio:1;transform:translate(-50%,-50%);
+  background:repeating-conic-gradient(from -90deg at 50% 50%,
+    color-mix(in oklab, var(--a) 38%, transparent) 0deg 3.4deg,
+    transparent 3.4deg 8deg);
+  -webkit-mask-image:radial-gradient(closest-side, #000 26%, transparent 80%);
+  mask-image:radial-gradient(closest-side, #000 26%, transparent 80%);
+  opacity:.5;
+}
+.sunburst::after{
+  content:"";position:absolute;inset:0;
+  background:var(--backdrop, none) center/cover no-repeat;
+  opacity:var(--backdrop-opacity, .5);
+}
+
+/* Woven paper texture over the top, so the band reads as printed stock. */
+.paper-grain{
+  position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5 .9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23p)' opacity='.6'/%3E%3C/svg%3E");
+}
 .stat-card{
   text-align:center;padding:30px 10px;border-radius:16px;background:var(--surface);
   border:1px solid color-mix(in oklab, var(--text) 6%, transparent);
@@ -326,11 +357,16 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   font-size:14px;letter-spacing:.4px;color:rgba(255,255,255,.8);text-align:center;max-width:90vw;
 }
 
+/* three short cards sit happily side by side well before the desktop cut */
+@media (min-width:560px){
+  .stats-grid{grid-template-columns:repeat(3,1fr)}
+}
+
 /* ---------- desktop breakpoints ---------- */
 @media (min-width:861px){
   .nav-links,.nav-swatches{display:flex}
   .about-grid{grid-template-columns:1.15fr .85fr;gap:60px}
-  .stats-grid{grid-template-columns:repeat(4,1fr);gap:30px}
+  .stats-grid{gap:30px}
   .timeline-row{grid-template-columns:70px 1fr;gap:24px}
 }
 
@@ -487,7 +523,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
         <p class="display" style="font-size:clamp(28px,4.2vw,56px);line-height:1.15">
           Every frame has purpose. Every cut tells a story. Every transition creates emotion.
         </p>
-        <p style="font-size:17px;line-height:1.7;color:var(--muted);max-width:560px;margin-top:34px">Abhay Jain is a video editor and motion designer working across commercials, music videos, cinematic shorts and brand films — six years of turning raw footage into films people remember.</p>
+        <p style="font-size:17px;line-height:1.7;color:var(--muted);max-width:560px;margin-top:34px">Abhay Jain is a video editor and motion designer working across brand films, AI avatar content, explainers and social campaigns — turning raw footage into films people remember.</p>
       </div>
       <div class="reveal" style="position:relative;width:min(100%,420px);aspect-ratio:4/5;justify-self:end">
         <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="about-portrait" shape="rounded" radius="18" placeholder="Drop portrait photo" style="width:100%;height:100%" hint-size="360px,450px"></x-import>
@@ -508,15 +544,19 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
     </div>
   </section>
 
-  <section ref="{{statsWrapRef}}" class="stats-grid" style="padding:clamp(80px,10vw,120px) clamp(20px,4vw,56px) clamp(100px,12vw,160px);max-width:1200px;margin:0 auto">
-    <sc-for list="{{stats}}" as="s" hint-placeholder-count="4">
-      <div class="stat-card reveal">
-        <div class="display" style="font-size:clamp(34px,5vw,58px);color:var(--a);display:flex;align-items:baseline;justify-content:center;gap:2px">
-          <span ref="{{s.ref}}">0</span><span>{{s.suffix}}</span>
+  <section ref="{{statsWrapRef}}" class="stats-band">
+    <div class="sunburst" aria-hidden="true"></div>
+    <div class="paper-grain" aria-hidden="true"></div>
+    <div class="stats-grid">
+      <sc-for list="{{stats}}" as="s" hint-placeholder-count="3">
+        <div class="stat-card reveal">
+          <div class="display" style="font-size:clamp(34px,5vw,58px);color:var(--a);display:flex;align-items:baseline;justify-content:center;gap:2px">
+            <span ref="{{s.ref}}">0</span><span>{{s.suffix}}</span>
+          </div>
+          <div style="font-size:13px;color:var(--muted);letter-spacing:.5px;margin-top:8px">{{s.label}}</div>
         </div>
-        <div style="font-size:13px;color:var(--muted);letter-spacing:.5px;margin-top:8px">{{s.label}}</div>
-      </div>
-    </sc-for>
+      </sc-for>
+    </div>
   </section>
   <div class="panel-scrim" data-panel-scrim></div>
 </div>
@@ -866,10 +906,9 @@ class Component extends DCLogic {
   ];
 
   statsData = [
-    {value:120,suffix:'+',label:'Projects Delivered'},
-    {value:24,suffix:'M+',label:'Views Generated'},
-    {value:6,suffix:'+',label:'Years Experience'},
-    {value:98,suffix:'%',label:'Client Satisfaction'}
+    {value:150,suffix:'+',label:'Projects Delivered'},
+    {value:35,suffix:'+',label:'Clients Managed'},
+    {value:2,suffix:'+',label:'Years of Experience'}
   ];
 
   contactData = {
