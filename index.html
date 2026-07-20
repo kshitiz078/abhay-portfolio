@@ -31,7 +31,6 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 /* ---------- keyframes ---------- */
 @keyframes grain{0%,100%{transform:translate(0,0)}10%{transform:translate(-2%,-4%)}20%{transform:translate(-5%,3%)}30%{transform:translate(3%,-6%)}40%{transform:translate(-3%,5%)}50%{transform:translate(4%,2%)}60%{transform:translate(-4%,-2%)}70%{transform:translate(2%,4%)}80%{transform:translate(-1%,-3%)}90%{transform:translate(3%,1%)}}
 @keyframes spin360{from{transform:rotateY(0deg) rotateX(10deg)}to{transform:rotateY(360deg) rotateX(10deg)}}
-@keyframes pulseGlow{0%,100%{opacity:.45;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
 @keyframes marqueeScroll{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
 @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
 
@@ -47,7 +46,15 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   transform-origin:50% 0;
   backface-visibility:hidden;
 }
-.panel:not(.panel--flow) .panel-inner{will-change:transform}
+/* Deliberately no `will-change:transform` here. Promoting every panel makes a
+   composited layer as tall as the panel, and the gallery panel is ~10,000px on
+   a phone — past the max GPU texture size, which shows up as blank/flashing
+   sections while scrolling. The scale is applied via transform anyway, which
+   promotes for the duration of the change without pinning a permanent layer. */
+
+/* Panels too tall to composite safely opt out of sticking entirely: the next
+   panel still slides over them, but nothing oversized gets transformed. */
+.panel[data-tall]{position:relative;top:auto !important}
 .panel:first-child .panel-inner{border-radius:0;box-shadow:none}
 /* dims the outgoing panel toward the page background as the next one covers it */
 .panel-scrim{
@@ -620,20 +627,9 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 </div>
 </section>
 
-<!-- ============ PANEL 5 — REEL + PROCESS ============ -->
+<!-- ============ PANEL 5 — PROCESS ============ -->
 <section class="panel" data-panel="5">
 <div class="panel-inner" data-panel-inner>
-  <section id="reel" style="position:relative;padding:clamp(90px,12vw,150px) clamp(20px,4vw,56px) 0">
-    <div class="reveal" style="position:relative;max-width:1400px;margin:0 auto;aspect-ratio:21/9;border-radius:22px;overflow:hidden;background:repeating-linear-gradient(135deg, var(--surface) 0 22px, color-mix(in oklab, var(--surface) 80%, black) 22px 44px)">
-      <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 50%, transparent, rgba(0,0,0,.6))"></div>
-      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px">
-        <button onClick="{{openReel}}" data-cursor="play" aria-label="Play 2026 showreel" style="width:clamp(68px,9vw,96px);aspect-ratio:1;border-radius:50%;border:2px solid #fff;background:rgba(255,255,255,.08);color:#fff;font-size:24px;cursor:pointer;animation:pulseGlow 2.6s ease-in-out infinite">▶</button>
-        <div class="display" style="font-size:clamp(24px,3.5vw,42px);color:#fff;letter-spacing:1px">2026 SHOWREEL</div>
-        <div style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,.5)">CLICK TO WATCH — 2026</div>
-      </div>
-    </div>
-  </section>
-
   <section id="process" style="padding:clamp(100px,13vw,160px) clamp(20px,4vw,56px);max-width:1100px;margin:0 auto">
     <div class="reveal" style="margin-bottom:50px">
       <div class="eyebrow">HOW IT'S MADE</div>
@@ -813,7 +809,7 @@ class Component extends DCLogic {
   };
 
   navLinksData = [
-    {label:'Work',href:'#work'},{label:'Gallery',href:'#gallery'},{label:'Reel',href:'#reel'},
+    {label:'Work',href:'#work'},{label:'Gallery',href:'#gallery'},
     {label:'Process',href:'#process'},{label:'Contact',href:'#contact'}
   ];
 
@@ -926,6 +922,10 @@ class Component extends DCLogic {
 
   // Star geometry, shared by the SVG outline and the card positions so the two
   // can never drift apart. Percentages of the square stage.
+  // Mobile GPUs commonly cap a single composited layer at 4096px; staying under
+  // that is what keeps long sections from flashing blank while scrolling.
+  MAX_STICKY_PX = 4000;
+
   rootRef = React.createRef();
   loaderBarRef = React.createRef();
   loaderPctRef = React.createRef();
@@ -1200,7 +1200,15 @@ class Component extends DCLogic {
     for (let i = 0; i < this.panels.length; i++) {
       const p = this.panels[i];
       if (p.dataset.panel === 'flow') continue;
-      p.style.top = (heights[i] > vh ? Math.round(vh - heights[i]) : 0) + 'px';
+      // Past MAX_STICKY_PX a panel can no longer be composited as one layer on
+      // mobile GPUs, so it opts out of sticking and transforming altogether.
+      if (heights[i] > this.MAX_STICKY_PX) {
+        p.dataset.tall = '1';
+        p.style.top = '';
+      } else {
+        delete p.dataset.tall;
+        p.style.top = (heights[i] > vh ? Math.round(vh - heights[i]) : 0) + 'px';
+      }
     }
     this.updateStack();
   }
@@ -1238,10 +1246,13 @@ class Component extends DCLogic {
         if (crossed && this.stackReady) this.playSfx('panel');
       }
 
-      if (scrim) scrim.style.opacity = (eased * 0.62).toFixed(3);
+      // Oversized panels get neither scrim nor scale — rasterising a surface
+      // that large every frame is what breaks scrolling on mobile.
+      const oversized = this.panels[i].dataset.tall === '1';
+      if (scrim) scrim.style.opacity = oversized ? '0' : (eased * 0.62).toFixed(3);
       // Panels holding a GSAP pin must stay transform-free: a transformed
       // ancestor would break `position:fixed` on the pinned child.
-      if (this.reduceMotion || this.panels[i].dataset.panel === 'flow') continue;
+      if (this.reduceMotion || oversized || this.panels[i].dataset.panel === 'flow') continue;
       inner.style.transform = 'scale(' + (1 - 0.07 * eased).toFixed(4) + ')';
     }
 
@@ -1729,11 +1740,6 @@ class Component extends DCLogic {
         : { width: 'min(1100px, 92vw)', aspectRatio: '16/9', maxHeight: '74vh' },
       closeVideo: this.closeVideo,
       onLightboxClick: this.onLightboxClick,
-      openReel: () => this.openVideo(
-        'https://drive.google.com/file/d/1hu4Bza2xuI2tlwMJsRXr_8shluFD-q-w/preview',
-        '2026 Showreel — Abhay Jain',
-        false
-      ),
       timeline: this.timelineData,
       testimonialsRendered, testDots,
       toolsBgRef: this.toolsBgRef,
