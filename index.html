@@ -1015,11 +1015,24 @@ class Component extends DCLogic {
   // NOTE: the dc-runtime only forwards `prevProps` here — there is no
   // `prevState` argument — so state changes are tracked by hand.
   componentDidUpdate() {
+    // Any render can mint new .reveal nodes; hand them to the observer.
+    this.observeReveals();
     const key = this.state.filter + '|' + this.state.loading;
     if (key !== this.lastLayoutKey) {
       this.lastLayoutKey = key;
       this.layoutPanels();
+      // The element under the pointer may have just been removed, so no
+      // mouseout fires and the cursor keeps a stale "PLAY" label. Reset it.
+      this.clearCursorTarget();
     }
+  }
+
+  clearCursorTarget() {
+    const ring = this.cursorRingRef.current, label = this.cursorLabelRef.current;
+    this.lastSfxHoverEl = null;
+    if (!ring || !label) return;
+    ring.classList.remove('is-active', 'is-down');
+    label.textContent = '';
   }
 
   componentWillUnmount() {
@@ -1073,16 +1086,7 @@ class Component extends DCLogic {
     const root = this.rootRef.current;
     if (!root) return;
     root.setAttribute('data-reveal-ready', '');
-
-    const els = [...root.querySelectorAll('.reveal')];
-    // Stagger siblings that share a parent so groups cascade instead of popping.
-    const seen = new Map();
-    els.forEach((el) => {
-      const parent = el.parentElement;
-      const i = seen.get(parent) || 0;
-      seen.set(parent, i + 1);
-      if (i > 0) el.style.transitionDelay = Math.min(i, 6) * 70 + 'ms';
-    });
+    this.observedReveals = new WeakSet();
 
     this.io = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
@@ -1091,7 +1095,29 @@ class Component extends DCLogic {
         this.io.unobserve(en.target);
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
-    els.forEach((el) => this.io.observe(el));
+
+    this.observeReveals();
+  }
+
+  // Must run after every render, not just on mount. Filtering the gallery down
+  // and back rebuilds the cards React can't match by index key: those nodes are
+  // brand new, start hidden, and were never handed to the observer — which is
+  // why the grid could end up showing a single video. Anything already revealed
+  // or already observed is skipped, so this stays cheap.
+  observeReveals() {
+    const root = this.rootRef.current;
+    if (!root || !this.io) return;
+    // Stagger siblings that share a parent so groups cascade instead of popping.
+    const seen = new Map();
+    root.querySelectorAll('.reveal').forEach((el) => {
+      const parent = el.parentElement;
+      const i = seen.get(parent) || 0;
+      seen.set(parent, i + 1);
+      if (el.classList.contains('is-in') || this.observedReveals.has(el)) return;
+      this.observedReveals.add(el);
+      if (i > 0) el.style.transitionDelay = Math.min(i, 6) * 70 + 'ms';
+      this.io.observe(el);
+    });
   }
 
   setupStatsCounter() {
