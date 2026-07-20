@@ -284,7 +284,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 /* ---------- selected work cards ---------- */
 .project-card{
   position:relative;flex-shrink:0;overflow:hidden;display:block;
-  width:min(58vw,820px);height:74%;align-self:center;margin-right:2.4vw;
+  width:min(58vw,820px);height:88%;align-self:center;margin-right:2.4vw;
   padding:0;border:none;background:var(--surface);cursor:pointer;font-family:inherit;
   border-radius:20px;transition:transform .8s var(--ease);
 }
@@ -455,11 +455,8 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
     <div style="position:absolute;left:0;right:0;bottom:16%;height:40px;opacity:.1;background-image:repeating-linear-gradient(90deg, var(--text) 0 4px, transparent 4px 20px);animation:floatY 9s ease-in-out infinite reverse"></div>
 
     <div style="position:relative;z-index:2;max-width:1100px">
-      <div class="reveal" style="font-size:13px;letter-spacing:4px;color:var(--muted);margin-bottom:22px;display:flex;align-items:center;gap:10px">
-        <span style="width:34px;height:1px;background:var(--a)"></span>PORTFOLIO — 2026
-      </div>
       <h1 class="display reveal" style="font-size:clamp(44px,9vw,132px);line-height:.96;letter-spacing:.5px">
-        NOTHING IS<br>ORIGINAL.<br>EVERYTHING IS<br><span style="color:var(--a);text-shadow:0 0 40px color-mix(in oklab, var(--a) 60%, transparent)">INSPIRED.</span>
+        I DON'T JUST EDIT VIDEOS.<br>I CREATE <span style="color:var(--a);text-shadow:0 0 40px color-mix(in oklab, var(--a) 60%, transparent)">EXPERIENCES.</span>
       </h1>
       <div class="reveal" style="display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:30px">
         <sc-for list="{{roles}}" as="r" hint-placeholder-count="3">
@@ -545,7 +542,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
       <div class="eyebrow">SELECTED WORK</div>
       <p class="display" style="font-size:clamp(30px,5vw,64px)">Projects worth pausing for.</p>
     </div>
-    <div ref="{{horizWrapRef}}" style="position:relative;height:100vh;overflow:hidden">
+    <div ref="{{horizWrapRef}}" style="position:relative;height:82vh;overflow:hidden">
       <div ref="{{trackRef}}" style="display:flex;height:100%;width:max-content;will-change:transform">
         <sc-for list="{{projects}}" as="pr" hint-placeholder-count="6">
           <button onClick="{{pr.onClick}}" data-cursor="play" onMouseMove="{{tiltMove}}" onMouseLeave="{{tiltLeave}}" class="project-card" aria-label="{{pr.aria}}">
@@ -941,6 +938,7 @@ class Component extends DCLogic {
     this.onHeroParallax = this.onHeroParallax.bind(this);
     this.requestStackUpdate = this.requestStackUpdate.bind(this);
     this.layoutPanels = this.layoutPanels.bind(this);
+    this.onResize = this.onResize.bind(this);
     this.onVisibility = this.onVisibility.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
     this.closeVideo = this.closeVideo.bind(this);
@@ -1037,7 +1035,7 @@ class Component extends DCLogic {
 
   componentWillUnmount() {
     window.removeEventListener('mousemove', this.onHeroParallax);
-    window.removeEventListener('resize', this.layoutPanels);
+    window.removeEventListener('resize', this.onResize);
     window.removeEventListener('scroll', this.requestStackUpdate);
     document.removeEventListener('mousemove', this.onCursorMove);
     document.removeEventListener('mouseover', this.onCursorOver);
@@ -1164,7 +1162,7 @@ class Component extends DCLogic {
     this.toolsPanelIndex = this.panels.findIndex((p) => p.querySelector('.tools-bg'));
 
     this.layoutPanels();
-    window.addEventListener('resize', this.layoutPanels);
+    window.addEventListener('resize', this.onResize);
     window.addEventListener('scroll', this.requestStackUpdate, { passive: true });
 
     if (window.ResizeObserver) {
@@ -1212,9 +1210,18 @@ class Component extends DCLogic {
     this.updateStack();
   }
 
-  layoutPanels() {
+  // `refresh` re-measures every ScrollTrigger, including the pinned work
+  // section. GSAP warns that refreshing while the page sits inside a pinned
+  // range can misplace the pin, so only do it when the geometry genuinely
+  // changed — a viewport resize — and never for a gallery filter click, which
+  // cannot affect that section at all.
+  layoutPanels(refreshTriggers) {
     this.measurePanelTops();
-    if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+    if (refreshTriggers === true && window.ScrollTrigger) window.ScrollTrigger.refresh();
+  }
+
+  onResize() {
+    this.layoutPanels(true);
   }
 
   requestStackUpdate() {
@@ -1284,10 +1291,10 @@ class Component extends DCLogic {
       ease: 'none',
       scrollTrigger: {
         trigger: wrap, start: 'top top', end: () => '+=' + getDistance(),
-        scrub: 1, pin: true, invalidateOnRefresh: true, anticipatePin: 1
+        scrub: 0.5, pin: true, invalidateOnRefresh: true
       }
     });
-    this.layoutPanels();
+    this.layoutPanels(true);
   }
 
   // ---------------------------------------------------------------- custom cursor
