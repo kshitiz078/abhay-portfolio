@@ -1607,8 +1607,13 @@ class Component extends DCLogic {
   // vanishing point; `zoom` sets how far above the frame that point sits, so a
   // higher value spreads the fan wider.
   LIGHTFALL = {
-    colors: ['#A6C8FF', '#5227FF', '#FF9FFC'],
-    backgroundColor: '#0A29FF',
+    // Crimson build of the reference palette, keeping its pale / saturated /
+    // warm-accent roles. The base is deliberately deep rather than a direct
+    // red translation of #0A29FF: red reads far brighter than blue at the same
+    // saturation, and the section's CTA is itself brand red, so a hot backdrop
+    // would flatten the button against it. Brightness comes from the bloom.
+    colors: ['#FFC9C2', '#E50914', '#FF6B8A'],
+    backgroundColor: '#6E0812',
     speed: 0.5, streakWidth: 1, streakLength: 1, glow: 1,
     density: 0.6, twinkle: 1, zoom: 3, backgroundGlow: 0.5, opacity: 1,
     mouseStrength: 0.5, mouseRadius: 1
@@ -1728,10 +1733,13 @@ class Component extends DCLogic {
     ctx.fillStyle = bloom;
     ctx.fillRect(0, 0, w, h);
 
-    // deepen the base of the frame so the plate sinks toward the page
+    // Deepen the base of the frame so the plate sinks toward the page. Derived
+    // from backgroundColor rather than hardcoded: these two stops used to be
+    // fixed navy, which was invisible under a blue palette but would have left
+    // a blue cast at the bottom of any other one.
     const sink = ctx.createLinearGradient(0, h * 0.35, 0, h);
-    sink.addColorStop(0, 'rgba(4,8,48,0)');
-    sink.addColorStop(1, 'rgba(3,5,32,0.92)');
+    sink.addColorStop(0, this.lfShade(P.backgroundColor, 0.16, 0));
+    sink.addColorStop(1, this.lfShade(P.backgroundColor, 0.11, 0.92));
     ctx.fillStyle = sink;
     ctx.fillRect(0, 0, w, h);
 
@@ -1774,6 +1782,15 @@ class Component extends DCLogic {
     }
     ctx.shadowBlur = 0;
     ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // `hex` darkened toward black by `k`, at alpha `a`.
+  lfShade(hex, k, a) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = Math.round(((n >> 16) & 255) * k);
+    const g = Math.round(((n >> 8) & 255) * k);
+    const b = Math.round((n & 255) * k);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
   }
 
   lfRgba(hex, a) {
