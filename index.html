@@ -12,9 +12,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Abhay Jain — Video Editor</title>
 <meta name="description" content="Abhay Jain — video editor and storyteller. Commercials, social content, AI-generated video, podcasts and brand storytelling.">
+<!-- Netflix sets its UI in Netflix Sans, a licensed cut of a neo-grotesque very
+     close to Helvetica. We can't ship that face, so the stack below resolves to
+     the nearest thing already installed on each platform — Helvetica Neue on
+     Apple, Arial on Windows/Android (near-identical metrics) — which also drops
+     two webfont requests off the critical path. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <style>
@@ -26,6 +30,9 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 :root{
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-spring:cubic-bezier(.34,1.4,.5,1);
+  /* One neo-grotesque for everything, Netflix-style: the brand voice comes from
+     weight and tracking, not from a second typeface. */
+  --font-sans:'Helvetica Neue',Helvetica,Arial,'Liberation Sans',sans-serif;
 }
 
 /* ---------- keyframes ---------- */
@@ -115,8 +122,13 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 .swatch:hover{transform:scale(1.28)}
 
 /* ---------- shared bits ---------- */
-.eyebrow{font-size:13px;letter-spacing:4px;color:var(--a);margin-bottom:20px}
-.display{font-family:'Anton',sans-serif;font-weight:400;margin:0;text-wrap:pretty}
+.eyebrow{font-size:12px;letter-spacing:3px;font-weight:700;text-transform:uppercase;color:var(--a);margin-bottom:20px}
+/* Netflix headline recipe: maximum weight, negative tracking so the counters
+   close up, and a tight leading set per-use at the call site. */
+.display{
+  font-family:var(--font-sans);font-weight:800;margin:0;text-wrap:pretty;
+  letter-spacing:-.022em;
+}
 .btn{
   display:inline-flex;align-items:center;gap:10px;text-decoration:none;
   font-weight:700;letter-spacing:.5px;border-radius:100px;
@@ -131,8 +143,57 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 .marquee-track{display:flex;width:max-content;gap:60px;animation:marqueeScroll 30s linear infinite;will-change:transform}
 .marquee-track--rev{gap:70px;align-items:center;animation-duration:38s;animation-direction:reverse}
 
+/* ---------- client strip ----------
+   Each chip renders both a mark and a wordmark; renderVals hides whichever the
+   client doesn't have, so dropping a real logo file into clientsData needs no
+   markup change. Names are set as wordmarks — tight, uppercase, heavy — which
+   reads as intentional branding rather than as a missing image. */
+.client-chip{
+  display:flex;align-items:center;justify-content:center;
+  height:44px;padding:0 26px;white-space:nowrap;
+  border:1px solid color-mix(in oklab, var(--text) 14%, transparent);border-radius:10px;
+  opacity:.72;transition:opacity .4s var(--ease), border-color .4s var(--ease);
+}
+.client-chip:hover{opacity:1;border-color:color-mix(in oklab, var(--a) 45%, transparent)}
+.client-word{
+  font-size:15px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text);
+}
+/* Real logo files: capped by height so wide and square marks sit on one optical
+   line, and desaturated to keep eight different brand palettes from fighting. */
+.client-mark{
+  display:block;height:24px;width:auto;max-width:160px;object-fit:contain;
+  filter:grayscale(1) brightness(1.7) contrast(.9);
+}
+
 /* ---------- layout grids ---------- */
 .about-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center}
+
+/* ---------- earth band ---------- */
+.earth-band{
+  display:grid;grid-template-columns:1fr;gap:clamp(36px,6vw,64px);align-items:center;
+  padding:clamp(90px,12vw,140px) clamp(20px,4vw,56px) 0;max-width:1400px;margin:0 auto;
+}
+.earth-stage-wrap{width:min(100%,440px);justify-self:center}
+.earth-stage{position:relative;width:100%;aspect-ratio:1}
+/* Themed glow behind the plate so a transparent PNG still sits on something,
+   and a flat photo still picks up the palette. */
+.earth-halo{
+  position:absolute;inset:-14%;z-index:0;pointer-events:none;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,
+    color-mix(in oklab, var(--a) 34%, transparent) 0%,
+    color-mix(in oklab, var(--a) 12%, transparent) 42%,
+    transparent 68%);
+}
+@media (min-width:861px){
+  .earth-band{grid-template-columns:1fr 1fr}
+  .earth-stage-wrap{justify-self:end}
+}
+/* The float is decorative only — it costs one composited layer, and the
+   reduced-motion block below already zeroes every animation. */
+@media (min-width:901px) and (prefers-reduced-motion:no-preference){
+  .earth-stage{animation:floatY 9s ease-in-out infinite}
+}
 /* ---------- stats band ---------- */
 .stats-band{
   position:relative;isolation:isolate;overflow:hidden;
@@ -198,7 +259,28 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   opacity:.85;transition:transform .5s var(--ease-spring), opacity .5s var(--ease), background .5s var(--ease);
 }
 .gallery-card:hover .gallery-play{transform:translate(-50%,-50%) scale(1.1);opacity:1;background:color-mix(in oklab, var(--a) 80%, transparent)}
-.filter-btn{padding:10px 20px;border-radius:100px;font-size:13px;cursor:pointer;font-family:inherit;transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease)}
+.filter-btn{padding:10px 20px;border-radius:100px;font-size:13px;font-weight:700;letter-spacing:.01em;cursor:pointer;font-family:inherit;transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease)}
+
+/* ---------- poster typography (video cards) ----------
+   Netflix sets titles over artwork heavy and tight, with the category as a
+   small all-caps kicker above it. Both live here so the gallery tiles and the
+   wide Selected Work cards can never drift apart. */
+/* The kicker is brand red over uncontrolled YouTube thumbnail artwork, so it
+   carries its own shadow rather than relying on the card scrim alone. */
+.poster-kicker{
+  display:block;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--a);margin-bottom:10px;
+  text-shadow:0 1px 6px rgba(0,0,0,.9), 0 0 18px rgba(0,0,0,.7);
+}
+.poster-title{
+  display:block;font-weight:800;letter-spacing:-.025em;line-height:1.02;color:#fff;
+  text-shadow:0 2px 18px rgba(0,0,0,.55);
+}
+/* Sizes live here rather than inline so the mobile block below can override
+   them — an inline font-size would win over any stylesheet rule. */
+.project-card .poster-title{font-size:clamp(28px,4.4vw,58px)}
+.gallery-card .poster-kicker{margin-bottom:4px}
+.gallery-card .poster-title{font-size:17px;line-height:1.15}
 .timeline-row{display:grid;grid-template-columns:56px 1fr;gap:20px;padding:26px 0;border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent);transition:padding-left .6s var(--ease)}
 .timeline-row:hover{padding-left:10px}
 
@@ -232,56 +314,95 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 .tool-group-head{display:flex;align-items:center;gap:18px;margin-bottom:clamp(22px,3vw,34px)}
 .tool-group-label{font-size:12px;letter-spacing:4px;font-weight:700;color:var(--a);white-space:nowrap}
 .tool-group-rule{flex:1;height:1px;background:linear-gradient(to right, color-mix(in oklab, var(--text) 22%, transparent), transparent)}
-.tool-group-count{font-family:'Anton',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted)}
+.tool-group-count{font-weight:800;font-size:13px;letter-spacing:0;color:var(--muted)}
 .tool-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(122px,1fr));
   gap:clamp(16px,2.2vw,28px);
 }
 
-/* No card, no glass, no plate — just the mark and its name. This also removes
-   the last 18 backdrop-filter elements, which is what kept this section
-   stuttering: each one forces a readback and blur of everything behind it. */
+/* The card itself stays a bare flex column — all the chrome lives on the icon
+   tile below, so there's still only one decorated element per tool. */
 .tool-card{
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;
   width:100%;padding:8px 4px;
   background:none;border:none;box-shadow:none;
-  -webkit-backdrop-filter:none;backdrop-filter:none;
   transition:transform .5s var(--ease-spring);
 }
 .tool-card:hover{transform:translateY(-6px)}
 
-/* Bare logo — no tile. This also removes 18 backdrop-filter elements from the
-   toolkit, which is most of what made this section stutter on phones. */
+/* ---- app-icon tile, glassmorphic ----
+   The glass is painted, not sampled: a translucent gradient fill, a hairline
+   rim, and an inset top highlight. Deliberately NO backdrop-filter — there are
+   18 of these in one panel, and each real backdrop blur forces the compositor
+   to read back and blur everything behind it, which is exactly what made this
+   section stutter on phones. The tools panel already carries a blurred gradient
+   backdrop, so a sampled blur would have had little left to reveal anyway. */
 .tool-logo{
   position:relative;
   display:flex;align-items:center;justify-content:center;
-  width:clamp(52px,7vw,66px);aspect-ratio:1;
-  transition:transform .6s var(--ease-spring);
+  width:clamp(60px,7.6vw,76px);aspect-ratio:1;
+  /* iOS-squircle proportion — ~22.5% of the side */
+  border-radius:22.5%;
+  /* NB: no percentage padding here. Percentage padding resolves against the
+     containing block's width — the grid cell, not the tile — which collapsed
+     the glyph to a few pixels. The mark sizes itself instead, below. */
+  background:
+    linear-gradient(160deg,
+      color-mix(in oklab, var(--text) 16%, transparent),
+      color-mix(in oklab, var(--text) 5%, transparent) 46%,
+      color-mix(in oklab, var(--glow, var(--a)) 13%, transparent));
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, #fff 26%, transparent),
+    inset 0 0 0 1px color-mix(in oklab, var(--text) 13%, transparent),
+    0 10px 24px -12px rgba(0,0,0,.75);
+  transition:transform .6s var(--ease-spring), box-shadow .5s var(--ease);
 }
-.tool-card:hover .tool-logo{transform:scale(1.1)}
+.tool-card:hover .tool-logo{
+  transform:scale(1.08);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, #fff 34%, transparent),
+    inset 0 0 0 1px color-mix(in oklab, var(--glow, var(--a)) 48%, transparent),
+    0 16px 32px -14px rgba(0,0,0,.8);
+}
+/* Specular sheen across the top half, the way an app icon catches light. */
+.tool-logo::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:52%;
+  border-radius:inherit;pointer-events:none;
+  background:linear-gradient(to bottom, color-mix(in oklab, #fff 15%, transparent), transparent);
+}
 
 /* the mark itself: a tinted CSS mask for real logos, text for lettermarks */
+/* Flex-centred so lettermarks sit dead centre in the tile; the mask case is
+   unaffected, since it fills the same 100%×100% box either way. */
 .tool-glyph{
-  display:block;width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  width:56%;height:56%;flex:0 0 auto;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   -webkit-mask-position:center;mask-position:center;
   -webkit-mask-size:contain;mask-size:contain;
-  font-family:'Anton',sans-serif;font-size:clamp(20px,2.6vw,26px);letter-spacing:.5px;
-  line-height:1.55;text-align:center;
+  font-weight:800;font-size:clamp(17px,2.1vw,21px);letter-spacing:-.02em;
+  line-height:1;text-align:center;
 }
 /* A soft brand halo anchors the near-monochrome marks, but it's a filter per
    logo — desktop only, so the section that was stuttering stays filter-free. */
 @media (min-width:901px){
-  .tool-glyph{filter:drop-shadow(0 4px 14px color-mix(in oklab, var(--glow) 55%, transparent))}
+  .tool-glyph{filter:drop-shadow(0 3px 10px color-mix(in oklab, var(--glow) 45%, transparent))}
 }
-/* full-colour logo plates that a mask would flatten */
+/* full-colour logo plates that a mask would flatten — inside the tile now, so
+   they only need enough rounding not to fight the squircle behind them */
 .tool-img{
-  display:block;width:100%;height:100%;object-fit:contain;border-radius:10px;
+  display:block;width:62%;height:62%;flex:0 0 auto;object-fit:contain;border-radius:6px;
 }
 .tool-name{font-size:12px;font-weight:600;letter-spacing:.2px;text-align:center;line-height:1.3;color:var(--text);opacity:.86}
 
-/* ---------- selected work cards ---------- */
+/* ---------- selected work ----------
+   Desktop: a fixed-height viewport whose track GSAP drives horizontally while
+   the section is pinned. Mobile: see the breakpoint below — the pin is dropped
+   entirely in favour of a native swipe scroller. */
+.work-viewport{position:relative;height:82vh;overflow:hidden}
+.work-track{display:flex;height:100%;width:max-content;will-change:transform}
+
 .project-card{
   position:relative;flex-shrink:0;overflow:hidden;display:block;
   width:min(58vw,820px);height:88%;align-self:center;margin-right:2.4vw;
@@ -294,6 +415,10 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   transition:transform 1.2s var(--ease);
 }
 .project-card:hover .project-thumb{transform:scale(1.04)}
+.project-scrim{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,.15) 55%, transparent);
+}
 
 /* ---------- contact ---------- */
 .contact-lines{
@@ -348,8 +473,36 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   .panel-inner{box-shadow:0 -18px 40px -18px rgba(0,0,0,.7)}
   /* Two columns halves a gallery panel that was ~10,000px tall at one column. */
   .gallery-grid{grid-template-columns:repeat(2,1fr);gap:12px}
-  /* phones have no width to spare — let the project cards run wider again */
-  .project-card{width:84vw;height:62%;margin-right:4vw}
+  /* ---- Selected Work: no pin, no scroll-driven animation on phones ----
+     The desktop version pins the section and tweens the track with GSAP. On
+     mobile that broke badly: showing/hiding the browser URL bar fires a resize
+     on every scroll-direction change, each one refreshed ScrollTrigger while
+     the page sat inside the pinned range, and the pin-spacer drifted — which is
+     what pushed the cards down over the heading and grew the gap a little more
+     on every down-then-up pass.
+     Here the track is just a native horizontal scroller: swipeable, snappy, and
+     with no scroll-linked transform there is nothing left to misplace. */
+  .work-viewport{
+    height:auto;overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    padding:0 clamp(20px,4vw,56px);
+    scrollbar-width:none;overscroll-behavior-x:contain;
+  }
+  .work-viewport::-webkit-scrollbar{display:none}
+  /* !important: GSAP writes an inline transform, so if a desktop session is
+     resized down to mobile the stale inline value has to lose. */
+  .work-track{width:max-content;transform:none !important;will-change:auto}
+  .project-card{
+    width:84vw;height:auto;aspect-ratio:4/3;margin-right:4vw;
+    scroll-snap-align:center;
+  }
+  /* A phone-width card is short, so the title block reaches well past where the
+     desktop gradient has already faded out — several thumbnails are bright
+     enough there to swallow the text. Hold the dark end higher up the card. */
+  .project-scrim{
+    background:linear-gradient(to top, rgba(0,0,0,.94), rgba(0,0,0,.82) 30%, rgba(0,0,0,.46) 58%, rgba(0,0,0,.14) 80%, transparent);
+  }
+  .project-card .poster-title{font-size:clamp(22px,6.4vw,30px)}
   .gallery-meta{padding:10px}
   .gallery-meta span:last-child{font-size:13px}
   /* 16 tiny blurred circles in one panel isn't worth a readback each */
@@ -359,8 +512,10 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
    don't stay lifted, and drop the sheen animation entirely. */
 @media (hover:none){
   .tool-card:hover,.gallery-card:hover,.stat-card:hover,.project-card:hover{transform:none}
-  .tool-card:hover .tool-logo{transform:none}
-  .tool-card:hover::after{transform:none;opacity:.5}
+  .tool-card:hover .tool-logo{transform:none;box-shadow:
+    inset 0 1px 0 color-mix(in oklab, #fff 26%, transparent),
+    inset 0 0 0 1px color-mix(in oklab, var(--text) 13%, transparent),
+    0 10px 24px -12px rgba(0,0,0,.75)}
   .gallery-card:hover .gallery-thumb,.project-card:hover .project-thumb{transform:none}
   .gallery-card:hover .gallery-play{transform:translate(-50%,-50%) scale(.9);background:rgba(255,255,255,.16)}
 }
@@ -503,16 +658,27 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
     </div>
   </section>
 
-  <section style="padding:clamp(90px,12vw,140px) clamp(20px,4vw,56px) 0;max-width:1400px;margin:0 auto">
-    <div class="eyebrow reveal" style="text-align:center;margin-bottom:26px">RAW → GRADED</div>
-    <div ref="{{baWrapRef}}" class="reveal" style="position:relative;width:100%;max-width:1000px;margin:0 auto;aspect-ratio:16/9;border-radius:18px;overflow:hidden;cursor:ew-resize;touch-action:none" onMouseDown="{{baStart}}" onTouchStart="{{baStart}}">
-      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="ba-raw" shape="rect" placeholder="Drop RAW footage still" style="position:absolute;inset:0;width:100%;height:100%" hint-size="100%,100%"></x-import>
-      <div ref="{{baOverlayRef}}" style="position:absolute;inset:0;width:50%;overflow:hidden">
-        <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="ba-graded" shape="rect" placeholder="Drop GRADED still" style="position:absolute;top:0;left:0;height:100%;width:200%" hint-size="100%,100%"></x-import>
-      </div>
-      <div ref="{{baHandleRef}}" style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:#fff;pointer-events:none">
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;color:#111;box-shadow:0 8px 24px -6px rgba(0,0,0,.6)">↔</div>
-      </div>
+  <!-- ---- REACH: the earth plate ----
+       Sits between the About copy and the stats band. The stats immediately
+       below already make a numbers claim ("35+ clients"), so a globe here reads
+       as the visual setup for that line rather than as unattached decoration —
+       and it fills the slot the RAW→GRADED comparison used to occupy, keeping
+       this panel's rhythm intact. -->
+  <section class="earth-band">
+    <div class="earth-copy reveal">
+      <div class="eyebrow">Reach</div>
+      <p class="display" style="font-size:clamp(26px,3.8vw,48px);line-height:1.1">
+        Edits that travel further than I do.
+      </p>
+      <p style="font-size:16px;line-height:1.7;color:var(--muted);max-width:460px;margin-top:22px">Brands across banking, hospitality, food and real estate — the work ships from one timeline and lands on screens everywhere.</p>
+    </div>
+    <!-- reveal and float are deliberately on different elements: both drive
+         `transform`, and an animation would silently win over the transition. -->
+    <div class="earth-stage-wrap reveal">
+    <div class="earth-stage">
+      <div class="earth-halo" aria-hidden="true"></div>
+      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="earth-image" shape="circle" placeholder="Drop earth image" style="width:100%;height:100%;position:relative;z-index:1" hint-size="440px,440px"></x-import>
+    </div>
     </div>
   </section>
 
@@ -542,16 +708,16 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
       <div class="eyebrow">SELECTED WORK</div>
       <p class="display" style="font-size:clamp(30px,5vw,64px)">Projects worth pausing for.</p>
     </div>
-    <div ref="{{horizWrapRef}}" style="position:relative;height:82vh;overflow:hidden">
-      <div ref="{{trackRef}}" style="display:flex;height:100%;width:max-content;will-change:transform">
+    <div ref="{{horizWrapRef}}" class="work-viewport">
+      <div ref="{{trackRef}}" class="work-track">
         <sc-for list="{{projects}}" as="pr" hint-placeholder-count="6">
           <button onClick="{{pr.onClick}}" data-cursor="play" onMouseMove="{{tiltMove}}" onMouseLeave="{{tiltLeave}}" class="project-card" aria-label="{{pr.aria}}">
             <img src="{{pr.thumb}}" alt="" loading="lazy" decoding="async" class="project-thumb">
-            <span style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,.15) 55%, transparent);pointer-events:none"></span>
+            <span class="project-scrim"></span>
             <span style="position:absolute;left:0;right:0;bottom:0;padding:clamp(24px,4vw,56px);color:#fff;text-align:left;display:block">
-              <span style="display:block;font-size:12px;letter-spacing:1.5px;color:var(--a);font-weight:700;margin-bottom:12px">{{pr.category}}</span>
-              <span class="display" style="display:block;font-size:clamp(26px,4.2vw,54px);line-height:1.05">{{pr.title}}</span>
-              <span style="display:inline-flex;align-items:center;gap:10px;margin-top:18px;font-size:14px;color:#fff;font-weight:700">▶ Watch film</span>
+              <span class="poster-kicker">{{pr.category}}</span>
+              <span class="poster-title">{{pr.title}}</span>
+              <span style="display:inline-flex;align-items:center;gap:10px;margin-top:18px;font-size:14px;color:#fff;font-weight:700;letter-spacing:.01em">▶ Watch film</span>
             </span>
           </button>
         </sc-for>
@@ -580,8 +746,8 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
         <button onClick="{{g.onClick}}" data-cursor="play" class="gallery-card reveal" aria-label="{{g.aria}}" style="{{g.style}}">
           <img src="{{g.thumb}}" alt="" loading="lazy" decoding="async" class="gallery-thumb">
           <span class="gallery-meta">
-            <span style="font-size:11px;letter-spacing:1.5px;color:var(--a);font-weight:700">{{g.tag}}</span>
-            <span style="font-size:16px;color:#fff;font-weight:600;line-height:1.3">{{g.title}}</span>
+            <span class="poster-kicker">{{g.tag}}</span>
+            <span class="poster-title">{{g.title}}</span>
           </span>
           <span class="gallery-play">▶</span>
         </button>
@@ -622,19 +788,24 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   <div class="marquee-strip" style="border-top:none;border-radius:34px 34px 0 0">
     <div class="marquee-track marquee-track--rev">
       <sc-for list="{{clientLogos}}" as="c" hint-placeholder-count="16">
-        <span class="display" style="font-size:20px;letter-spacing:1px;color:var(--muted);white-space:nowrap;border:1px solid color-mix(in oklab, var(--text) 15%, transparent);padding:10px 22px;border-radius:8px">{{c}}</span>
+        <span class="client-chip" title="{{c.name}}">
+          <img class="client-mark" src="{{c.imgSrc}}" alt="" aria-hidden="true" style="{{c.imgStyle}}">
+          <span class="client-word" style="{{c.wordStyle}}">{{c.name}}</span>
+        </span>
       </sc-for>
     </div>
   </div>
 
   <section style="padding:clamp(100px,13vw,160px) clamp(20px,4vw,56px);max-width:900px;margin:0 auto;text-align:center">
     <div class="eyebrow reveal" style="margin-bottom:40px">CLIENT WORDS</div>
-    <div style="position:relative;min-height:280px;perspective:1200px">
+    <!-- Reserves enough height that the dots below don't jump as slides rotate.
+         Dropping the job-title line took ~40px off every slide, so this came
+         down from a flat 280px, which now left a visible hole under the name. -->
+    <div style="position:relative;min-height:clamp(150px,24vw,190px);perspective:1200px">
       <sc-for list="{{testimonialsRendered}}" as="t" hint-placeholder-count="4">
         <div style="{{t.style}}">
-          <p class="display" style="font-size:clamp(20px,2.6vw,32px);line-height:1.3;margin:0 0 22px">{{t.quote}}</p>
-          <div style="font-size:14px;font-weight:700">{{t.name}}</div>
-          <div style="font-size:13px;color:var(--muted)">{{t.role}}</div>
+          <p class="display" style="font-size:clamp(20px,2.6vw,32px);line-height:1.22;margin:0 0 22px">{{t.quote}}</p>
+          <div style="font-size:14px;font-weight:700;letter-spacing:.02em">{{t.name}}</div>
         </div>
       </sc-for>
     </div>
@@ -758,7 +929,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{
   &quot;$preview&quot;: {&quot;width&quot;: 1600, &quot;height&quot;: 1000},
-  &quot;defaultTheme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;crimson&quot;, &quot;options&quot;: [&quot;crimson&quot;,&quot;arctic&quot;,&quot;cyber&quot;,&quot;emerald&quot;,&quot;sunset&quot;,&quot;mono&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Behavior&quot;},
+  &quot;defaultTheme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;crimson&quot;, &quot;options&quot;: [&quot;crimson&quot;,&quot;cyber&quot;,&quot;emerald&quot;,&quot;sunset&quot;,&quot;mono&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Behavior&quot;},
   &quot;enableMusic&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Behavior&quot;},
   &quot;enableCursor&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Behavior&quot;}
 }">
@@ -766,7 +937,6 @@ class Component extends DCLogic {
   // ---------------------------------------------------------------- data
   themesData = {
     crimson: {name:'Crimson Cinema', bg:'#050505', surface:'#111111', text:'#FFFFFF', muted:'rgba(255,255,255,.55)', a:'#E50914', b:'#FF4D5A'},
-    arctic: {name:'Arctic Minimal', bg:'#F7F7F5', surface:'#FFFFFF', text:'#111111', muted:'#666666', a:'#4A90E2', b:'#7BB0EA'},
     cyber: {name:'Cyber Neon', bg:'#060B16', surface:'#101827', text:'#EAF6FF', muted:'rgba(234,246,255,.55)', a:'#00F5FF', b:'#FF00C8'},
     emerald: {name:'Emerald Luxe', bg:'#08110E', surface:'#12221A', text:'#F8F8F8', muted:'rgba(248,248,248,.55)', a:'#2ECC71', b:'#D4AF37'},
     sunset: {name:'Sunset Gold', bg:'#1A0F07', surface:'#2C1A10', text:'#FFE8C7', muted:'rgba(255,232,199,.55)', a:'#FF7A00', b:'#FFD700'},
@@ -830,13 +1000,32 @@ class Component extends DCLogic {
     {n:'06',title:'Final Delivery',desc:'Polished, exported, and ready for its audience.'}
   ];
 
-  clientLogosData = ['NORTHPEAK','LOOPLINE','VANTAGE','STUDIO NINE','NIGHTSHIFT CO.','ORBIT MEDIA','FIELD & CO','HALCYON'];
+  // Real clients. `logo` is optional: give it a path under ./assets/clients/ and
+  // that chip renders the image instead of the wordmark — no markup change.
+  //
+  // None ship with a logo today. Of the eight, only AU Small Finance Bank has a
+  // freely-licensed file in the wild (Wikimedia), and it's a low-res raster of
+  // the full boxed lockup — solid purple plate plus a tagline bar — which looks
+  // worse on this dark strip than the wordmark does. Everything else is only on
+  // logo-aggregator sites redistributing trademarks. Ask each client for their
+  // transparent SVG/PNG and drop it in here.
+  clientsData = [
+    {name:'AU Small Finance Bank'},
+    {name:'Kedia'},
+    {name:'Kedia Pavitra'},
+    {name:'RMIB Insurance'},
+    {name:'Burger Farm'},
+    {name:'Sarovar Portico'},
+    {name:'CafeBae'},
+    {name:'The Woods Property'}
+  ];
 
+  // Name only — job titles were dropped, so nothing here carries a `role`.
   testimonialsData = [
-    {quote:"“Abhay doesn't just cut footage — he finds the emotion hiding inside it.”",name:'Riya Malhotra',role:'Brand Director, Studio Nine'},
-    {quote:'"Fast, precise, and always one step ahead creatively."',name:'Karan Bhatt',role:'Founder, Loopline Films'},
-    {quote:'"Every delivery feels like a finished film, not just an edit."',name:'Meera Kapoor',role:'Producer, Vantage Media'},
-    {quote:'"He turned three hours of raw footage into ninety seconds of pure tension."',name:'Dev Anand',role:'Creative Lead, Nightshift Co.'}
+    {quote:"“Abhay doesn't just cut footage — he finds the emotion hiding inside it.”",name:'Riya Malhotra'},
+    {quote:'"Fast, precise, and always one step ahead creatively."',name:'Karan Bhatt'},
+    {quote:'"Every delivery feels like a finished film, not just an edit."',name:'Meera Kapoor'},
+    {quote:'"He turned three hours of raw footage into ninety seconds of pure tension."',name:'Dev Anand'}
   ];
 
   // Two labelled groups of glass cards. A 5-pointed star only has 10 vertices,
@@ -905,9 +1094,6 @@ class Component extends DCLogic {
   horizWrapRef = React.createRef();
   trackRef = React.createRef();
   statsWrapRef = React.createRef();
-  baWrapRef = React.createRef();
-  baOverlayRef = React.createRef();
-  baHandleRef = React.createRef();
   toolsBgRef = React.createRef();
   numRefs = this.statsData.map(() => React.createRef());
 
@@ -921,14 +1107,14 @@ class Component extends DCLogic {
 
   constructor(props) {
     super(props);
-    this.state.themeKey = props.defaultTheme || 'crimson';
+    // Falls back to crimson for any key that isn't a live theme — the retired
+    // blue "arctic" palette is still a valid prop value in saved documents.
+    const wanted = props.defaultTheme;
+    this.state.themeKey = (wanted && this.themesData[wanted]) ? wanted : 'crimson';
     this.magnetMove = this.magnetMove.bind(this);
     this.magnetLeave = this.magnetLeave.bind(this);
     this.tiltMove = this.tiltMove.bind(this);
     this.tiltLeave = this.tiltLeave.bind(this);
-    this.baStart = this.baStart.bind(this);
-    this.baMove = this.baMove.bind(this);
-    this.baEnd = this.baEnd.bind(this);
     this.onCursorMove = this.onCursorMove.bind(this);
     this.onCursorOver = this.onCursorOver.bind(this);
     this.onCursorLeave = this.onCursorLeave.bind(this);
@@ -1047,7 +1233,6 @@ class Component extends DCLogic {
     document.removeEventListener('keydown', this.onKeyDown);
     document.removeEventListener('pointerover', this.onPointerOverSfx);
     document.removeEventListener('click', this.onClickSfx);
-    this.baEnd();
     if (this.cursorRaf) cancelAnimationFrame(this.cursorRaf);
     if (this.stackRaf) cancelAnimationFrame(this.stackRaf);
     if (this.layoutRaf) cancelAnimationFrame(this.layoutRaf);
@@ -1057,10 +1242,7 @@ class Component extends DCLogic {
     if (this.testInterval) clearInterval(this.testInterval);
     if (this.loaderTimer) clearInterval(this.loaderTimer);
     if (this.horizTimer) clearTimeout(this.horizTimer);
-    if (this.horizTween) {
-      if (this.horizTween.scrollTrigger) this.horizTween.scrollTrigger.kill();
-      this.horizTween.kill();
-    }
+    this.teardownHorizontalScroll();
     if (this.audio && this.audio.ctx) this.audio.ctx.close();
   }
 
@@ -1162,6 +1344,7 @@ class Component extends DCLogic {
     this.toolsPanelIndex = this.panels.findIndex((p) => p.querySelector('.tools-bg'));
 
     this.layoutPanels();
+    this.lastResizeW = window.innerWidth;
     window.addEventListener('resize', this.onResize);
     window.addEventListener('scroll', this.requestStackUpdate, { passive: true });
 
@@ -1220,7 +1403,30 @@ class Component extends DCLogic {
     if (refreshTriggers === true && window.ScrollTrigger) window.ScrollTrigger.refresh();
   }
 
+  // Mobile browsers fire `resize` every time the URL bar slides in or out — so
+  // on a phone this runs on essentially every change of scroll direction, with
+  // only the height changing. Forwarding those to ScrollTrigger.refresh() while
+  // the page sat inside the pinned Work section is what walked the pin-spacer
+  // out of place: the cards crept down over the heading and the gap grew a
+  // little more on each down-then-up pass.
+  //
+  // Width is the only dimension this layout actually depends on, so a
+  // height-only resize is ignored on touch devices. Real rotations change the
+  // width too and still come through.
   onResize() {
+    const w = window.innerWidth;
+    const widthChanged = w !== this.lastResizeW;
+    this.lastResizeW = w;
+
+    if (this.isCoarse && !widthChanged) return;
+
+    // Crossing the breakpoint swaps the Work section between the pinned tween
+    // and the CSS swipe scroller.
+    if (widthChanged) {
+      if (this.workPinWanted()) this.setupHorizontalScroll();
+      else this.teardownHorizontalScroll();
+    }
+
     this.layoutPanels(true);
   }
 
@@ -1277,9 +1483,21 @@ class Component extends DCLogic {
   }
 
   // ---------------------------------------------------------------- horizontal work scroll
+  // Desktop only. Below WORK_PIN_MIN_W the section is a plain CSS swipe
+  // scroller (see the max-width:900px block) and no ScrollTrigger is created at
+  // all — a scroll-linked pin is not survivable on mobile, where the URL bar
+  // resizes the viewport on every change of scroll direction.
+  WORK_PIN_MIN_W = 901;
+
+  workPinWanted() {
+    return window.innerWidth >= this.WORK_PIN_MIN_W && !this.reduceMotion;
+  }
+
   setupHorizontalScroll() {
     const wrap = this.horizWrapRef.current, track = this.trackRef.current;
     if (!wrap || !track) return;
+    if (!this.workPinWanted()) return;
+    if (this.horizTween) return;
     if (!window.gsap || !window.ScrollTrigger) {
       this.horizTimer = setTimeout(() => this.setupHorizontalScroll(), 500);
       return;
@@ -1295,6 +1513,17 @@ class Component extends DCLogic {
       }
     });
     this.layoutPanels(true);
+  }
+
+  // Tearing the pin down has to also clear the transform GSAP left on the
+  // track, or the cards stay scrolled off-screen as a static scroller.
+  teardownHorizontalScroll() {
+    if (!this.horizTween) return;
+    if (this.horizTween.scrollTrigger) this.horizTween.scrollTrigger.kill(true);
+    this.horizTween.kill();
+    this.horizTween = null;
+    const track = this.trackRef.current;
+    if (track) track.style.transform = '';
   }
 
   // ---------------------------------------------------------------- custom cursor
@@ -1405,34 +1634,6 @@ class Component extends DCLogic {
     el.style.transform = 'perspective(900px) rotateX(' + (py * -5).toFixed(2) + 'deg) rotateY(' + (px * 5).toFixed(2) + 'deg) scale(1.02)';
   }
   tiltLeave(e) { e.currentTarget.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)'; }
-
-  // ---------------------------------------------------------------- before / after slider
-  baSetFromClientX(clientX) {
-    const wrap = this.baWrapRef.current;
-    if (!wrap) return;
-    const r = wrap.getBoundingClientRect();
-    let pct = ((clientX - r.left) / r.width) * 100;
-    pct = Math.max(0, Math.min(100, pct));
-    if (this.baOverlayRef.current) this.baOverlayRef.current.style.width = pct + '%';
-    if (this.baHandleRef.current) this.baHandleRef.current.style.left = pct + '%';
-  }
-  baStart(e) {
-    this.baSetFromClientX(e.touches ? e.touches[0].clientX : e.clientX);
-    window.addEventListener('mousemove', this.baMove);
-    window.addEventListener('mouseup', this.baEnd);
-    window.addEventListener('touchmove', this.baMove, { passive: false });
-    window.addEventListener('touchend', this.baEnd);
-  }
-  baMove(e) {
-    if (e.touches && e.cancelable) e.preventDefault();
-    this.baSetFromClientX(e.touches ? e.touches[0].clientX : e.clientX);
-  }
-  baEnd() {
-    window.removeEventListener('mousemove', this.baMove);
-    window.removeEventListener('mouseup', this.baEnd);
-    window.removeEventListener('touchmove', this.baMove);
-    window.removeEventListener('touchend', this.baEnd);
-  }
 
   // ---------------------------------------------------------------- sound
   // Everything is synthesised with WebAudio — no audio files, so this adds no
@@ -1600,7 +1801,7 @@ class Component extends DCLogic {
     const enableCursorFlag = (this.props.enableCursor ?? true) && !this.state.isTouch;
     const rootStyle = {
       '--bg': theme.bg, '--surface': theme.surface, '--text': theme.text, '--muted': theme.muted, '--a': theme.a, '--b': theme.b,
-      background: 'var(--bg)', color: 'var(--text)', fontFamily: "'Manrope', sans-serif",
+      background: 'var(--bg)', color: 'var(--text)', fontFamily: 'var(--font-sans)',
       position: 'relative',
       // `clip` (not `hidden`) — `overflow:hidden` would make this a scroll
       // container and break every `position:sticky` panel inside it.
@@ -1675,6 +1876,12 @@ class Component extends DCLogic {
 
     const stats = this.statsData.map((s, i) => ({ ...s, ref: this.numRefs[i] }));
 
+    // Same two-slot trick as the tool cards: render mark and wordmark, hide one.
+    const clientChips = this.clientsData.map((c) => (c.logo
+      ? { ...c, imgSrc: c.logo, imgStyle: {}, wordStyle: { display: 'none' } }
+      : { ...c, imgSrc: BLANK_PX, imgStyle: { display: 'none' }, wordStyle: {} }
+    ));
+
     const testimonialsRendered = this.testimonialsData.map((t, i) => {
       let offset = i - this.state.testIdx;
       const n = this.testimonialsData.length;
@@ -1730,10 +1937,10 @@ class Component extends DCLogic {
       heroObjRef: this.heroObjRef, particles, roles: this.rolesData,
       // duplicated so the -50% marquee keyframe loops seamlessly
       marqueeWords: this.marqueeWordsData.concat(this.marqueeWordsData),
-      clientLogos: this.clientLogosData.concat(this.clientLogosData),
+      // Doubled so the -50% marquee keyframe loops seamlessly.
+      clientLogos: clientChips.concat(clientChips),
       magnetMove: this.magnetMove, magnetLeave: this.magnetLeave,
       statsWrapRef: this.statsWrapRef, stats,
-      baWrapRef: this.baWrapRef, baOverlayRef: this.baOverlayRef, baHandleRef: this.baHandleRef, baStart: this.baStart,
       horizWrapRef: this.horizWrapRef, trackRef: this.trackRef, projects,
       tiltMove: this.tiltMove, tiltLeave: this.tiltLeave,
       filterTabs, galleryFiltered,
