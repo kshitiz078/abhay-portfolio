@@ -19,8 +19,9 @@
      two webfont requests off the critical path. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<!-- GSAP + ScrollTrigger removed: the only thing they drove was the pinned
+     Selected Work section, which is now a native horizontal scroller. That
+     also takes two render-blocking third-party scripts off the critical path. -->
 <style>
 /* ---------- base ---------- */
 *{box-sizing:border-box}
@@ -148,51 +149,59 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
    client doesn't have, so dropping a real logo file into clientsData needs no
    markup change. Names are set as wordmarks — tight, uppercase, heavy — which
    reads as intentional branding rather than as a missing image. */
+/* One fixed plate for every client, so fifteen logos of wildly different
+   proportions still march along the strip at a single size. */
 .client-chip{
-  display:flex;align-items:center;justify-content:center;
-  height:44px;padding:0 26px;white-space:nowrap;
-  border:1px solid color-mix(in oklab, var(--text) 14%, transparent);border-radius:10px;
-  opacity:.72;transition:opacity .4s var(--ease), border-color .4s var(--ease);
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  width:170px;height:62px;padding:0;overflow:hidden;
+  background:#fff;border-radius:10px;
+  box-shadow:0 6px 18px -10px rgba(0,0,0,.8);
+  opacity:.88;transition:opacity .4s var(--ease), transform .4s var(--ease);
 }
-.client-chip:hover{opacity:1;border-color:color-mix(in oklab, var(--a) 45%, transparent)}
+.client-chip:hover{opacity:1;transform:translateY(-3px)}
+/* Fallback for a client with no file yet — never shown while every entry has a
+   logo, but it keeps the strip from collapsing if one is removed. */
 .client-word{
-  font-size:15px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--text);
+  font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+  color:#111;text-align:center;padding:0 12px;line-height:1.15;
 }
-/* Real logo files: capped by height so wide and square marks sit on one optical
-   line, and desaturated to keep eight different brand palettes from fighting. */
-.client-mark{
-  display:block;height:24px;width:auto;max-width:160px;object-fit:contain;
-  filter:grayscale(1) brightness(1.7) contrast(.9);
-}
+.client-mark{display:block;width:100%;height:100%;object-fit:contain}
 
 /* ---------- layout grids ---------- */
 .about-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center}
 
-/* ---------- earth band ---------- */
+/* ---------- earth band ----------
+   The earth is the section's backdrop, not an object sitting in it: the image
+   fills the band edge to edge and the copy reads on top of it. */
 .earth-band{
-  display:grid;grid-template-columns:1fr;gap:clamp(36px,6vw,64px);align-items:center;
-  padding:clamp(90px,12vw,140px) clamp(20px,4vw,56px) 0;max-width:1400px;margin:0 auto;
+  position:relative;isolation:isolate;overflow:hidden;
+  display:flex;align-items:center;
+  min-height:clamp(420px,62vw,660px);
+  padding:clamp(80px,10vw,130px) clamp(20px,4vw,56px);
 }
-.earth-stage-wrap{width:min(100%,440px);justify-self:center}
-.earth-stage{position:relative;width:100%;aspect-ratio:1}
-/* Themed glow behind the plate so a transparent PNG still sits on something,
-   and a flat photo still picks up the palette. */
-.earth-halo{
-  position:absolute;inset:-14%;z-index:0;pointer-events:none;border-radius:50%;
-  background:radial-gradient(circle at 50% 50%,
-    color-mix(in oklab, var(--a) 34%, transparent) 0%,
-    color-mix(in oklab, var(--a) 12%, transparent) 42%,
-    transparent 68%);
+.earth-bg{position:absolute;inset:0;z-index:0;opacity:.62}
+/* Feathered to the page background on every edge so the plate never shows a
+   hard rectangle, plus a heavier wash on the text side for contrast. */
+.earth-veil{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    linear-gradient(to right, var(--bg) 0%, color-mix(in oklab, var(--bg) 72%, transparent) 42%, transparent 78%),
+    linear-gradient(to bottom, var(--bg) 0%, transparent 22%, transparent 78%, var(--bg) 100%);
 }
-@media (min-width:861px){
-  .earth-band{grid-template-columns:1fr 1fr}
-  .earth-stage-wrap{justify-self:end}
-}
-/* The float is decorative only — it costs one composited layer, and the
-   reduced-motion block below already zeroes every animation. */
-@media (min-width:901px) and (prefers-reduced-motion:no-preference){
-  .earth-stage{animation:floatY 9s ease-in-out infinite}
+.earth-copy{position:relative;z-index:2;max-width:620px}
+/* Until an image is actually dropped in, the dimming and the veil would hide
+   the drop target itself. image-slot only carries `src` once it's filled, so
+   the empty state keeps the slot at full strength and stands the veil down. */
+.earth-bg:has(image-slot:not([src])){opacity:1}
+.earth-band:has(image-slot:not([src])) .earth-veil{opacity:.2}
+@media (max-width:860px){
+  /* Portrait: the image reads better centred behind the copy than pushed off
+     to one side, so the wash goes vertical instead of horizontal. */
+  .earth-bg{opacity:.4}
+  .earth-veil{
+    background:
+      linear-gradient(to bottom, var(--bg) 0%, color-mix(in oklab, var(--bg) 55%, transparent) 30%, color-mix(in oklab, var(--bg) 78%, transparent) 70%, var(--bg) 100%);
+  }
 }
 /* ---------- stats band ---------- */
 .stats-band{
@@ -339,7 +348,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
    section stutter on phones. The tools panel already carries a blurred gradient
    backdrop, so a sampled blur would have had little left to reveal anyway. */
 .tool-logo{
-  position:relative;
+  position:relative;overflow:hidden;
   display:flex;align-items:center;justify-content:center;
   width:clamp(60px,7.6vw,76px);aspect-ratio:1;
   /* iOS-squircle proportion — ~22.5% of the side */
@@ -347,11 +356,9 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   /* NB: no percentage padding here. Percentage padding resolves against the
      containing block's width — the grid cell, not the tile — which collapsed
      the glyph to a few pixels. The mark sizes itself instead, below. */
-  background:
-    linear-gradient(160deg,
-      color-mix(in oklab, var(--text) 16%, transparent),
-      color-mix(in oklab, var(--text) 5%, transparent) 46%,
-      color-mix(in oklab, var(--glow, var(--a)) 13%, transparent));
+  /* White base: the supplied tiles mostly sit on white, and the SVG-mask tools
+     are drawn on it directly, so both families read as one set. */
+  background:#fff;
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, #fff 26%, transparent),
     inset 0 0 0 1px color-mix(in oklab, var(--text) 13%, transparent),
@@ -365,49 +372,69 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
     inset 0 0 0 1px color-mix(in oklab, var(--glow, var(--a)) 48%, transparent),
     0 16px 32px -14px rgba(0,0,0,.8);
 }
-/* Specular sheen across the top half, the way an app icon catches light. */
+/* Specular sheen across the top half, the way an app icon catches light. Sits
+   above the artwork so image tiles get the same glass read as the mask ones. */
 .tool-logo::before{
-  content:"";position:absolute;left:0;right:0;top:0;height:52%;
+  content:"";position:absolute;left:0;right:0;top:0;height:52%;z-index:2;
   border-radius:inherit;pointer-events:none;
-  background:linear-gradient(to bottom, color-mix(in oklab, #fff 15%, transparent), transparent);
+  background:linear-gradient(to bottom, rgba(255,255,255,.28), rgba(255,255,255,0));
+}
+/* ...and a hairline inner rim over the top, so the artwork can't reach the
+   very edge of the squircle and flatten the bevel. */
+.tool-logo::after{
+  content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
+  border-radius:inherit;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.5);
 }
 
 /* the mark itself: a tinted CSS mask for real logos, text for lettermarks */
 /* Flex-centred so lettermarks sit dead centre in the tile; the mask case is
    unaffected, since it fills the same 100%×100% box either way. */
 .tool-glyph{
+  position:relative;z-index:1;
   display:flex;align-items:center;justify-content:center;
-  width:56%;height:56%;flex:0 0 auto;
+  width:62%;height:62%;flex:0 0 auto;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   -webkit-mask-position:center;mask-position:center;
   -webkit-mask-size:contain;mask-size:contain;
   font-weight:800;font-size:clamp(17px,2.1vw,21px);letter-spacing:-.02em;
   line-height:1;text-align:center;
 }
-/* A soft brand halo anchors the near-monochrome marks, but it's a filter per
-   logo — desktop only, so the section that was stuttering stays filter-free. */
-@media (min-width:901px){
-  .tool-glyph{filter:drop-shadow(0 3px 10px color-mix(in oklab, var(--glow) 45%, transparent))}
-}
-/* full-colour logo plates that a mask would flatten — inside the tile now, so
-   they only need enough rounding not to fight the squircle behind them */
+/* The brand halo that used to sit behind these marks is gone: it existed to
+   anchor bare logos floating on the dark panel, and now every mark sits on its
+   own white tile. That also drops a per-logo filter off the paint path. */
+/* Supplied brand tiles fill the squircle edge to edge, like a real app icon.
+   They're pre-normalised to one 288x288 square with their own background baked
+   in, so `cover` never crops anything that matters. */
 .tool-img{
-  display:block;width:62%;height:62%;flex:0 0 auto;object-fit:contain;border-radius:6px;
+  position:absolute;inset:0;z-index:1;
+  display:block;width:100%;height:100%;object-fit:cover;
 }
 .tool-name{font-size:12px;font-weight:600;letter-spacing:.2px;text-align:center;line-height:1.3;color:var(--text);opacity:.86}
 
 /* ---------- selected work ----------
-   Desktop: a fixed-height viewport whose track GSAP drives horizontally while
-   the section is pinned. Mobile: see the breakpoint below — the pin is dropped
-   entirely in favour of a native swipe scroller. */
-.work-viewport{position:relative;height:82vh;overflow:hidden}
-.work-track{display:flex;height:100%;width:max-content;will-change:transform}
+   A native horizontal scroller at every width — no pin, no scroll-linked
+   transform, nothing that can be mis-measured. Height comes from the cards
+   rather than the viewport, so browser-chrome changes can't resize it. */
+.work-viewport{
+  position:relative;
+  overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain;
+  padding:0 clamp(20px,4vw,56px);
+  scrollbar-width:none;
+  cursor:grab;
+}
+.work-viewport:active{cursor:grabbing}
+.work-viewport::-webkit-scrollbar{display:none}
+.work-track{display:flex;width:max-content}
 
 .project-card{
   position:relative;flex-shrink:0;overflow:hidden;display:block;
-  width:min(58vw,820px);height:88%;align-self:center;margin-right:2.4vw;
+  width:min(58vw,820px);aspect-ratio:16/9;margin-right:2.4vw;
   padding:0;border:none;background:var(--surface);cursor:pointer;font-family:inherit;
   border-radius:20px;transition:transform .8s var(--ease);
+  scroll-snap-align:center;
 }
 .project-card:focus-visible{outline:2px solid var(--a);outline-offset:3px}
 .project-thumb{
@@ -473,29 +500,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   .panel-inner{box-shadow:0 -18px 40px -18px rgba(0,0,0,.7)}
   /* Two columns halves a gallery panel that was ~10,000px tall at one column. */
   .gallery-grid{grid-template-columns:repeat(2,1fr);gap:12px}
-  /* ---- Selected Work: no pin, no scroll-driven animation on phones ----
-     The desktop version pins the section and tweens the track with GSAP. On
-     mobile that broke badly: showing/hiding the browser URL bar fires a resize
-     on every scroll-direction change, each one refreshed ScrollTrigger while
-     the page sat inside the pinned range, and the pin-spacer drifted — which is
-     what pushed the cards down over the heading and grew the gap a little more
-     on every down-then-up pass.
-     Here the track is just a native horizontal scroller: swipeable, snappy, and
-     with no scroll-linked transform there is nothing left to misplace. */
-  .work-viewport{
-    height:auto;overflow-x:auto;overflow-y:hidden;
-    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
-    padding:0 clamp(20px,4vw,56px);
-    scrollbar-width:none;overscroll-behavior-x:contain;
-  }
-  .work-viewport::-webkit-scrollbar{display:none}
-  /* !important: GSAP writes an inline transform, so if a desktop session is
-     resized down to mobile the stale inline value has to lose. */
-  .work-track{width:max-content;transform:none !important;will-change:auto}
-  .project-card{
-    width:84vw;height:auto;aspect-ratio:4/3;margin-right:4vw;
-    scroll-snap-align:center;
-  }
+  .project-card{width:84vw;aspect-ratio:4/3;margin-right:4vw}
   /* A phone-width card is short, so the title block reaches well past where the
      desktop gradient has already faded out — several thumbnails are bright
      enough there to swallow the text. Hold the dark end higher up the card. */
@@ -665,20 +670,16 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
        and it fills the slot the RAW→GRADED comparison used to occupy, keeping
        this panel's rhythm intact. -->
   <section class="earth-band">
-    <div class="earth-copy reveal">
+    <div class="earth-bg" aria-hidden="true">
+      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="earth-image" shape="rect" placeholder="Drop earth image" style="position:absolute;inset:0;width:100%;height:100%" hint-size="100%,100%"></x-import>
+    </div>
+    <div class="earth-veil" aria-hidden="true"></div>
+    <div class="earth-copy">
       <div class="eyebrow">Reach</div>
       <p class="display" style="font-size:clamp(26px,3.8vw,48px);line-height:1.1">
         Edits that travel further than I do.
       </p>
       <p style="font-size:16px;line-height:1.7;color:var(--muted);max-width:460px;margin-top:22px">Brands across banking, hospitality, food and real estate — the work ships from one timeline and lands on screens everywhere.</p>
-    </div>
-    <!-- reveal and float are deliberately on different elements: both drive
-         `transform`, and an animation would silently win over the transition. -->
-    <div class="earth-stage-wrap reveal">
-    <div class="earth-stage">
-      <div class="earth-halo" aria-hidden="true"></div>
-      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="earth-image" shape="circle" placeholder="Drop earth image" style="width:100%;height:100%;position:relative;z-index:1" hint-size="440px,440px"></x-import>
-    </div>
     </div>
   </section>
 
@@ -687,7 +688,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
     <div class="paper-grain" aria-hidden="true"></div>
     <div class="stats-grid">
       <sc-for list="{{stats}}" as="s" hint-placeholder-count="3">
-        <div class="stat-card reveal">
+        <div class="stat-card">
           <div class="display" style="font-size:clamp(34px,5vw,58px);color:var(--a);display:flex;align-items:baseline;justify-content:center;gap:2px">
             <span ref="{{s.ref}}">0</span><span>{{s.suffix}}</span>
           </div>
@@ -704,14 +705,16 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 <section class="panel panel--flow" data-panel="flow">
 <div class="panel-inner" data-panel-inner>
   <div id="work" style="padding:clamp(90px,11vw,140px) 0 40px">
-    <div class="reveal" style="padding:0 clamp(20px,4vw,56px);margin-bottom:44px">
+    <!-- No `reveal` in this section: it and the stats band above it stay fully
+         painted at all times, per the brief. -->
+    <div style="padding:0 clamp(20px,4vw,56px);margin-bottom:44px">
       <div class="eyebrow">SELECTED WORK</div>
       <p class="display" style="font-size:clamp(30px,5vw,64px)">Projects worth pausing for.</p>
     </div>
     <div ref="{{horizWrapRef}}" class="work-viewport">
       <div ref="{{trackRef}}" class="work-track">
         <sc-for list="{{projects}}" as="pr" hint-placeholder-count="6">
-          <button onClick="{{pr.onClick}}" data-cursor="play" onMouseMove="{{tiltMove}}" onMouseLeave="{{tiltLeave}}" class="project-card" aria-label="{{pr.aria}}">
+          <button onClick="{{pr.onClick}}" data-cursor="play" class="project-card" aria-label="{{pr.aria}}">
             <img src="{{pr.thumb}}" alt="" loading="lazy" decoding="async" class="project-thumb">
             <span class="project-scrim"></span>
             <span style="position:absolute;left:0;right:0;bottom:0;padding:clamp(24px,4vw,56px);color:#fff;text-align:left;display:block">
@@ -1009,15 +1012,26 @@ class Component extends DCLogic {
   // worse on this dark strip than the wordmark does. Everything else is only on
   // logo-aggregator sites redistributing trademarks. Ask each client for their
   // transparent SVG/PNG and drop it in here.
+  // Supplied client marks, normalised to one 520x190 light plate each (see
+  // assets/clients) so the strip reads as a single set rather than fifteen
+  // different crops. Upasna Centric shipped as white-on-transparent and was
+  // inverted during that pass, or it would have vanished on its own plate.
   clientsData = [
-    {name:'AU Small Finance Bank'},
-    {name:'Kedia'},
-    {name:'Kedia Pavitra'},
-    {name:'RMIB Insurance'},
-    {name:'Burger Farm'},
-    {name:'Sarovar Portico'},
-    {name:'CafeBae'},
-    {name:'The Woods Property'}
+    {name:'AU Small Finance Bank', logo:'./assets/clients/au-small-finance-bank.png'},
+    {name:'Kedia',                 logo:'./assets/clients/kedia.png'},
+    {name:'Kedia Pavitra',         logo:'./assets/clients/kedia-pavitra.png'},
+    {name:'KDIA Re Park',          logo:'./assets/clients/kdia-re-park.png'},
+    {name:'RMIB',                  logo:'./assets/clients/rmib.png'},
+    {name:'Burger Farm',           logo:'./assets/clients/burger-farm.png'},
+    {name:'Sarovar Portico',       logo:'./assets/clients/sarovar-portico.png'},
+    {name:'Ramada by Wyndham',     logo:'./assets/clients/ramada.png'},
+    {name:'The Woods',             logo:'./assets/clients/the-woods.png'},
+    {name:'Upasna',                logo:'./assets/clients/upasna.png'},
+    {name:'Upasna Centric',        logo:'./assets/clients/upasna-centric.png'},
+    {name:'Money Times',           logo:'./assets/clients/money-times.png'},
+    {name:'Amateur Kabaddi Federation of India', logo:'./assets/clients/akfi.png'},
+    {name:'Swa-Shiksha',           logo:'./assets/clients/swa-shiksha.png'},
+    {name:'J4K — Just For Kids',   logo:'./assets/clients/j4k.png'}
   ];
 
   // Name only — job titles were dropped, so nothing here carries a `role`.
@@ -1028,31 +1042,32 @@ class Component extends DCLogic {
     {quote:'"He turned three hours of raw footage into ninety seconds of pure tension."',name:'Dev Anand'}
   ];
 
-  // Two labelled groups of glass cards. A 5-pointed star only has 10 vertices,
-  // so it can't hold 19 tools with the breathing room asked for — the star
-  // outline is kept as a background motif behind the AI group instead.
+  // Every tool carries a real mark. Most are supplied brand tiles, normalised
+  // to a single 288x288 square (see assets/tools) so the grid is uniform; the
+  // rest are brand SVGs drawn as tinted CSS masks on a white tile, which reads
+  // identically next to them. No lettermark fallbacks remain.
   aiToolsData = [
-    {name:"Grok", logo:"data:image/svg+xml,<svg width=%221024%22 height=%221024%22 viewBox=%220 0 1024 1024%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22> <path d=%22M395.479 633.828L735.91 381.105C752.599 368.715 776.454 373.548 784.406 392.792C826.26 494.285 807.561 616.253 724.288 699.996C641.016 783.739 525.151 802.104 419.247 760.277L303.556 814.143C469.49 928.202 670.987 899.995 796.901 773.282C896.776 672.843 927.708 535.937 898.785 412.476L899.047 412.739C857.105 231.37 909.358 158.874 1016.4 10.6326C1018.93 7.11771 1021.47 3.60279 1024 0L883.144 141.651V141.212L395.392 633.916%22 fill=%22white%22/> <path d=%22M325.226 695.251C206.128 580.84 226.662 403.776 328.285 301.668C403.431 226.097 526.549 195.254 634.026 240.596L749.454 186.994C728.657 171.88 702.007 155.623 671.424 144.2C533.19 86.9942 367.693 115.465 255.323 228.382C147.234 337.081 113.244 504.215 171.613 646.833C215.216 753.423 143.739 828.818 71.7385 904.916C46.2237 931.893 20.6216 958.87 0 987.429L325.139 695.339%22 fill=%22white%22/> </svg>", color:"var(--text)", glow:"#8E8E99"},
+    {name:"Grok", img:true, logo:"./assets/tools/grok.png", glow:"#8E8E99"},
     {name:"Google Flow Veo", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z%22/></svg>", color:"#4285F4", glow:"#4285F4"},
-    {name:"Claude", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z%22/></svg>", color:"#D97757", glow:"#D97757"},
-    {name:"ChatGPT", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z%22/></svg>", color:"var(--text)", glow:"#10A37F"},
-    {name:"ElevenLabs", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M4.6035 0v24h4.9317V0zm9.8613 0v24h4.9317V0z%22/></svg>", color:"var(--text)", glow:"#8E8E99"},
-    {name:"HeyGen", mono:"Hg", color:"#DCCBFF", glow:"#7C3AED"},
-    {name:"Higgsfield", mono:"Hf", color:"#EBD6FF", glow:"#A855F7"},
-    {name:"Runway", logo:"data:image/svg+xml,<svg viewBox=%220 0 300 300%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M212.486 105.22C216.254 116.938 215.261 127.642 207.452 137.312C203.943 141.658 198.973 144.485 189.13 147.005C191.57 149.279 193.809 151.242 195.906 153.347C199.96 157.417 203.986 161.518 207.932 165.693C217.154 175.451 216.804 189.546 210.541 200.693C202.271 215.412 181.191 220.187 168.48 209.238C162.421 204.019 156.733 198.368 150.904 192.884C149.733 191.782 148.681 190.553 147.407 189.205C146.401 192.311 145.751 195.242 144.537 197.918C137.775 212.822 118.698 218.857 103.153 211.198C92.5986 205.997 87.6601 197.087 87.4939 185.832C87.1521 162.69 87.2602 139.539 87.4386 116.393C87.5585 100.838 100.245 87.4862 115.766 87.2205C139.448 86.8152 163.146 86.8725 186.831 87.2132C199.002 87.3883 207.628 93.6476 212.486 105.22ZM125.01 108.086C121.119 105.032 116.875 103.935 112.324 106.343C107.723 108.778 105.575 112.638 105.603 118.003C105.72 140.149 105.625 162.295 105.698 184.441C105.705 186.442 105.972 188.617 106.788 190.405C109.016 195.282 114.992 197.672 120.598 196.281C125.959 194.95 129.101 190.869 129.104 185.111C129.118 162.639 129.062 140.167 129.158 117.695C129.174 113.951 128.015 110.938 125.01 108.086ZM150.442 146.846C149.498 146.891 148.553 146.936 147.39 146.991C147.39 152.27 147.336 157.358 147.443 162.443C147.461 163.291 147.983 164.313 148.597 164.935C158.035 174.501 167.442 184.102 177.083 193.46C178.821 195.148 181.473 196.395 183.878 196.791C188.779 197.599 193.731 194.313 196.144 189.426C198.157 185.348 197.209 180.335 193.55 176.606C185.263 168.162 176.836 159.854 168.643 151.321C165.437 147.981 162.029 146.038 157.259 146.793C155.245 147.112 153.138 146.846 150.442 146.846ZM169.239 105.042C161.272 105.042 153.305 105.042 145.948 105.042C146.614 113.151 147.252 120.934 147.905 128.886C160.176 128.886 172.526 128.917 184.876 128.875C192.21 128.849 196.856 124.101 196.812 116.824C196.77 109.897 191.917 105.095 184.857 105.049C179.869 105.016 174.88 105.042 169.239 105.042Z%22 fill=%22black%22/><path d=%22M125.184 108.249C128.015 110.938 129.174 113.951 129.158 117.695C129.062 140.167 129.118 162.639 129.104 185.111C129.101 190.869 125.959 194.95 120.598 196.281C114.992 197.672 109.016 195.282 106.788 190.405C105.972 188.617 105.705 186.442 105.698 184.441C105.625 162.295 105.72 140.149 105.603 118.003C105.575 112.638 107.723 108.778 112.324 106.343C116.875 103.935 121.119 105.032 125.184 108.249Z%22 fill=%22black%22/><path d=%22M150.758 146.846C153.138 146.846 155.245 147.112 157.259 146.793C162.029 146.038 165.437 147.981 168.643 151.321C176.836 159.854 185.263 168.162 193.55 176.606C197.209 180.335 198.157 185.348 196.144 189.426C193.731 194.313 188.779 197.599 183.878 196.791C181.473 196.395 178.821 195.148 177.083 193.46C167.442 184.102 158.035 174.501 148.597 164.935C147.983 164.313 147.461 163.291 147.443 162.443C147.336 157.358 147.39 152.27 147.39 146.991C148.553 146.936 149.498 146.891 150.758 146.846Z%22 fill=%22black%22/><path d=%22M169.565 105.042C174.88 105.042 179.869 105.016 184.857 105.049C191.917 105.095 196.77 109.897 196.812 116.824C196.857 124.101 192.21 128.849 184.876 128.875C172.526 128.917 160.176 128.886 147.905 128.886C147.252 120.934 146.614 113.151 145.948 105.042C153.305 105.042 161.272 105.042 169.565 105.042Z%22 fill=%22black%22/></svg>", color:"var(--text)", glow:"#8E8E99"},
-    {name:"Kling AI", mono:"Kl", color:"#BFE2FF", glow:"#1E88E5"},
-    {name:"Veed.io", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22m23.9847 3.44845-6.4707 15.8711a2.41415 2.41415 0 0 1-2.23542 1.50241H8.73883a2.4138 2.4138 0 0 1-2.23388-1.5005L.01467 3.44846a.196.196 0 0 1 .18143-.27042h6.5505a.3923.3923 0 0 1 .36707.25392l4.90577 13.08297 4.8655-13.08144c.05678-.15342.20368-.25545.36708-.25545h6.55164c.13924 0 .23398.14115.18181.26965z%22/></svg>", color:"#B6FF60", glow:"#B6FF60"},
-    {name:"Gamma AI", mono:"Ga", color:"#FFD6C2", glow:"#E0653A"},
-    {name:"Captions.ai", mono:"Cp", color:"#EDEDF5", glow:"#4B4B5C"}
+    {name:"Claude", img:true, logo:"./assets/tools/claude.png", glow:"#D97757"},
+    {name:"ChatGPT", img:true, logo:"./assets/tools/chatgpt.png", glow:"#10A37F"},
+    {name:"ElevenLabs", img:true, logo:"./assets/tools/elevenlabs.png", glow:"#8E8E99"},
+    {name:"HeyGen", img:true, logo:"./assets/tools/heygen.png", glow:"#7C3AED"},
+    {name:"Higgsfield", img:true, logo:"./assets/tools/higgsfield.png", glow:"#A855F7"},
+    {name:"Runway", img:true, logo:"./assets/tools/runway.png", glow:"#5B6570"},
+    {name:"Kling AI", img:true, logo:"./assets/tools/kling-ai.png", glow:"#1E88E5"},
+    {name:"Veed.io", img:true, logo:"./assets/tools/veed.png", glow:"#B6FF60"},
+    {name:"Gamma AI", img:true, logo:"./assets/tools/gamma.png", glow:"#E0653A"},
+    {name:"Captions.ai", img:true, logo:"./assets/tools/captions-ai.png", glow:"#4B4B5C"}
   ];
 
   softwareData = [
     {name:"Premiere Pro", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M10.15 8.42a2.93 2.93 0 00-1.18-.2 13.9 13.9 0 00-1.09.02v3.36l.39.02h.53c.39 0 .78-.06 1.15-.18.32-.09.6-.28.82-.53.21-.25.31-.59.31-1.03a1.45 1.45 0 00-.93-1.46zM19.75.3H4.25A4.25 4.25 0 000 4.55v14.9c0 2.35 1.9 4.25 4.25 4.25h15.5c2.35 0 4.25-1.9 4.25-4.25V4.55C24 2.2 22.1.3 19.75.3zm-7.09 11.65c-.4.56-.96.98-1.61 1.22-.68.25-1.43.34-2.25.34l-.5-.01-.43-.01v3.21a.12.12 0 01-.11.14H5.82c-.08 0-.12-.04-.12-.13V6.42c0-.07.03-.11.1-.11l.56-.01.76-.02.87-.02.91-.01c.82 0 1.5.1 2.06.31.5.17.96.45 1.34.82.32.32.57.71.73 1.14.15.42.23.85.23 1.3 0 .86-.2 1.57-.6 2.13zm6.82-3.15v1.95c0 .08-.05.11-.16.11a4.35 4.35 0 00-1.92.37c-.19.09-.37.21-.51.37v5.1c0 .1-.04.14-.13.14h-1.97a.14.14 0 01-.16-.12v-5.58l-.01-.75-.02-.78c0-.23-.02-.45-.04-.68a.1.1 0 01.07-.11h1.78c.1 0 .18.07.2.16a3.03 3.03 0 01.13.92c.3-.35.67-.64 1.08-.86a3.1 3.1 0 011.52-.39c.07-.01.13.04.14.11v.04z%22/></svg>", color:"#9999FF", glow:"#8A2BE2"},
-    {name:"DaVinci Resolve", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M17.621 0 5.977.004c-1.37 0-2.756.345-3.762 1.11a4.925 4.925 0 0 0-1.61 2.003C.233 3.93 0 5.02 0 5.951l.012 12.2c.002 1.604.479 3.057 1.461 4.112.984 1.056 2.462 1.683 4.331 1.691L16.856 24c1.26.005 3.095-.036 4.303-.714 1.075-.605 2.025-1.556 2.497-2.984.278-.84.345-2.084.344-3.147l-.021-11.13c-.002-.888-.15-2.023-.547-2.934-.425-.976-1.181-1.815-2.322-2.425C20.353.26 19.123 0 17.622 0zm0 .93c1.378 0 2.538.295 3.04.565.977.523 1.544 1.166 1.889 1.96.315.721.47 1.793.473 2.572l.018 11.13c.002 1.013-.097 2.257-.298 2.86-.396 1.202-1.146 1.946-2.063 2.462-.814.457-2.612.593-3.82.588l-11.05-.044c-1.657-.007-2.832-.534-3.626-1.386-.792-.851-1.212-2.06-1.212-3.485L.999 5.95c0-.829.196-1.827.474-2.437.345-.757.75-1.207 1.365-1.674C3.585 1.27 4.868.97 6.08.97zm-5.66 3.423c-1.976.089-3.204 1.658-3.214 3.29.019 1.443 1.635 3.481 2.884 4.53.12.099.154.109.33.18.062.025.198-.047.327-.135.36-.245.993-.947 1.648-1.738a7.67 7.67 0 0 0 1.031-1.683c.409-.89.261-1.599.235-1.888a3.983 3.983 0 0 0-.99-1.692 3.36 3.36 0 0 0-2.251-.864zm4.172 7.922a10.185 10.185 0 0 0-3.244.61c-.15.058-.26.1-.374.17-.057.036-.11.135-.105.292.017.433.29 1.278.624 2.27.384 1.135 1.066 2.27 1.844 2.74a3.23 3.23 0 0 0 2.53.342c.832-.243 1.595-.868 1.962-1.546.986-1.818.19-3.548-1.121-4.417-.447-.296-1.133-.445-1.89-.46-.074 0-.15-.002-.226-.001zm-8.432.038a6.201 6.201 0 0 0-.752.047c-.596.078-.932.273-1.29.51a3.177 3.177 0 0 0-1.365 1.979c-.075.552-.086 1.053.033 1.507.433 1.389 1.326 2.222 2.847 2.452.636.028 1.37-.063 1.99-.45 1.269-.782 2.08-3.17 2.412-4.742.053-.176.035-.357-.013-.42-.005-.067-.044-.113-.19-.183-.398-.192-1.32-.417-2.375-.6a7.68 7.68 0 0 0-1.297-.1z%22/></svg>", color:"var(--text)", glow:"#5B6570"},
-    {name:"Media Encoder", mono:"Me", color:"#CFC2FF", glow:"#5A2BC9"},
-    {name:"CapCut", mono:"Cc", color:"#F0F0FA", glow:"#3B3B52"},
+    {name:"DaVinci Resolve", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M17.621 0 5.977.004c-1.37 0-2.756.345-3.762 1.11a4.925 4.925 0 0 0-1.61 2.003C.233 3.93 0 5.02 0 5.951l.012 12.2c.002 1.604.479 3.057 1.461 4.112.984 1.056 2.462 1.683 4.331 1.691L16.856 24c1.26.005 3.095-.036 4.303-.714 1.075-.605 2.025-1.556 2.497-2.984.278-.84.345-2.084.344-3.147l-.021-11.13c-.002-.888-.15-2.023-.547-2.934-.425-.976-1.181-1.815-2.322-2.425C20.353.26 19.123 0 17.622 0zm0 .93c1.378 0 2.538.295 3.04.565.977.523 1.544 1.166 1.889 1.96.315.721.47 1.793.473 2.572l.018 11.13c.002 1.013-.097 2.257-.298 2.86-.396 1.202-1.146 1.946-2.063 2.462-.814.457-2.612.593-3.82.588l-11.05-.044c-1.657-.007-2.832-.534-3.626-1.386-.792-.851-1.212-2.06-1.212-3.485L.999 5.95c0-.829.196-1.827.474-2.437.345-.757.75-1.207 1.365-1.674C3.585 1.27 4.868.97 6.08.97zm-5.66 3.423c-1.976.089-3.204 1.658-3.214 3.29.019 1.443 1.635 3.481 2.884 4.53.12.099.154.109.33.18.062.025.198-.047.327-.135.36-.245.993-.947 1.648-1.738a7.67 7.67 0 0 0 1.031-1.683c.409-.89.261-1.599.235-1.888a3.983 3.983 0 0 0-.99-1.692 3.36 3.36 0 0 0-2.251-.864zm4.172 7.922a10.185 10.185 0 0 0-3.244.61c-.15.058-.26.1-.374.17-.057.036-.11.135-.105.292.017.433.29 1.278.624 2.27.384 1.135 1.066 2.27 1.844 2.74a3.23 3.23 0 0 0 2.53.342c.832-.243 1.595-.868 1.962-1.546.986-1.818.19-3.548-1.121-4.417-.447-.296-1.133-.445-1.89-.46-.074 0-.15-.002-.226-.001zm-8.432.038a6.201 6.201 0 0 0-.752.047c-.596.078-.932.273-1.29.51a3.177 3.177 0 0 0-1.365 1.979c-.075.552-.086 1.053.033 1.507.433 1.389 1.326 2.222 2.847 2.452.636.028 1.37-.063 1.99-.45 1.269-.782 2.08-3.17 2.412-4.742.053-.176.035-.357-.013-.42-.005-.067-.044-.113-.19-.183-.398-.192-1.32-.417-2.375-.6a7.68 7.68 0 0 0-1.297-.1z%22/></svg>", color:"#1D1D20", glow:"#5B6570"},
+    {name:"Media Encoder", img:true, logo:"./assets/tools/media-encoder.png", glow:"#5A2BC9"},
+    {name:"CapCut", img:true, logo:"./assets/tools/capcut.png", glow:"#3B3B52"},
     {name:"Canva", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zM6.962 7.68c.754 0 1.337.549 1.405 1.2.069.583-.171 1.097-.822 1.406-.343.171-.48.172-.549.069-.034-.069 0-.137.069-.206.617-.514.617-.926.548-1.508-.034-.378-.308-.618-.583-.618-1.2 0-2.914 2.674-2.674 4.629.103.754.549 1.646 1.509 1.646.308 0 .65-.103.96-.24.5-.264.799-.47 1.097-.8-.073-.885.704-2.046 1.851-2.046.515 0 .926.205.96.583.068.514-.377.582-.514.582s-.378-.034-.378-.17c-.034-.138.309-.07.275-.378-.035-.206-.24-.274-.446-.274-.72 0-1.131.994-1.029 1.611.035.275.172.549.447.549.205 0 .514-.31.617-.755.068-.308.343-.514.583-.514.102 0 .17.034.205.171v.138c-.034.137-.137.548-.102.651 0 .069.034.171.17.171.092 0 .436-.18.777-.459.117-.59.253-1.298.253-1.357.034-.24.137-.48.617-.48.103 0 .171.034.205.171v.138l-.136.617c.445-.583 1.097-.994 1.508-.994.172 0 .309.102.309.274 0 .103 0 .274-.069.446-.137.377-.309.96-.412 1.474 0 .137.035.274.207.274.171 0 .685-.206 1.096-.754l.007-.004c-.002-.068-.007-.134-.007-.202 0-.411.035-.754.104-.994.068-.274.411-.514.617-.514.103 0 .205.069.205.171 0 .035 0 .103-.034.137-.137.446-.24.857-.24 1.269 0 .24.034.582.102.788 0 .034.035.069.07.069.068 0 .548-.445.89-1.028-.308-.206-.48-.549-.48-.96 0-.72.446-1.097.858-1.097.343 0 .617.24.617.72 0 .308-.103.65-.274.96h.102a.77.77 0 0 0 .584-.24.293.293 0 0 1 .134-.117c.335-.425.83-.74 1.41-.74.48 0 .924.205.959.582.068.515-.378.618-.515.618l-.002-.002c-.138 0-.377-.035-.377-.172 0-.137.309-.068.274-.376-.034-.206-.24-.275-.446-.275-.686 0-1.13.891-1.028 1.611.034.275.171.583.445.583.206 0 .515-.308.652-.754.068-.274.343-.514.583-.514.103 0 .17.034.205.171 0 .069 0 .206-.137.652-.17.308-.171.48-.137.617.034.274.171.48.309.583.034.034.068.102.068.102 0 .069-.034.138-.137.138-.034 0-.068 0-.103-.035-.514-.205-.72-.548-.789-.891-.205.24-.445.377-.72.377-.445 0-.89-.411-.96-.926a1.609 1.609 0 0 1 .075-.649c-.203.13-.422.203-.623.203h-.17c-.447.652-.927 1.098-1.27 1.303a.896.896 0 0 1-.377.104c-.068 0-.171-.035-.205-.104-.095-.152-.156-.392-.193-.667-.481.527-1.145.805-1.453.805-.343 0-.548-.206-.582-.55v-.376c.102-.754.377-1.2.377-1.337a.074.074 0 0 0-.069-.07c-.24 0-1.028.824-1.166 1.373l-.103.445c-.068.309-.377.515-.582.515-.103 0-.172-.035-.206-.172v-.137l.046-.233c-.435.31-.87.508-1.075.508-.308 0-.48-.172-.514-.412-.206.274-.445.412-.754.412-.352 0-.696-.24-.862-.593-.244.275-.523.553-.852.764-.48.309-1.028.549-1.68.549-.582 0-1.097-.309-1.371-.583-.412-.377-.651-.96-.686-1.509-.205-1.68.823-3.84 2.4-4.8.378-.205.755-.343 1.132-.343zm9.77 3.291c-.104 0-.172.172-.172.343 0 .274.137.583.309.755a1.74 1.74 0 0 0 .102-.583c0-.343-.137-.515-.24-.515z%22/></svg>", color:"#00C4CC", glow:"#00C4CC"},
-    {name:"Filmora", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M5.475 0A5.463 5.463 0 0 0 0 5.475v13.05A5.463 5.463 0 0 0 5.475 24h13.05A5.463 5.463 0 0 0 24 18.525V5.475A5.463 5.463 0 0 0 18.525 0H5.475Zm4.552 3.6 4.026 4.029-4.617 4.623-.022-.023a1.088 1.088 0 0 0-.158-1.339L5.999 7.63l4.028-4.03ZM14.528 8l4.027 4.03-8.528 8.536L6 16.536 14.528 8Z%22/></svg>", color:"var(--text)", glow:"#00A5E0"}
+    {name:"Filmora", logo:"data:image/svg+xml,<svg viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M5.475 0A5.463 5.463 0 0 0 0 5.475v13.05A5.463 5.463 0 0 0 5.475 24h13.05A5.463 5.463 0 0 0 24 18.525V5.475A5.463 5.463 0 0 0 18.525 0H5.475Zm4.552 3.6 4.026 4.029-4.617 4.623-.022-.023a1.088 1.088 0 0 0-.158-1.339L5.999 7.63l4.028-4.03ZM14.528 8l4.027 4.03-8.528 8.536L6 16.536 14.528 8Z%22/></svg>", color:"#00A5E0", glow:"#00A5E0"}
   ];
 
   statsData = [
@@ -1082,7 +1097,13 @@ class Component extends DCLogic {
 
   // How many opening panels take part in the card-overlap effect. Everything
   // after this scrolls normally.
-  STACK_PANELS = 2;
+  //
+  // 1, not 2: at 2 the About panel was itself an outgoing panel, so the Work
+  // section sliding up over it dimmed it toward the page background — which is
+  // what made the stats band (150+ / 35+ / 2+) fade out on the way down. Only
+  // the hero is an overlap surface now; everything from About onward stays at
+  // full opacity and full scale the whole way down.
+  STACK_PANELS = 1;
 
   rootRef = React.createRef();
   loaderBarRef = React.createRef();
@@ -1113,8 +1134,6 @@ class Component extends DCLogic {
     this.state.themeKey = (wanted && this.themesData[wanted]) ? wanted : 'crimson';
     this.magnetMove = this.magnetMove.bind(this);
     this.magnetLeave = this.magnetLeave.bind(this);
-    this.tiltMove = this.tiltMove.bind(this);
-    this.tiltLeave = this.tiltLeave.bind(this);
     this.onCursorMove = this.onCursorMove.bind(this);
     this.onCursorOver = this.onCursorOver.bind(this);
     this.onCursorLeave = this.onCursorLeave.bind(this);
@@ -1125,6 +1144,9 @@ class Component extends DCLogic {
     this.requestStackUpdate = this.requestStackUpdate.bind(this);
     this.layoutPanels = this.layoutPanels.bind(this);
     this.onResize = this.onResize.bind(this);
+    this.workDragStart = this.workDragStart.bind(this);
+    this.workDragMove = this.workDragMove.bind(this);
+    this.workDragEnd = this.workDragEnd.bind(this);
     this.onVisibility = this.onVisibility.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
     this.closeVideo = this.closeVideo.bind(this);
@@ -1156,7 +1178,7 @@ class Component extends DCLogic {
       this.setState((s) => ({ testIdx: (s.testIdx + 1) % this.testimonialsData.length }));
     }, 6000);
 
-    this.horizTimer = setTimeout(() => this.setupHorizontalScroll(), 400);
+    this.setupWorkDrag();
     document.addEventListener('visibilitychange', this.onVisibility);
     document.addEventListener('keydown', this.onKeyDown);
     document.addEventListener('pointerover', this.onPointerOverSfx, { passive: true });
@@ -1241,8 +1263,9 @@ class Component extends DCLogic {
     if (this.panelRO) this.panelRO.disconnect();
     if (this.testInterval) clearInterval(this.testInterval);
     if (this.loaderTimer) clearInterval(this.loaderTimer);
-    if (this.horizTimer) clearTimeout(this.horizTimer);
-    this.teardownHorizontalScroll();
+    const workWrap = this.horizWrapRef.current;
+    if (workWrap) workWrap.removeEventListener('pointerdown', this.workDragStart);
+    this.workDragEnd();
     if (this.audio && this.audio.ctx) this.audio.ctx.close();
   }
 
@@ -1393,41 +1416,22 @@ class Component extends DCLogic {
     this.updateStack();
   }
 
-  // `refresh` re-measures every ScrollTrigger, including the pinned work
-  // section. GSAP warns that refreshing while the page sits inside a pinned
-  // range can misplace the pin, so only do it when the geometry genuinely
-  // changed — a viewport resize — and never for a gallery filter click, which
-  // cannot affect that section at all.
-  layoutPanels(refreshTriggers) {
+  layoutPanels() {
     this.measurePanelTops();
-    if (refreshTriggers === true && window.ScrollTrigger) window.ScrollTrigger.refresh();
   }
 
   // Mobile browsers fire `resize` every time the URL bar slides in or out — so
   // on a phone this runs on essentially every change of scroll direction, with
-  // only the height changing. Forwarding those to ScrollTrigger.refresh() while
-  // the page sat inside the pinned Work section is what walked the pin-spacer
-  // out of place: the cards crept down over the heading and the gap grew a
-  // little more on each down-then-up pass.
-  //
-  // Width is the only dimension this layout actually depends on, so a
-  // height-only resize is ignored on touch devices. Real rotations change the
-  // width too and still come through.
+  // only the height changing. Width is the only dimension this layout depends
+  // on, so a height-only resize is ignored on touch devices; real rotations
+  // change the width too and still come through. The panel ResizeObserver is
+  // still live either way, so genuine content-height changes are picked up.
   onResize() {
     const w = window.innerWidth;
     const widthChanged = w !== this.lastResizeW;
     this.lastResizeW = w;
-
     if (this.isCoarse && !widthChanged) return;
-
-    // Crossing the breakpoint swaps the Work section between the pinned tween
-    // and the CSS swipe scroller.
-    if (widthChanged) {
-      if (this.workPinWanted()) this.setupHorizontalScroll();
-      else this.teardownHorizontalScroll();
-    }
-
-    this.layoutPanels(true);
+    this.layoutPanels();
   }
 
   requestStackUpdate() {
@@ -1483,47 +1487,71 @@ class Component extends DCLogic {
   }
 
   // ---------------------------------------------------------------- horizontal work scroll
-  // Desktop only. Below WORK_PIN_MIN_W the section is a plain CSS swipe
-  // scroller (see the max-width:900px block) and no ScrollTrigger is created at
-  // all — a scroll-linked pin is not survivable on mobile, where the URL bar
-  // resizes the viewport on every change of scroll direction.
-  WORK_PIN_MIN_W = 901;
-
-  workPinWanted() {
-    return window.innerWidth >= this.WORK_PIN_MIN_W && !this.reduceMotion;
+  // Selected Work is a plain native horizontal scroller at every width. There is
+  // no GSAP pin and no scroll-linked animation here any more.
+  //
+  // The pin was the single worst thing in this page. It made the section
+  // `position:fixed` for the length of its scrub, next to a stack of
+  // `position:sticky` panels that also paint at viewport coordinates — so the
+  // cards could end up drawn over the hero (and over whatever else was pinned
+  // at the time). It also inserted a pin-spacer whose height was recomputed on
+  // every ScrollTrigger.refresh(); mobile browsers fire `resize` whenever the
+  // URL bar slides, so the spacer drifted, which is where the growing gap
+  // between "Projects worth pausing for." and the cards came from. Both
+  // symptoms had the same single cause, and neither can recur without a pin.
+  //
+  // Dragging is handled below so mouse users aren't stranded; trackpads and
+  // touch already scroll this natively.
+  setupWorkDrag() {
+    const wrap = this.horizWrapRef.current;
+    if (!wrap) return;
+    wrap.addEventListener('pointerdown', this.workDragStart);
   }
 
-  setupHorizontalScroll() {
-    const wrap = this.horizWrapRef.current, track = this.trackRef.current;
-    if (!wrap || !track) return;
-    if (!this.workPinWanted()) return;
-    if (this.horizTween) return;
-    if (!window.gsap || !window.ScrollTrigger) {
-      this.horizTimer = setTimeout(() => this.setupHorizontalScroll(), 500);
-      return;
+  workDragStart(e) {
+    // Touch already pans natively, and letting both run fights the momentum.
+    if (e.pointerType === 'touch') return;
+    const wrap = this.horizWrapRef.current;
+    if (!wrap) return;
+    this.workDrag = { x: e.clientX, left: wrap.scrollLeft, moved: false, id: e.pointerId };
+    // Mandatory snap re-snaps every scrollLeft write, so a drag would fight it
+    // the whole way across. Snapping is restored on release, which also lets
+    // the card settle to a stop rather than halting mid-gap.
+    wrap.style.scrollSnapType = 'none';
+    // Capture is a nice-to-have; it throws when the pointer isn't live, and
+    // that must not take the drag down with it.
+    try { wrap.setPointerCapture(e.pointerId); } catch (err) { /* not capturable */ }
+    wrap.addEventListener('pointermove', this.workDragMove);
+    wrap.addEventListener('pointerup', this.workDragEnd);
+    wrap.addEventListener('pointercancel', this.workDragEnd);
+  }
+
+  workDragMove(e) {
+    const wrap = this.horizWrapRef.current;
+    if (!wrap || !this.workDrag) return;
+    const dx = e.clientX - this.workDrag.x;
+    if (Math.abs(dx) > 3) this.workDrag.moved = true;
+    wrap.scrollLeft = this.workDrag.left - dx;
+  }
+
+  workDragEnd(e) {
+    const wrap = this.horizWrapRef.current;
+    if (!wrap) return;
+    // A drag shouldn't also open the lightbox on release.
+    if (this.workDrag && this.workDrag.moved) {
+      const kill = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
+      wrap.addEventListener('click', kill, { capture: true, once: true });
+      setTimeout(() => wrap.removeEventListener('click', kill, { capture: true }), 0);
     }
-    window.gsap.registerPlugin(window.ScrollTrigger);
-    const getDistance = () => Math.max(0, track.scrollWidth - window.innerWidth);
-    this.horizTween = window.gsap.to(track, {
-      x: () => -getDistance(),
-      ease: 'none',
-      scrollTrigger: {
-        trigger: wrap, start: 'top top', end: () => '+=' + getDistance(),
-        scrub: 0.5, pin: true, invalidateOnRefresh: true
-      }
-    });
-    this.layoutPanels(true);
-  }
-
-  // Tearing the pin down has to also clear the transform GSAP left on the
-  // track, or the cards stay scrolled off-screen as a static scroller.
-  teardownHorizontalScroll() {
-    if (!this.horizTween) return;
-    if (this.horizTween.scrollTrigger) this.horizTween.scrollTrigger.kill(true);
-    this.horizTween.kill();
-    this.horizTween = null;
-    const track = this.trackRef.current;
-    if (track) track.style.transform = '';
+    const id = this.workDrag ? this.workDrag.id : null;
+    this.workDrag = null;
+    wrap.style.scrollSnapType = '';
+    wrap.removeEventListener('pointermove', this.workDragMove);
+    wrap.removeEventListener('pointerup', this.workDragEnd);
+    wrap.removeEventListener('pointercancel', this.workDragEnd);
+    try {
+      if (id != null && wrap.hasPointerCapture && wrap.hasPointerCapture(id)) wrap.releasePointerCapture(id);
+    } catch (err) { /* already released */ }
   }
 
   // ---------------------------------------------------------------- custom cursor
@@ -1625,15 +1653,6 @@ class Component extends DCLogic {
   }
   magnetLeave(e) { e.currentTarget.style.transform = 'translate3d(0,0,0)'; }
 
-  tiltMove(e) {
-    if (this.isCoarse || this.reduceMotion) return;
-    const el = e.currentTarget;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    el.style.transform = 'perspective(900px) rotateX(' + (py * -5).toFixed(2) + 'deg) rotateY(' + (px * 5).toFixed(2) + 'deg) scale(1.02)';
-  }
-  tiltLeave(e) { e.currentTarget.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)'; }
 
   // ---------------------------------------------------------------- sound
   // Everything is synthesised with WebAudio — no audio files, so this adds no
@@ -1888,14 +1907,24 @@ class Component extends DCLogic {
       if (offset > n / 2) offset -= n;
       if (offset < -n / 2) offset += n;
       const abs = Math.abs(offset);
+      const active = abs === 0;
       return {
         ...t,
         style: {
-          position: abs === 0 ? 'relative' : 'absolute', left: 0, right: 0, top: 0,
+          // Every slide is absolutely positioned, so the block's height comes
+          // from its min-height alone and can't jump when the active quote
+          // changes length mid-fade.
+          position: 'absolute', left: 0, right: 0, top: 0,
           transform: 'translateX(' + offset * 40 + 'px) translateZ(' + -abs * 120 + 'px) rotateY(' + offset * -12 + 'deg)',
-          opacity: abs === 0 ? 1 : 0, zIndex: 10 - abs,
-          transition: 'transform .8s var(--ease), opacity .8s var(--ease)',
-          pointerEvents: abs === 0 ? 'auto' : 'none'
+          opacity: active ? 1 : 0, zIndex: 10 - abs,
+          // Sequential, not simultaneous: the outgoing quote clears before the
+          // incoming one arrives. With both on the same .8s curve they sat at
+          // ~50% together every rotation, which rendered as one quote printed
+          // on top of another.
+          transition: active
+            ? 'transform .8s var(--ease), opacity .42s var(--ease) .34s'
+            : 'transform .8s var(--ease), opacity .3s var(--ease)',
+          pointerEvents: active ? 'auto' : 'none'
         }
       };
     });
@@ -1942,7 +1971,6 @@ class Component extends DCLogic {
       magnetMove: this.magnetMove, magnetLeave: this.magnetLeave,
       statsWrapRef: this.statsWrapRef, stats,
       horizWrapRef: this.horizWrapRef, trackRef: this.trackRef, projects,
-      tiltMove: this.tiltMove, tiltLeave: this.tiltLeave,
       filterTabs, galleryFiltered,
       videoOpen: !!this.state.video,
       videoSrc: this.state.video ? this.state.video.src : '',
