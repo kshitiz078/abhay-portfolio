@@ -759,16 +759,24 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
       <!-- Nothing else signals that this row scrolls sideways, so the arrows
            are the affordance. They disable at each end rather than vanishing,
            which keeps the header from reflowing as you page through. -->
+      <!-- No bindings on these buttons at all. This runtime drops *every*
+           binding on an element when one of them is unsupported, and a bound
+           `disabled` was enough to silently take `onClick` with it — the arrows
+           rendered but did nothing. Click handling and the disabled state are
+           both wired up imperatively in setupWorkArrows(). -->
       <div class="work-nav">
-        <button onClick="{{workPrev}}" class="work-arrow" aria-label="Previous projects" disabled="{{workAtStart}}">
+        <button class="work-arrow" data-work-prev aria-label="Previous projects">
           <span aria-hidden="true">←</span>
         </button>
-        <button onClick="{{workNext}}" class="work-arrow" aria-label="More projects" disabled="{{workAtEnd}}">
+        <button class="work-arrow" data-work-next aria-label="More projects">
           <span aria-hidden="true">→</span>
         </button>
       </div>
     </div>
-    <div ref="{{horizWrapRef}}" class="work-viewport" onScroll="{{workScrolled}}">
+    <!-- The scroll listener is attached in setupWorkDrag, not as an onScroll
+         binding: adding one here stopped `ref` from resolving on this element,
+         which silently took the arrows and drag-to-scroll down with it. -->
+    <div ref="{{horizWrapRef}}" class="work-viewport">
       <div ref="{{trackRef}}" class="work-track">
         <sc-for list="{{projects}}" as="pr" hint-placeholder-count="6">
           <button onClick="{{pr.onClick}}" data-cursor="play" class="project-card" aria-label="{{pr.aria}}">
@@ -903,7 +911,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
         <sc-for list="{{aiTools}}" as="t" hint-placeholder-count="12">
           <div class="tool-card" data-cursor="expand">
             <span class="tool-logo" style="{{t.tileStyle}}">
-              <span class="tool-glyph" style="{{t.glyphStyle}}">{{t.mono}}</span>
+              <span class="tool-glyph" style="{{t.glyphStyle}}"></span>
               <img class="tool-img" src="{{t.imgSrc}}" alt="" aria-hidden="true" loading="lazy" decoding="async" style="{{t.imgStyle}}">
             </span>
             <span class="tool-name">{{t.name}}</span>
@@ -922,7 +930,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
         <sc-for list="{{software}}" as="t" hint-placeholder-count="6">
           <div class="tool-card" data-cursor="expand">
             <span class="tool-logo" style="{{t.tileStyle}}">
-              <span class="tool-glyph" style="{{t.glyphStyle}}">{{t.mono}}</span>
+              <span class="tool-glyph" style="{{t.glyphStyle}}"></span>
               <img class="tool-img" src="{{t.imgSrc}}" alt="" aria-hidden="true" loading="lazy" decoding="async" style="{{t.imgStyle}}">
             </span>
             <span class="tool-name">{{t.name}}</span>
@@ -1188,8 +1196,7 @@ class Component extends DCLogic {
   }));
 
   // `video` holds the currently open lightbox clip: { src, title, short }.
-  state = { themeKey: null, loading: true, filter: 'All', testIdx: 0, soundOn: false, menuOpen: false, video: null, isTouch: false,
-            workAtStart: true, workAtEnd: false };
+  state = { themeKey: null, loading: true, filter: 'All', testIdx: 0, soundOn: false, menuOpen: false, video: null, isTouch: false };
 
   constructor(props) {
     super(props);
@@ -1210,6 +1217,8 @@ class Component extends DCLogic {
     this.layoutPanels = this.layoutPanels.bind(this);
     this.onResize = this.onResize.bind(this);
     this.onWorkScroll = this.onWorkScroll.bind(this);
+    this.onWorkPrev = this.onWorkPrev.bind(this);
+    this.onWorkNext = this.onWorkNext.bind(this);
     this.workDragStart = this.workDragStart.bind(this);
     this.workDragMove = this.workDragMove.bind(this);
     this.workDragEnd = this.workDragEnd.bind(this);
@@ -1331,10 +1340,16 @@ class Component extends DCLogic {
     if (this.panelRO) this.panelRO.disconnect();
     if (this.testInterval) clearInterval(this.testInterval);
     if (this.loaderTimer) clearInterval(this.loaderTimer);
-    const workWrap = this.horizWrapRef.current;
-    if (workWrap) workWrap.removeEventListener('pointerdown', this.workDragStart);
+    const workWrap = this.workEl();
+    if (workWrap) {
+      workWrap.removeEventListener('pointerdown', this.workDragStart);
+      workWrap.removeEventListener('scroll', this.onWorkScroll);
+    }
+    if (this.workPrevBtn) this.workPrevBtn.removeEventListener('click', this.onWorkPrev);
+    if (this.workNextBtn) this.workNextBtn.removeEventListener('click', this.onWorkNext);
     this.workDragEnd();
     if (this.workSnapTimer) clearTimeout(this.workSnapTimer);
+    if (this.workNudgeTimer) clearTimeout(this.workNudgeTimer);
     if (this.workArrowRaf) cancelAnimationFrame(this.workArrowRaf);
     if (this.audio && this.audio.ctx) this.audio.ctx.close();
   }
@@ -1584,16 +1599,37 @@ class Component extends DCLogic {
   //
   // Dragging is handled below so mouse users aren't stranded; trackpads and
   // touch already scroll this natively.
+  // The `ref` on .work-viewport stopped resolving once this section grew a
+  // header with the arrow buttons — the runtime hands back null, which silently
+  // disabled both the arrows and drag-to-scroll. The class is unique and stable,
+  // so fall back to looking the element up rather than depending on the binding.
+  workEl() {
+    if (this.horizWrapRef.current) return this.horizWrapRef.current;
+    const root = this.rootRef.current;
+    return root ? root.querySelector('.work-viewport') : null;
+  }
+
   setupWorkDrag() {
-    const wrap = this.horizWrapRef.current;
+    const wrap = this.workEl();
     if (!wrap) return;
     wrap.addEventListener('pointerdown', this.workDragStart);
+    wrap.addEventListener('scroll', this.onWorkScroll, { passive: true });
+
+    const root = this.rootRef.current;
+    if (!root) return;
+    this.workPrevBtn = root.querySelector('[data-work-prev]');
+    this.workNextBtn = root.querySelector('[data-work-next]');
+    if (this.workPrevBtn) this.workPrevBtn.addEventListener('click', this.onWorkPrev);
+    if (this.workNextBtn) this.workNextBtn.addEventListener('click', this.onWorkNext);
   }
+
+  onWorkPrev() { this.workPage(-1); }
+  onWorkNext() { this.workPage(1); }
 
   workDragStart(e) {
     // Touch already pans natively, and letting both run fights the momentum.
     if (e.pointerType === 'touch') return;
-    const wrap = this.horizWrapRef.current;
+    const wrap = this.workEl();
     if (!wrap) return;
     this.workDrag = { x: e.clientX, left: wrap.scrollLeft, moved: false, id: e.pointerId };
     // Mandatory snap re-snaps every scrollLeft write, so a drag would fight it
@@ -1609,7 +1645,7 @@ class Component extends DCLogic {
   }
 
   workDragMove(e) {
-    const wrap = this.horizWrapRef.current;
+    const wrap = this.workEl();
     if (!wrap || !this.workDrag) return;
     const dx = e.clientX - this.workDrag.x;
     if (Math.abs(dx) > 3) this.workDrag.moved = true;
@@ -1617,7 +1653,7 @@ class Component extends DCLogic {
   }
 
   workDragEnd(e) {
-    const wrap = this.horizWrapRef.current;
+    const wrap = this.workEl();
     if (!wrap) return;
     // A drag shouldn't also open the lightbox on release.
     if (this.workDrag && this.workDrag.moved) {
@@ -1639,41 +1675,64 @@ class Component extends DCLogic {
   // Page by one card plus its gutter, so an arrow press always lands a card on
   // the same edge rather than drifting out of step over several presses.
   workPage(dir) {
-    const wrap = this.horizWrapRef.current;
+    const wrap = this.workEl();
     if (!wrap) return;
     const card = wrap.querySelector('.project-card');
     const step = card
       ? card.getBoundingClientRect().width + parseFloat(getComputedStyle(card).marginRight || 0)
       : wrap.clientWidth * 0.8;
 
-    // `scroll-snap-type: mandatory` cancels a programmatic *smooth* scroll and
-    // springs the row straight back to where it started — an instant scroll
-    // gets through, a smooth one does not. So snapping is suspended for the
-    // length of the animation and restored once it settles, which also tidies
-    // up any sub-pixel drift by snapping to the card we landed on.
-    const smooth = !this.reduceMotion;
-    if (smooth) wrap.style.scrollSnapType = 'none';
-    wrap.scrollBy({ left: dir * step, behavior: smooth ? 'smooth' : 'auto' });
-    if (!smooth) return;
+    // Getting this to move reliably took some doing. On a `scroll-snap-type:
+    // mandatory` container, `scrollBy({behavior:'smooth'})` can be cancelled
+    // outright and leave the row exactly where it started; and where smooth
+    // scrolling is unsupported or disabled, *any* smooth request — including a
+    // plain scrollLeft assignment while `scroll-behavior: smooth` is in force —
+    // silently does nothing at all. Both failures look identical: a button that
+    // visibly does nothing.
+    //
+    // So: suspend snapping, ask for the smooth version, then verify it actually
+    // started and fall back to an instant jump if it didn't. The arrow always
+    // moves the row; the easing is the part that degrades.
+    const max = wrap.scrollWidth - wrap.clientWidth;
+    const from = wrap.scrollLeft;
+    const target = Math.max(0, Math.min(max, from + dir * step));
+    if (Math.abs(target - from) < 1) return;
+
+    wrap.style.scrollSnapType = 'none';
+    wrap.style.scrollBehavior = this.reduceMotion ? 'auto' : 'smooth';
+    wrap.scrollLeft = target;
+
+    clearTimeout(this.workNudgeTimer);
+    this.workNudgeTimer = setTimeout(() => {
+      if (Math.abs(wrap.scrollLeft - from) < 1) {
+        wrap.style.scrollBehavior = 'auto';
+        wrap.scrollLeft = target;
+      }
+      this.syncWorkArrows();
+    }, 70);
 
     clearTimeout(this.workSnapTimer);
-    const restore = () => { wrap.style.scrollSnapType = ''; };
-    // `scrollend` where supported, with a timeout as the guarantee.
-    if ('onscrollend' in window) wrap.addEventListener('scrollend', restore, { once: true });
-    this.workSnapTimer = setTimeout(restore, 800);
+    this.workSnapTimer = setTimeout(() => {
+      wrap.style.scrollSnapType = '';
+      wrap.style.scrollBehavior = '';
+      this.syncWorkArrows();
+    }, 700);
+    this.syncWorkArrows();
   }
 
-  // Drives the arrows' disabled state. Reads only scroll offsets, which are
-  // free — no getBoundingClientRect on the scroll path.
+  // Drives the arrows' disabled state directly on the nodes. Reads only scroll
+  // offsets, which are free — no getBoundingClientRect on the scroll path — and
+  // no setState, so scrolling the row never re-renders the page.
   syncWorkArrows() {
-    const wrap = this.horizWrapRef.current;
+    const wrap = this.workEl();
     if (!wrap) return;
     const max = wrap.scrollWidth - wrap.clientWidth;
-    const atStart = wrap.scrollLeft <= 2;
-    const atEnd = wrap.scrollLeft >= max - 2;
-    if (atStart !== this.state.workAtStart || atEnd !== this.state.workAtEnd) {
-      this.setState({ workAtStart: atStart, workAtEnd: atEnd });
-    }
+    // Snapping settles the last card a few pixels short of the true maximum, so
+    // an exact comparison never reports "at the end" and the arrow stays lit
+    // with nowhere left to go.
+    const EDGE = 12;
+    if (this.workPrevBtn) this.workPrevBtn.disabled = wrap.scrollLeft <= EDGE;
+    if (this.workNextBtn) this.workNextBtn.disabled = wrap.scrollLeft >= max - EDGE;
   }
 
   onWorkScroll() {
@@ -2101,10 +2160,6 @@ class Component extends DCLogic {
       magnetMove: this.magnetMove, magnetLeave: this.magnetLeave,
       statsWrapRef: this.statsWrapRef, stats,
       horizWrapRef: this.horizWrapRef, trackRef: this.trackRef, projects,
-      workPrev: () => this.workPage(-1),
-      workNext: () => this.workPage(1),
-      workScrolled: this.onWorkScroll,
-      workAtStart: this.state.workAtStart, workAtEnd: this.state.workAtEnd,
       filterTabs, galleryFiltered,
       videoOpen: !!this.state.video,
       videoSrc: this.state.video ? this.state.video.src : '',
