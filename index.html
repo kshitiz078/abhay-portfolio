@@ -12,13 +12,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Abhay Jain — Video Editor</title>
 <meta name="description" content="Abhay Jain — video editor and storyteller. Commercials, social content, AI-generated video, podcasts and brand storytelling.">
-<!-- Netflix sets its UI in Netflix Sans, a licensed cut of a neo-grotesque very
-     close to Helvetica. We can't ship that face, so the stack below resolves to
-     the nearest thing already installed on each platform — Helvetica Neue on
-     Apple, Arial on Windows/Android (near-identical metrics) — which also drops
-     two webfont requests off the critical path. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- GSAP + ScrollTrigger removed: the only thing they drove was the pinned
      Selected Work section, which is now a native horizontal scroller. That
      also takes two render-blocking third-party scripts off the critical path. -->
@@ -31,9 +27,6 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 :root{
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-spring:cubic-bezier(.34,1.4,.5,1);
-  /* One neo-grotesque for everything, Netflix-style: the brand voice comes from
-     weight and tracking, not from a second typeface. */
-  --font-sans:'Helvetica Neue',Helvetica,Arial,'Liberation Sans',sans-serif;
 }
 
 /* ---------- keyframes ---------- */
@@ -129,13 +122,8 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 .swatch:hover{transform:scale(1.28)}
 
 /* ---------- shared bits ---------- */
-.eyebrow{font-size:12px;letter-spacing:3px;font-weight:700;text-transform:uppercase;color:var(--a);margin-bottom:20px}
-/* Netflix headline recipe: maximum weight, negative tracking so the counters
-   close up, and a tight leading set per-use at the call site. */
-.display{
-  font-family:var(--font-sans);font-weight:800;margin:0;text-wrap:pretty;
-  letter-spacing:-.022em;
-}
+.eyebrow{font-size:13px;letter-spacing:4px;color:var(--a);margin-bottom:20px}
+.display{font-family:'Anton',sans-serif;font-weight:400;margin:0;text-wrap:pretty}
 .btn{
   display:inline-flex;align-items:center;gap:10px;text-decoration:none;
   font-weight:700;letter-spacing:.5px;border-radius:100px;
@@ -168,7 +156,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 /* Fallback for a client with no file yet — never shown while every entry has a
    logo, but it keeps the strip from collapsing if one is removed. */
 .client-word{
-  font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+  font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
   color:#111;text-align:center;padding:0 12px;line-height:1.15;
 }
 .client-mark{display:block;width:100%;height:100%;object-fit:contain}
@@ -255,28 +243,28 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   opacity:.85;transition:transform .5s var(--ease-spring), opacity .5s var(--ease), background .5s var(--ease);
 }
 .gallery-card:hover .gallery-play{transform:translate(-50%,-50%) scale(1.1);opacity:1;background:color-mix(in oklab, var(--a) 80%, transparent)}
-.filter-btn{padding:10px 20px;border-radius:100px;font-size:13px;font-weight:700;letter-spacing:.01em;cursor:pointer;font-family:inherit;transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease)}
+.filter-btn{padding:10px 20px;border-radius:100px;font-size:13px;cursor:pointer;font-family:inherit;transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease)}
 
 /* ---------- poster typography (video cards) ----------
-   Netflix sets titles over artwork heavy and tight, with the category as a
-   small all-caps kicker above it. Both live here so the gallery tiles and the
-   wide Selected Work cards can never drift apart. */
-/* The kicker is brand red over uncontrolled YouTube thumbnail artwork, so it
-   carries its own shadow rather than relying on the card scrim alone. */
+   Shared by the gallery tiles and the wide Selected Work cards so the two can't
+   drift apart. Type is the original Anton title over a Manrope kicker; the
+   text-shadows are not decoration — they're what keeps this readable over
+   uncontrolled YouTube thumbnail artwork, several of which are near-white. */
 .poster-kicker{
-  display:block;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;
   color:var(--a);margin-bottom:10px;
   text-shadow:0 1px 6px rgba(0,0,0,.9), 0 0 18px rgba(0,0,0,.7);
 }
 .poster-title{
-  display:block;font-weight:800;letter-spacing:-.025em;line-height:1.02;color:#fff;
+  display:block;font-family:'Anton',sans-serif;font-weight:400;line-height:1.05;color:#fff;
   text-shadow:0 2px 18px rgba(0,0,0,.55);
 }
 /* Sizes live here rather than inline so the mobile block below can override
    them — an inline font-size would win over any stylesheet rule. */
-.project-card .poster-title{font-size:clamp(28px,4.4vw,58px)}
+.project-card .poster-kicker{font-size:12px;margin-bottom:12px}
+.project-card .poster-title{font-size:clamp(26px,4.2vw,54px)}
 .gallery-card .poster-kicker{margin-bottom:4px}
-.gallery-card .poster-title{font-size:17px;line-height:1.15}
+.gallery-card .poster-title{font-size:16px;line-height:1.3}
 .timeline-row{display:grid;grid-template-columns:56px 1fr;gap:20px;padding:26px 0;border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent);transition:padding-left .6s var(--ease)}
 .timeline-row:hover{padding-left:10px}
 
@@ -310,7 +298,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 .tool-group-head{display:flex;align-items:center;gap:18px;margin-bottom:clamp(22px,3vw,34px)}
 .tool-group-label{font-size:12px;letter-spacing:4px;font-weight:700;color:var(--a);white-space:nowrap}
 .tool-group-rule{flex:1;height:1px;background:linear-gradient(to right, color-mix(in oklab, var(--text) 22%, transparent), transparent)}
-.tool-group-count{font-weight:800;font-size:13px;letter-spacing:0;color:var(--muted)}
+.tool-group-count{font-family:'Anton',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted)}
 .tool-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(122px,1fr));
@@ -384,7 +372,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   -webkit-mask-position:center;mask-position:center;
   -webkit-mask-size:contain;mask-size:contain;
-  font-weight:800;font-size:clamp(17px,2.1vw,21px);letter-spacing:-.02em;
+  font-family:'Anton',sans-serif;font-size:clamp(17px,2.1vw,21px);letter-spacing:.5px;
   line-height:1;text-align:center;
 }
 /* The brand halo that used to sit behind these marks is gone: it existed to
@@ -744,7 +732,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
             <span style="position:absolute;left:0;right:0;bottom:0;padding:clamp(24px,4vw,56px);color:#fff;text-align:left;display:block">
               <span class="poster-kicker">{{pr.category}}</span>
               <span class="poster-title">{{pr.title}}</span>
-              <span style="display:inline-flex;align-items:center;gap:10px;margin-top:18px;font-size:14px;color:#fff;font-weight:700;letter-spacing:.01em">▶ Watch film</span>
+              <span style="display:inline-flex;align-items:center;gap:10px;margin-top:18px;font-size:14px;color:#fff;font-weight:700">▶ Watch film</span>
             </span>
           </button>
         </sc-for>
@@ -832,8 +820,8 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
     <div style="position:relative;min-height:clamp(150px,24vw,190px);perspective:1200px">
       <sc-for list="{{testimonialsRendered}}" as="t" hint-placeholder-count="4">
         <div style="{{t.style}}">
-          <p class="display" style="font-size:clamp(20px,2.6vw,32px);line-height:1.22;margin:0 0 22px">{{t.quote}}</p>
-          <div style="font-size:14px;font-weight:700;letter-spacing:.02em">{{t.name}}</div>
+          <p class="display" style="font-size:clamp(20px,2.6vw,32px);line-height:1.3;margin:0 0 22px">{{t.quote}}</p>
+          <div style="font-size:14px;font-weight:700">{{t.name}}</div>
         </div>
       </sc-for>
     </div>
@@ -2176,7 +2164,7 @@ class Component extends DCLogic {
     const enableCursorFlag = (this.props.enableCursor ?? true) && !this.state.isTouch;
     const rootStyle = {
       '--bg': theme.bg, '--surface': theme.surface, '--text': theme.text, '--muted': theme.muted, '--a': theme.a, '--b': theme.b,
-      background: 'var(--bg)', color: 'var(--text)', fontFamily: 'var(--font-sans)',
+      background: 'var(--bg)', color: 'var(--text)', fontFamily: "'Manrope', sans-serif",
       position: 'relative',
       // `clip` (not `hidden`) — `overflow:hidden` would make this a scroll
       // container and break every `position:sticky` panel inside it.
