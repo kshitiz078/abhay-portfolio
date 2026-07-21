@@ -245,6 +245,64 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 .gallery-card:hover .gallery-play{transform:translate(-50%,-50%) scale(1.1);opacity:1;background:color-mix(in oklab, var(--a) 80%, transparent)}
 .filter-btn{padding:10px 20px;border-radius:100px;font-size:13px;cursor:pointer;font-family:inherit;transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease)}
 
+/* ---------- showreel ---------- */
+.reel-section{
+  padding:clamp(100px,13vw,170px) clamp(20px,4vw,56px) clamp(110px,14vw,180px);
+  max-width:1240px;margin:0 auto;
+}
+.reel-head{max-width:760px;margin-bottom:clamp(36px,5vw,56px)}
+.reel-sub{font-size:17px;line-height:1.7;color:var(--muted);max-width:560px;margin-top:22px}
+
+.reel-stage{
+  position:relative;display:block;width:100%;aspect-ratio:16/9;
+  padding:0;border:none;overflow:hidden;border-radius:22px;
+  background:var(--surface);cursor:pointer;font-family:inherit;
+  box-shadow:0 40px 90px -40px rgba(0,0,0,.9);
+  transition:transform .7s var(--ease), box-shadow .7s var(--ease);
+}
+.reel-stage:hover{transform:translateY(-6px);box-shadow:0 52px 110px -44px rgba(0,0,0,.95)}
+.reel-stage:focus-visible{outline:3px solid var(--a);outline-offset:4px}
+.reel-thumb{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transition:transform 1.2s var(--ease);
+}
+.reel-stage:hover .reel-thumb{transform:scale(1.04)}
+.reel-scrim{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(60% 60% at 50% 50%, rgba(0,0,0,.15), rgba(0,0,0,.55) 100%),
+    linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.1) 55%, rgba(0,0,0,.25));
+}
+
+/* Play control: a filled brand disc with a ring that pushes out on hover. */
+.reel-play{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:clamp(72px,9vw,116px);aspect-ratio:1;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;pointer-events:none;
+  background:var(--a);color:#fff;
+  box-shadow:0 20px 50px -14px color-mix(in oklab, var(--a) 80%, transparent);
+  transition:transform .5s var(--ease-spring), background .4s var(--ease);
+}
+.reel-stage:hover .reel-play{transform:translate(-50%,-50%) scale(1.08)}
+.reel-play-tri{font-size:clamp(22px,2.6vw,34px);margin-left:.12em;line-height:1}
+.reel-play-ring{
+  position:absolute;inset:-14px;border-radius:50%;
+  border:1px solid color-mix(in oklab, #fff 55%, transparent);
+  opacity:.55;transition:transform .6s var(--ease), opacity .6s var(--ease);
+}
+.reel-stage:hover .reel-play-ring{transform:scale(1.18);opacity:0}
+.reel-meta{
+  position:absolute;left:clamp(20px,3vw,36px);bottom:clamp(18px,2.6vw,30px);
+  font-size:13px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#fff;
+  text-shadow:0 1px 8px rgba(0,0,0,.9);
+}
+@media (hover:none){
+  .reel-stage:hover{transform:none}
+  .reel-stage:hover .reel-thumb{transform:none}
+  .reel-stage:hover .reel-play{transform:translate(-50%,-50%)}
+  .reel-stage:hover .reel-play-ring{transform:none;opacity:.55}
+}
+
 /* ---------- poster typography (video cards) ----------
    Shared by the gallery tiles and the wide Selected Work cards so the two can't
    drift apart. Type is the original Anton title over a Manrope kicker; the
@@ -657,7 +715,35 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 </div>
 </section>
 
-<!-- ============ PANEL 2 — ABOUT / GRADE / STATS ============ -->
+<!-- ============ PANEL 2 — SHOWREEL ============
+     Sits directly after the hero: the reel is the proof, so it lands before
+     anyone has to scroll past the About copy. Click-to-play rather than an
+     autoplaying background loop — it reuses the lightbox the rest of the page
+     already uses, and costs nothing until someone actually asks for it. -->
+<section class="panel" data-panel="reel">
+<div class="panel-inner" data-panel-inner>
+  <section id="showreel" class="reel-section">
+    <div class="reel-head reveal">
+      <div class="eyebrow">SHOWREEL</div>
+      <p class="display" style="font-size:clamp(30px,5.2vw,68px);line-height:1.02">{{showreel.heading}}</p>
+      <p class="reel-sub">{{showreel.blurb}}</p>
+    </div>
+
+    <button onClick="{{showreel.onClick}}" data-cursor="play" class="reel-stage reveal" aria-label="{{showreel.aria}}">
+      <img src="{{showreel.thumb}}" alt="" decoding="async" class="reel-thumb">
+      <span class="reel-scrim"></span>
+      <span class="reel-play" aria-hidden="true">
+        <span class="reel-play-ring"></span>
+        <span class="reel-play-tri">▶</span>
+      </span>
+      <span class="reel-meta">Watch the reel</span>
+    </button>
+  </section>
+  <div class="panel-scrim" data-panel-scrim></div>
+</div>
+</section>
+
+<!-- ============ PANEL 3 — ABOUT / STATS ============ -->
 <section class="panel" data-panel="2">
 <div class="panel-inner" data-panel-inner>
   <div class="marquee-strip" style="border-top:none;border-radius:34px 34px 0 0">
@@ -975,13 +1061,28 @@ class Component extends DCLogic {
   };
 
   navLinksData = [
-    {label:'Work',href:'#work'},{label:'Gallery',href:'#gallery'},
-    {label:'Process',href:'#process'},{label:'Contact',href:'#contact'}
+    {label:'Showreel',href:'#showreel'},{label:'Work',href:'#work'},
+    {label:'Gallery',href:'#gallery'},{label:'Process',href:'#process'},
+    {label:'Contact',href:'#contact'}
   ];
 
   rolesData = ['Video Editor','Cinematographer','Camera Handling','Visual Storyteller'];
 
   marqueeWordsData = ['BANKING','AI AVATAR','INSURANCE','REAL ESTATE','CORPORATE','EXPLAINER','WALKTHROUGH','TUTORIAL','SHORTS'];
+
+  // ---- Showreel ----
+  // `id` is a STAND-IN: it currently points at the AU 0101 App film so the
+  // section is live and clickable. Swap it for the real reel's YouTube id and
+  // nothing else needs to change. `res` follows the same rule as projectsData —
+  // YouTube serves a grey 120x90 placeholder for missing maxresdefault rather
+  // than 404ing, so the rendition is pinned here rather than guessed at runtime.
+  showreelData = {
+    id: 'ixtIMhxnopc',
+    res: 'maxresdefault',
+    title: 'Showreel',
+    heading: 'Everything I do, in one cut.',
+    blurb: 'A run through recent work — commercials, AI-generated video, brand films and social.'
+  };
 
   // Selected Work — the long-form landscape pieces, which suit the wide
   // horizontal cards. The vertical Shorts live in the gallery mosaic instead,
@@ -2236,6 +2337,14 @@ class Component extends DCLogic {
       onClick: () => this.openVideo(this.youtubeEmbed(pr.id), pr.title, false)
     }));
 
+    const sr = this.showreelData;
+    const showreel = {
+      ...sr,
+      thumb: 'https://i.ytimg.com/vi/' + sr.id + '/' + sr.res + '.jpg',
+      aria: 'Play the showreel',
+      onClick: () => this.openVideo(this.youtubeEmbed(sr.id), sr.title, false)
+    };
+
     // One glass tile, three glyph modes:
     //  - tinted CSS mask for single-path logos (alpha keeps counters knocked out)
     //  - <img> where the mark is a filled plate with the glyph reversed out of
@@ -2336,7 +2445,7 @@ class Component extends DCLogic {
       clientLogos: clientChips.concat(clientChips),
       magnetMove: this.magnetMove, magnetLeave: this.magnetLeave,
       statsWrapRef: this.statsWrapRef, stats,
-      horizWrapRef: this.horizWrapRef, trackRef: this.trackRef, projects,
+      horizWrapRef: this.horizWrapRef, trackRef: this.trackRef, projects, showreel,
       lightfallRef: this.lightfallRef,
       filterTabs, galleryFiltered,
       videoOpen: !!this.state.video,
