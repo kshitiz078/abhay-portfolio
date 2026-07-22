@@ -1857,7 +1857,7 @@
           <div class="panel-inner" data-panel-inner>
             <section id="showreel" class="reel-section">
               <div class="reel-head reveal">
-                <div class="eyebrow">SHOWREEL</div>
+                <div class="eyebrow">DOCUMENTARY</div>
                 <p class="display" style="font-size:clamp(30px,5.2vw,68px);line-height:1.02">{{showreel.heading}}</p>
                 <p class="reel-sub">{{showreel.blurbFirst}}</p>
                 <sc-if value="{{showreelExpanded}}">
@@ -1881,7 +1881,7 @@
                   <span class="reel-play-ring"></span>
                   <span class="reel-play-tri">▶</span>
                 </span>
-                <span class="reel-meta">Watch the reel</span>
+                <span class="reel-meta">Watch the Documentary</span>
               </button>
             </section>
             <div class="panel-scrim" data-panel-scrim></div>
@@ -2113,7 +2113,7 @@ class Component extends DCLogic {
     id: 'QciCwTDRiEM',
     res: 'maxresdefault',
     title: 'Showreel',
-    heading: 'Documentary - Maskhra',
+    heading: 'Maskhara',
     blurbFirst: `Storytelling has always been at the heart of my creative journey, and this time, I had the privilege of diving into the world of Behrupiyas—India’s traditional impersonators who bring history, mythology, and folklore to life through their art.`,
     blurbRest: `Through my latest documentary, I explored the challenges, evolution, and fading legacy of this centuries-old performance tradition. From intricate disguises to spontaneous performances, Behrupiyas are the living embodiment of India's cultural richness. However, with modernization, this art form faces an uncertain future.
 
@@ -2382,10 +2382,12 @@ This project was an incredible learning experience—both behind the camera and 
 
   openVideo(src, title, short) {
     this.playSfx('open');
+    this.clearCursorTarget();
     this.setState({ video: { src, title, short: !!short } });
   }
   closeVideo() {
     if (this.state.video) this.playSfx('close');
+    this.clearCursorTarget();
     this.setState({ video: null });
   }
   // Close when the backdrop is clicked, but not the player or its chrome.
