@@ -1425,6 +1425,17 @@
           }
         }
 
+        /* ---------- tablet: side-by-side about layout from 640px up ---------- */
+        /* Covers 640px–860px (768, 1024 etc.) where the desktop 861px rule hasn't
+           fired yet but a single-column layout with a right-aligned portrait looks
+           broken. Uses the same column ratio as desktop, just with a tighter gap. */
+        @media (min-width:640px) {
+          .about-grid {
+            grid-template-columns: 1.15fr .85fr;
+            gap: 40px
+          }
+        }
+
         /* ---------- desktop breakpoints ---------- */
         @media (min-width:861px) {
 
@@ -1575,11 +1586,14 @@
             overflow: hidden;
           }
 
-          /* --- about portrait --- */
+          /* --- about portrait (mobile ≤ 480px, single-column) ---
+             Portrait fills its grid cell fully, centered, with a height cap
+             so it doesn't dominate the screen on phones. */
           .about-grid > div:last-child {
             width: 100% !important;
             max-width: 100% !important;
-            justify-self: stretch !important;
+            max-height: 55vw !important;
+            justify-self: center !important;
           }
 
           /* --- stats band & background on mobile --- */
