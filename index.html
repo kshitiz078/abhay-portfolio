@@ -2763,9 +2763,6 @@ This project was an incredible learning experience—both behind the camera and 
     // the whole way across. Snapping is restored on release, which also lets
     // the card settle to a stop rather than halting mid-gap.
     wrap.style.scrollSnapType = 'none';
-    // Capture is a nice-to-have; it throws when the pointer isn't live, and
-    // that must not take the drag down with it.
-    try { wrap.setPointerCapture(e.pointerId); } catch (err) { /* not capturable */ }
     wrap.addEventListener('pointermove', this.workDragMove);
     wrap.addEventListener('pointerup', this.workDragEnd);
     wrap.addEventListener('pointercancel', this.workDragEnd);
@@ -2775,8 +2772,13 @@ This project was an incredible learning experience—both behind the camera and 
     const wrap = this.workEl();
     if (!wrap || !this.workDrag) return;
     const dx = e.clientX - this.workDrag.x;
-    if (Math.abs(dx) > 3) this.workDrag.moved = true;
-    wrap.scrollLeft = this.workDrag.left - dx;
+    if (Math.abs(dx) > 3) {
+      if (!this.workDrag.moved) {
+        this.workDrag.moved = true;
+        try { wrap.setPointerCapture(this.workDrag.id); } catch (err) { /* not capturable */ }
+      }
+      wrap.scrollLeft = this.workDrag.left - dx;
+    }
   }
 
   workDragEnd(e) {
