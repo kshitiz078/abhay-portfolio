@@ -1425,11 +1425,8 @@
           }
         }
 
-        /* ---------- tablet: side-by-side about layout from 640px up ---------- */
-        /* Covers 640px–860px (768, 1024 etc.) where the desktop 861px rule hasn't
-           fired yet but a single-column layout with a right-aligned portrait looks
-           broken. Uses the same column ratio as desktop, just with a tighter gap. */
-        @media (min-width:640px) {
+        /* ---------- tablet: side-by-side about layout from 768px up ---------- */
+        @media (min-width:768px) {
           .about-grid {
             grid-template-columns: 1.15fr .85fr;
             gap: 40px
@@ -1586,19 +1583,26 @@
             overflow: hidden;
           }
 
-          /* --- about portrait (mobile ≤ 480px, single-column) ---
-             Portrait fills its grid cell fully, centered, with a height cap
-             so it doesn't dominate the screen on phones. */
-          .about-grid > div:last-child {
-            width: 100% !important;
-            max-width: 100% !important;
-            max-height: 55vw !important;
-            justify-self: center !important;
+          /* --- about portrait & layout below 768px --- */
+          #about {
+            padding-bottom: 36px !important;
           }
 
-          /* --- stats band & background on mobile --- */
+          .about-grid {
+            grid-template-columns: 1fr !important;
+            gap: 28px !important;
+          }
+
+          .about-grid > div:last-child {
+            width: 100% !important;
+            max-width: 380px !important;
+            justify-self: center !important;
+            margin: 0 auto !important;
+          }
+
+          /* --- stats band & cards below 768px --- */
           .stats-band {
-            padding: clamp(44px, 8vw, 64px) clamp(16px, 4vw, 24px) !important;
+            padding: clamp(36px, 6vw, 56px) clamp(16px, 4vw, 24px) !important;
           }
 
           .sunburst::before {
@@ -1609,10 +1613,15 @@
 
           .stats-grid {
             grid-template-columns: repeat(3, 1fr) !important;
-            gap: clamp(6px, 2vw, 16px) !important;
+            gap: clamp(8px, 2vw, 16px) !important;
+            position: relative !important;
+            z-index: 2 !important;
           }
 
           .stat-card {
+            background: var(--surface) !important;
+            position: relative !important;
+            z-index: 2 !important;
             padding: clamp(14px, 3.5vw, 24px) clamp(4px, 1.5vw, 10px) !important;
             border-radius: 14px !important;
           }
