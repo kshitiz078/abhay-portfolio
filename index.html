@@ -1,1047 +1,2014 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="./support.js"></script>
 </head>
+
 <body>
-<x-dc>
-<helmet>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Abhay Jain — Video Editor</title>
-<meta name="description" content="Abhay Jain — video editor and storyteller. Commercials, social content, AI-generated video, podcasts and brand storytelling.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- GSAP + ScrollTrigger removed: the only thing they drove was the pinned
+  <x-dc>
+    <helmet>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Abhay Jain — Video Editor</title>
+      <meta name="description"
+        content="Abhay Jain — video editor and storyteller. Commercials, social content, AI-generated video, podcasts and brand storytelling.">
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+      <link
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+      <!-- GSAP + ScrollTrigger removed: the only thing they drove was the pinned
      Selected Work section, which is now a native horizontal scroller. That
      also takes two render-blocking third-party scripts off the critical path. -->
-<style>
-/* ---------- base ---------- */
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;overscroll-behavior-y:none}
-html{scroll-behavior:smooth;scroll-padding-top:0}
-::selection{background:rgba(229,9,20,.45);color:#fff}
-:root{
-  --ease:cubic-bezier(.16,1,.3,1);
-  --ease-spring:cubic-bezier(.34,1.4,.5,1);
-}
+      <style>
+        /* ---------- base ---------- */
+        * {
+          box-sizing: border-box
+        }
 
-/* ---------- keyframes ---------- */
-@keyframes grain{0%,100%{transform:translate(0,0)}10%{transform:translate(-2%,-4%)}20%{transform:translate(-5%,3%)}30%{transform:translate(3%,-6%)}40%{transform:translate(-3%,5%)}50%{transform:translate(4%,2%)}60%{transform:translate(-4%,-2%)}70%{transform:translate(2%,4%)}80%{transform:translate(-1%,-3%)}90%{transform:translate(3%,1%)}}
-@keyframes spin360{from{transform:rotateY(0deg) rotateX(10deg)}to{transform:rotateY(360deg) rotateX(10deg)}}
-@keyframes marqueeScroll{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
-@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+          overscroll-behavior-y: none
+        }
 
-/* ---------- scroll-overlap panel stack ---------- */
-.stack{position:relative;isolation:isolate}
-.panel{position:sticky;top:0}
-.panel--flow{position:relative}
-.panel-inner{
-  position:relative;
-  background:var(--bg);
-  border-radius:34px 34px 0 0;
-  box-shadow:0 -30px 70px -20px rgba(0,0,0,.72), 0 -1px 0 color-mix(in oklab, var(--text) 9%, transparent);
-  transform-origin:50% 0;
-  backface-visibility:hidden;
-}
-/* Deliberately no `will-change:transform` here. Promoting every panel makes a
+        html {
+          scroll-behavior: smooth;
+          scroll-padding-top: 0
+        }
+
+        ::selection {
+          background: rgba(229, 9, 20, .45);
+          color: #fff
+        }
+
+        :root {
+          --ease: cubic-bezier(.16, 1, .3, 1);
+          --ease-spring: cubic-bezier(.34, 1.4, .5, 1);
+        }
+
+        /* ---------- keyframes ---------- */
+        @keyframes grain {
+
+          0%,
+          100% {
+            transform: translate(0, 0)
+          }
+
+          10% {
+            transform: translate(-2%, -4%)
+          }
+
+          20% {
+            transform: translate(-5%, 3%)
+          }
+
+          30% {
+            transform: translate(3%, -6%)
+          }
+
+          40% {
+            transform: translate(-3%, 5%)
+          }
+
+          50% {
+            transform: translate(4%, 2%)
+          }
+
+          60% {
+            transform: translate(-4%, -2%)
+          }
+
+          70% {
+            transform: translate(2%, 4%)
+          }
+
+          80% {
+            transform: translate(-1%, -3%)
+          }
+
+          90% {
+            transform: translate(3%, 1%)
+          }
+        }
+
+        @keyframes spin360 {
+          from {
+            transform: rotateY(0deg) rotateX(10deg)
+          }
+
+          to {
+            transform: rotateY(360deg) rotateX(10deg)
+          }
+        }
+
+        @keyframes marqueeScroll {
+          from {
+            transform: translate3d(0, 0, 0)
+          }
+
+          to {
+            transform: translate3d(-50%, 0, 0)
+          }
+        }
+
+        @keyframes floatY {
+
+          0%,
+          100% {
+            transform: translateY(0)
+          }
+
+          50% {
+            transform: translateY(-18px)
+          }
+        }
+
+        /* ---------- scroll-overlap panel stack ---------- */
+        .stack {
+          position: relative;
+          isolation: isolate
+        }
+
+        .panel {
+          position: sticky;
+          top: 0
+        }
+
+        .panel--flow {
+          position: relative
+        }
+
+        .panel-inner {
+          position: relative;
+          background: var(--bg);
+          border-radius: 34px 34px 0 0;
+          box-shadow: 0 -30px 70px -20px rgba(0, 0, 0, .72), 0 -1px 0 color-mix(in oklab, var(--text) 9%, transparent);
+          transform-origin: 50% 0;
+          backface-visibility: hidden;
+        }
+
+        /* Deliberately no `will-change:transform` here. Promoting every panel makes a
    composited layer as tall as the panel, and the gallery panel is ~10,000px on
    a phone — past the max GPU texture size, which shows up as blank/flashing
    sections while scrolling. The scale is applied via transform anyway, which
    promotes for the duration of the change without pinning a permanent layer. */
 
-/* Panels too tall to composite safely opt out of sticking entirely: the next
+        /* Panels too tall to composite safely opt out of sticking entirely: the next
    panel still slides over them, but nothing oversized gets transformed. */
-.panel[data-tall]{position:relative;top:auto !important}
-/* Their scrims are pinned at opacity 0 and never animate, so taking them out
+        .panel[data-tall] {
+          position: relative;
+          top: auto !important
+        }
+
+        /* Their scrims are pinned at opacity 0 and never animate, so taking them out
    of the tree drops six full-panel-height composited layers — the gallery's is
    roughly 10,000px tall on a phone. */
-.panel[data-tall] .panel-scrim{display:none}
-.panel:first-child .panel-inner{border-radius:0;box-shadow:none}
-/* dims the outgoing panel toward the page background as the next one covers it */
-.panel-scrim{
-  position:absolute;inset:0;z-index:6;pointer-events:none;
-  background:var(--bg);opacity:0;border-radius:inherit;will-change:opacity;
-}
+        .panel[data-tall] .panel-scrim {
+          display: none
+        }
 
-/* ---------- entrance reveals ---------- */
-.reveal{opacity:1}
-/* No `will-change` here on purpose — it is applied inline for the duration of
+        .panel:first-child .panel-inner {
+          border-radius: 0;
+          box-shadow: none
+        }
+
+        /* dims the outgoing panel toward the page background as the next one covers it */
+        .panel-scrim {
+          position: absolute;
+          inset: 0;
+          z-index: 6;
+          pointer-events: none;
+          background: var(--bg);
+          opacity: 0;
+          border-radius: inherit;
+          will-change: opacity;
+        }
+
+        /* ---------- entrance reveals ---------- */
+        .reveal {
+          opacity: 1
+        }
+
+        /* No `will-change` here on purpose — it is applied inline for the duration of
    the entrance and removed again (see setupReveals). As a static rule it left
    every revealed element promoted to its own layer for the life of the page. */
-[data-reveal-ready] .reveal{
-  opacity:0;transform:translate3d(0,42px,0);
-  transition:opacity .95s var(--ease), transform 1.05s var(--ease);
-}
-[data-reveal-ready] .reveal.is-in{opacity:1;transform:translate3d(0,0,0)}
+        [data-reveal-ready] .reveal {
+          opacity: 0;
+          transform: translate3d(0, 42px, 0);
+          transition: opacity .95s var(--ease), transform 1.05s var(--ease);
+        }
 
-/* ---------- custom cursor ---------- */
-.cursor-dot,.cursor-ring{
-  position:fixed;top:0;left:0;z-index:9998;pointer-events:none;
-  border-radius:50%;opacity:0;will-change:transform,opacity;
-  transition:opacity .3s ease;
-}
-.cursor-dot{width:6px;height:6px;margin:-3px 0 0 -3px;background:var(--a)}
-.cursor-ring{
-  width:40px;height:40px;margin:-20px 0 0 -20px;z-index:9997;
-  border:1px solid color-mix(in oklab, var(--text) 65%, transparent);
-  display:flex;align-items:center;justify-content:center;
-  transition:opacity .3s ease, width .35s var(--ease), height .35s var(--ease), margin .35s var(--ease), background .35s var(--ease), border-color .35s var(--ease);
-}
-.cursor-ring.is-active{width:86px;height:86px;margin:-43px 0 0 -43px;background:color-mix(in oklab, var(--text) 7%, transparent);border-color:transparent}
-.cursor-ring.is-down{width:30px;height:30px;margin:-15px 0 0 -15px}
-.cursor-visible{opacity:1}
-.cursor-label{font-size:9px;letter-spacing:2px;font-weight:700;color:var(--text);opacity:0;transition:opacity .25s ease;white-space:nowrap}
-.cursor-ring.is-active .cursor-label{opacity:1}
+        [data-reveal-ready] .reveal.is-in {
+          opacity: 1;
+          transform: translate3d(0, 0, 0)
+        }
 
-/* ---------- nav ---------- */
-.nav{
-  position:fixed;top:0;left:0;right:0;z-index:500;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:22px clamp(20px,4vw,56px);
-  backdrop-filter:blur(12px);
-  background:linear-gradient(to bottom, color-mix(in oklab, var(--bg) 62%, transparent), transparent);
-}
-.nav-links{display:none;gap:34px;align-items:center}
-.nav-link{position:relative;font-size:13px;letter-spacing:.5px;color:var(--text);text-decoration:none;opacity:.8;transition:opacity .35s var(--ease)}
-.nav-link::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:1px;background:var(--a);transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--ease)}
-.nav-link:hover{opacity:1}
-.nav-link:hover::after{transform:scaleX(1)}
-.nav-swatches{display:none;gap:8px}
-.icon-btn{
-  width:34px;height:34px;border-radius:50%;
-  border:1px solid color-mix(in oklab, var(--text) 28%, transparent);
-  background:transparent;color:var(--text);cursor:pointer;font-size:12px;letter-spacing:1px;
-  transition:background .35s var(--ease), transform .35s var(--ease-spring);
-}
-.icon-btn:hover{background:color-mix(in oklab, var(--text) 10%, transparent);transform:scale(1.08)}
-.swatch{width:16px;height:16px;border-radius:50%;border:1px solid color-mix(in oklab, var(--text) 30%, transparent);cursor:pointer;padding:0;transition:transform .35s var(--ease-spring)}
-.swatch:hover{transform:scale(1.28)}
+        /* ---------- custom cursor ---------- */
+        .cursor-dot,
+        .cursor-ring {
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: 9998;
+          pointer-events: none;
+          border-radius: 50%;
+          opacity: 0;
+          will-change: transform, opacity;
+          transition: opacity .3s ease;
+        }
 
-/* ---------- shared bits ---------- */
-.eyebrow{font-size:13px;letter-spacing:4px;color:var(--a);margin-bottom:20px}
-.display{font-family:'Anton',sans-serif;font-weight:400;margin:0;text-wrap:pretty}
-.btn{
-  display:inline-flex;align-items:center;gap:10px;text-decoration:none;
-  font-weight:700;letter-spacing:.5px;border-radius:100px;
-  transition:transform .5s var(--ease), box-shadow .5s var(--ease), background .4s var(--ease);
-}
-.btn--solid{background:var(--a);color:#fff;padding:18px 32px;font-size:14px}
-.btn--solid:hover{box-shadow:0 18px 46px -14px color-mix(in oklab, var(--a) 85%, transparent)}
-.btn--ghost{background:transparent;border:1px solid color-mix(in oklab, var(--text) 28%, transparent);color:var(--text);padding:18px 32px;font-size:14px}
-.btn--ghost:hover{background:color-mix(in oklab, var(--text) 8%, transparent)}
-.btn--lg{padding:22px 46px;font-size:16px}
-.marquee-strip{position:relative;padding:22px 0;background:var(--surface);overflow:hidden;border-top:1px solid color-mix(in oklab, var(--text) 8%, transparent);border-bottom:1px solid color-mix(in oklab, var(--text) 8%, transparent)}
-.marquee-track{display:flex;width:max-content;gap:60px;animation:marqueeScroll 30s linear infinite;will-change:transform}
-.marquee-track--rev{gap:70px;align-items:center;animation-duration:38s;animation-direction:reverse}
+        .cursor-dot {
+          width: 6px;
+          height: 6px;
+          margin: -3px 0 0 -3px;
+          background: var(--a)
+        }
 
-/* ---------- client strip ----------
+        .cursor-ring {
+          width: 40px;
+          height: 40px;
+          margin: -20px 0 0 -20px;
+          z-index: 9997;
+          border: 1px solid color-mix(in oklab, var(--text) 65%, transparent);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: opacity .3s ease, width .35s var(--ease), height .35s var(--ease), margin .35s var(--ease), background .35s var(--ease), border-color .35s var(--ease);
+        }
+
+        .cursor-ring.is-active {
+          width: 86px;
+          height: 86px;
+          margin: -43px 0 0 -43px;
+          background: color-mix(in oklab, var(--text) 7%, transparent);
+          border-color: transparent
+        }
+
+        .cursor-ring.is-down {
+          width: 30px;
+          height: 30px;
+          margin: -15px 0 0 -15px
+        }
+
+        .cursor-visible {
+          opacity: 1
+        }
+
+        .cursor-label {
+          font-size: 9px;
+          letter-spacing: 2px;
+          font-weight: 700;
+          color: var(--text);
+          opacity: 0;
+          transition: opacity .25s ease;
+          white-space: nowrap
+        }
+
+        .cursor-ring.is-active .cursor-label {
+          opacity: 1
+        }
+
+        /* ---------- nav ---------- */
+        .nav {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 500;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 22px clamp(20px, 4vw, 56px);
+          backdrop-filter: blur(12px);
+          background: linear-gradient(to bottom, color-mix(in oklab, var(--bg) 62%, transparent), transparent);
+        }
+
+        .nav-links {
+          display: none;
+          gap: 34px;
+          align-items: center
+        }
+
+        .nav-link {
+          position: relative;
+          font-size: 13px;
+          letter-spacing: .5px;
+          color: var(--text);
+          text-decoration: none;
+          opacity: .8;
+          transition: opacity .35s var(--ease)
+        }
+
+        .nav-link::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: -6px;
+          height: 1px;
+          background: var(--a);
+          transform: scaleX(0);
+          transform-origin: 0 50%;
+          transition: transform .5s var(--ease)
+        }
+
+        .nav-link:hover {
+          opacity: 1
+        }
+
+        .nav-link:hover::after {
+          transform: scaleX(1)
+        }
+
+        .nav-swatches {
+          display: none;
+          gap: 8px
+        }
+
+        .icon-btn {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          border: 1px solid color-mix(in oklab, var(--text) 28%, transparent);
+          background: transparent;
+          color: var(--text);
+          cursor: pointer;
+          font-size: 12px;
+          letter-spacing: 1px;
+          transition: background .35s var(--ease), transform .35s var(--ease-spring);
+        }
+
+        .icon-btn:hover {
+          background: color-mix(in oklab, var(--text) 10%, transparent);
+          transform: scale(1.08)
+        }
+
+        .swatch {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          border: 1px solid color-mix(in oklab, var(--text) 30%, transparent);
+          cursor: pointer;
+          padding: 0;
+          transition: transform .35s var(--ease-spring)
+        }
+
+        .swatch:hover {
+          transform: scale(1.28)
+        }
+
+        /* ---------- shared bits ---------- */
+        .eyebrow {
+          font-size: 13px;
+          letter-spacing: 4px;
+          color: var(--a);
+          margin-bottom: 20px
+        }
+
+        .display {
+          font-family: 'Anton', sans-serif;
+          font-weight: 400;
+          margin: 0;
+          text-wrap: pretty
+        }
+
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          text-decoration: none;
+          font-weight: 700;
+          letter-spacing: .5px;
+          border-radius: 100px;
+          transition: transform .5s var(--ease), box-shadow .5s var(--ease), background .4s var(--ease);
+        }
+
+        .btn--solid {
+          background: var(--a);
+          color: #fff;
+          padding: 18px 32px;
+          font-size: 14px
+        }
+
+        .btn--solid:hover {
+          box-shadow: 0 18px 46px -14px color-mix(in oklab, var(--a) 85%, transparent)
+        }
+
+        .btn--ghost {
+          background: transparent;
+          border: 1px solid color-mix(in oklab, var(--text) 28%, transparent);
+          color: var(--text);
+          padding: 18px 32px;
+          font-size: 14px
+        }
+
+        .btn--ghost:hover {
+          background: color-mix(in oklab, var(--text) 8%, transparent)
+        }
+
+        .btn--lg {
+          padding: 22px 46px;
+          font-size: 16px
+        }
+
+        .marquee-strip {
+          position: relative;
+          padding: 22px 0;
+          background: var(--surface);
+          overflow: hidden;
+          border-top: 1px solid color-mix(in oklab, var(--text) 8%, transparent);
+          border-bottom: 1px solid color-mix(in oklab, var(--text) 8%, transparent)
+        }
+
+        .marquee-track {
+          display: flex;
+          width: max-content;
+          gap: 60px;
+          animation: marqueeScroll 30s linear infinite;
+          will-change: transform
+        }
+
+        .marquee-track--rev {
+          gap: 70px;
+          align-items: center;
+          animation-duration: 38s;
+          animation-direction: reverse
+        }
+
+        /* ---------- client strip ----------
    Each chip renders both a mark and a wordmark; renderVals hides whichever the
    client doesn't have, so dropping a real logo file into clientsData needs no
    markup change. Names are set as wordmarks — tight, uppercase, heavy — which
    reads as intentional branding rather than as a missing image. */
-/* One fixed plate for every client, so fifteen logos of wildly different
+        /* One fixed plate for every client, so fifteen logos of wildly different
    proportions still march along the strip at a single size. */
-.client-chip{
-  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
-  width:170px;height:62px;padding:0;overflow:hidden;
-  background:#fff;border-radius:10px;
-  box-shadow:0 6px 18px -10px rgba(0,0,0,.8);
-  opacity:.88;transition:opacity .4s var(--ease), transform .4s var(--ease);
-}
-.client-chip:hover{opacity:1;transform:translateY(-3px)}
-/* Fallback for a client with no file yet — never shown while every entry has a
+        .client-chip {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 auto;
+          width: 170px;
+          height: 62px;
+          padding: 0;
+          overflow: hidden;
+          background: #fff;
+          border-radius: 10px;
+          box-shadow: 0 6px 18px -10px rgba(0, 0, 0, .8);
+          opacity: .88;
+          transition: opacity .4s var(--ease), transform .4s var(--ease);
+        }
+
+        .client-chip:hover {
+          opacity: 1;
+          transform: translateY(-3px)
+        }
+
+        /* Fallback for a client with no file yet — never shown while every entry has a
    logo, but it keeps the strip from collapsing if one is removed. */
-.client-word{
-  font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
-  color:#111;text-align:center;padding:0 12px;line-height:1.15;
-}
-.client-mark{display:block;width:100%;height:100%;object-fit:contain}
+        .client-word {
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          color: #111;
+          text-align: center;
+          padding: 0 12px;
+          line-height: 1.15;
+        }
 
-/* ---------- layout grids ---------- */
-.about-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center}
+        .client-mark {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: contain
+        }
 
-/* ---------- hero roles ----------
+        /* ---------- layout grids ---------- */
+        .about-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 40px;
+          align-items: center
+        }
+
+        /* ---------- hero roles ----------
    Pipe-separated, with the rule drawn by CSS rather than baked into the data,
    so the last item never trails one and the list still wraps cleanly. */
-/* Direct children only: the templating wraps each value in its own inner
+        /* Direct children only: the templating wraps each value in its own inner
    <span>, which would otherwise pick up the flex box and the separator rule. */
-.hero-roles{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
-.hero-roles > span{
-  display:inline-flex;align-items:center;gap:14px;
-  font-size:15px;color:var(--muted);letter-spacing:.3px;
-}
-.hero-roles > span:not(:last-child)::after{
-  content:"|";color:color-mix(in oklab, var(--text) 26%, transparent);
-}
+        .hero-roles {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 6px 14px
+        }
 
-/* ---------- stats band ---------- */
-.stats-band{
-  position:relative;isolation:isolate;overflow:hidden;
-  padding:clamp(100px,12vw,150px) clamp(20px,4vw,56px) clamp(115px,14vw,180px);
-}
-.stats-grid{position:relative;z-index:2;display:grid;grid-template-columns:1fr;gap:20px;max-width:1200px;margin:0 auto}
+        .hero-roles>span {
+          display: inline-flex;
+          align-items: center;
+          gap: 14px;
+          font-size: 15px;
+          color: var(--muted);
+          letter-spacing: .3px;
+        }
 
-/* Radial sunburst backdrop. Themed rays by default so it adapts to all six
+        .hero-roles>span:not(:last-child)::after {
+          content: "|";
+          color: color-mix(in oklab, var(--text) 26%, transparent);
+        }
+
+        /* ---------- stats band ---------- */
+        .stats-band {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          padding: clamp(100px, 12vw, 150px) clamp(20px, 4vw, 56px) clamp(115px, 14vw, 180px);
+        }
+
+        .stats-grid {
+          position: relative;
+          z-index: 2;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+          max-width: 1200px;
+          margin: 0 auto
+        }
+
+        /* Radial sunburst backdrop. Themed rays by default so it adapts to all six
    palettes; set --backdrop on .stats-band to use a real image instead, e.g.
    style="--backdrop:url('./bg-sunburst.jpg')". */
-.sunburst{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.sunburst::before{
-  content:"";position:absolute;left:50%;top:100%;
-  width:min(200vw,2200px);aspect-ratio:1;transform:translate(-50%,-50%);
-  background:repeating-conic-gradient(from -90deg at 50% 50%,
-    color-mix(in oklab, var(--a) 38%, transparent) 0deg 3.4deg,
-    transparent 3.4deg 8deg);
-  -webkit-mask-image:radial-gradient(closest-side, #000 26%, transparent 80%);
-  mask-image:radial-gradient(closest-side, #000 26%, transparent 80%);
-  opacity:.5;
-}
-.sunburst::after{
-  content:"";position:absolute;inset:0;
-  background:var(--backdrop, none) center/cover no-repeat;
-  opacity:var(--backdrop-opacity, .5);
-}
+        .sunburst {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          overflow: hidden
+        }
 
-/* Woven paper texture over the top, so the band reads as printed stock. */
-.paper-grain{
-  position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5 .9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23p)' opacity='.6'/%3E%3C/svg%3E");
-}
-.stat-card{
-  text-align:center;padding:30px 10px;border-radius:16px;background:var(--surface);
-  border:1px solid color-mix(in oklab, var(--text) 6%, transparent);
-  transition:transform .6s var(--ease), border-color .6s var(--ease);
-}
-.stat-card:hover{transform:translateY(-6px);border-color:color-mix(in oklab, var(--a) 45%, transparent)}
-.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
-.gallery-card{
-  position:relative;border-radius:16px;overflow:hidden;display:block;width:100%;
-  padding:0;border:none;background:var(--surface);cursor:pointer;font-family:inherit;
-  transition:transform .7s var(--ease), box-shadow .7s var(--ease);
-}
-.gallery-card:hover{transform:translateY(-8px) scale(1.015);box-shadow:0 26px 50px -22px rgba(0,0,0,.85)}
-.gallery-card:focus-visible{outline:2px solid var(--a);outline-offset:3px}
-.gallery-thumb{
-  width:100%;height:100%;object-fit:cover;display:block;
-  transition:transform 1s var(--ease), filter .7s var(--ease);
-}
-.gallery-card:hover .gallery-thumb{transform:scale(1.06)}
-.gallery-meta{
-  position:absolute;inset:0;pointer-events:none;text-align:left;
-  display:flex;flex-direction:column;justify-content:flex-end;gap:2px;padding:16px;
-  background:linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,.1) 46%, transparent);
-}
-.gallery-play{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);
-  width:52px;height:52px;border-radius:50%;pointer-events:none;
-  /* solid translucent rather than a blur pass — 16 of these sit in one panel */
-  background:rgba(0,0,0,.38);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);
-  display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;
-  opacity:.85;transition:transform .5s var(--ease-spring), opacity .5s var(--ease), background .5s var(--ease);
-}
-.gallery-card:hover .gallery-play{transform:translate(-50%,-50%) scale(1.1);opacity:1;background:color-mix(in oklab, var(--a) 80%, transparent)}
-.filter-btn{padding:10px 20px;border-radius:100px;font-size:13px;cursor:pointer;font-family:inherit;transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease)}
+        .sunburst::before {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 100%;
+          width: min(200vw, 2200px);
+          aspect-ratio: 1;
+          transform: translate(-50%, -50%);
+          background: repeating-conic-gradient(from -90deg at 50% 50%,
+              color-mix(in oklab, var(--a) 38%, transparent) 0deg 3.4deg,
+              transparent 3.4deg 8deg);
+          -webkit-mask-image: radial-gradient(closest-side, #000 26%, transparent 80%);
+          mask-image: radial-gradient(closest-side, #000 26%, transparent 80%);
+          opacity: .5;
+        }
 
-/* ---------- showreel ---------- */
-.reel-section{
-  padding:clamp(100px,13vw,170px) clamp(20px,4vw,56px) clamp(110px,14vw,180px);
-  max-width:1240px;margin:0 auto;
-}
-.reel-head{max-width:760px;margin-bottom:clamp(36px,5vw,56px)}
-.reel-sub{font-size:17px;line-height:1.7;color:var(--muted);max-width:560px;margin-top:22px}
+        .sunburst::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: var(--backdrop, none) center/cover no-repeat;
+          opacity: var(--backdrop-opacity, .5);
+        }
 
-.reel-stage{
-  position:relative;display:block;width:100%;aspect-ratio:16/9;
-  padding:0;border:none;overflow:hidden;border-radius:22px;
-  background:var(--surface);cursor:pointer;font-family:inherit;
-  box-shadow:0 40px 90px -40px rgba(0,0,0,.9);
-  transition:transform .7s var(--ease), box-shadow .7s var(--ease);
-}
-.reel-stage:hover{transform:translateY(-6px);box-shadow:0 52px 110px -44px rgba(0,0,0,.95)}
-.reel-stage:focus-visible{outline:3px solid var(--a);outline-offset:4px}
-.reel-thumb{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  transition:transform 1.2s var(--ease);
-}
-.reel-stage:hover .reel-thumb{transform:scale(1.04)}
-.reel-scrim{
-  position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(60% 60% at 50% 50%, rgba(0,0,0,.15), rgba(0,0,0,.55) 100%),
-    linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.1) 55%, rgba(0,0,0,.25));
-}
+        /* Woven paper texture over the top, so the band reads as printed stock. */
+        .paper-grain {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          pointer-events: none;
+          opacity: .16;
+          mix-blend-mode: overlay;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5 .9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23p)' opacity='.6'/%3E%3C/svg%3E");
+        }
 
-/* Play control: a filled brand disc with a ring that pushes out on hover. */
-.reel-play{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:clamp(72px,9vw,116px);aspect-ratio:1;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;pointer-events:none;
-  background:var(--a);color:#fff;
-  box-shadow:0 20px 50px -14px color-mix(in oklab, var(--a) 80%, transparent);
-  transition:transform .5s var(--ease-spring), background .4s var(--ease);
-}
-.reel-stage:hover .reel-play{transform:translate(-50%,-50%) scale(1.08)}
-.reel-play-tri{font-size:clamp(22px,2.6vw,34px);margin-left:.12em;line-height:1}
-.reel-play-ring{
-  position:absolute;inset:-14px;border-radius:50%;
-  border:1px solid color-mix(in oklab, #fff 55%, transparent);
-  opacity:.55;transition:transform .6s var(--ease), opacity .6s var(--ease);
-}
-.reel-stage:hover .reel-play-ring{transform:scale(1.18);opacity:0}
-.reel-meta{
-  position:absolute;left:clamp(20px,3vw,36px);bottom:clamp(18px,2.6vw,30px);
-  font-size:13px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#fff;
-  text-shadow:0 1px 8px rgba(0,0,0,.9);
-}
-@media (hover:none){
-  .reel-stage:hover{transform:none}
-  .reel-stage:hover .reel-thumb{transform:none}
-  .reel-stage:hover .reel-play{transform:translate(-50%,-50%)}
-  .reel-stage:hover .reel-play-ring{transform:none;opacity:.55}
-}
+        .stat-card {
+          text-align: center;
+          padding: 30px 10px;
+          border-radius: 16px;
+          background: var(--surface);
+          border: 1px solid color-mix(in oklab, var(--text) 6%, transparent);
+          transition: transform .6s var(--ease), border-color .6s var(--ease);
+        }
 
-/* ---------- poster typography (video cards) ----------
+        .stat-card:hover {
+          transform: translateY(-6px);
+          border-color: color-mix(in oklab, var(--a) 45%, transparent)
+        }
+
+        .gallery-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          gap: 20px
+        }
+
+        .gallery-card {
+          position: relative;
+          border-radius: 16px;
+          overflow: hidden;
+          display: block;
+          width: 100%;
+          padding: 0;
+          border: none;
+          background: var(--surface);
+          cursor: pointer;
+          font-family: inherit;
+          transition: transform .7s var(--ease), box-shadow .7s var(--ease);
+        }
+
+        .gallery-card:hover {
+          transform: translateY(-8px) scale(1.015);
+          box-shadow: 0 26px 50px -22px rgba(0, 0, 0, .85)
+        }
+
+        .gallery-card:focus-visible {
+          outline: 2px solid var(--a);
+          outline-offset: 3px
+        }
+
+        .gallery-thumb {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 1s var(--ease), filter .7s var(--ease);
+        }
+
+        .gallery-card:hover .gallery-thumb {
+          transform: scale(1.06)
+        }
+
+        .gallery-meta {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          text-align: left;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          gap: 2px;
+          padding: 16px;
+          background: linear-gradient(to top, rgba(0, 0, 0, .82), rgba(0, 0, 0, .1) 46%, transparent);
+        }
+
+        .gallery-play {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) scale(.9);
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          pointer-events: none;
+          /* solid translucent rather than a blur pass — 16 of these sit in one panel */
+          background: rgba(0, 0, 0, .38);
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          font-size: 16px;
+          opacity: .85;
+          transition: transform .5s var(--ease-spring), opacity .5s var(--ease), background .5s var(--ease);
+        }
+
+        .gallery-card:hover .gallery-play {
+          transform: translate(-50%, -50%) scale(1.1);
+          opacity: 1;
+          background: color-mix(in oklab, var(--a) 80%, transparent)
+        }
+
+        .filter-btn {
+          padding: 10px 20px;
+          border-radius: 100px;
+          font-size: 13px;
+          cursor: pointer;
+          font-family: inherit;
+          transition: background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease)
+        }
+
+        /* ---------- showreel ---------- */
+        .reel-section {
+          padding: clamp(100px, 13vw, 170px) clamp(20px, 4vw, 56px) clamp(110px, 14vw, 180px);
+          max-width: 1240px;
+          margin: 0 auto;
+        }
+
+        .reel-head {
+          max-width: 760px;
+          margin-bottom: clamp(36px, 5vw, 56px)
+        }
+
+        .reel-sub {
+          font-size: 17px;
+          line-height: 1.7;
+          color: var(--muted);
+          max-width: 560px;
+          margin-top: 22px
+        }
+
+        .reel-stage {
+          position: relative;
+          display: block;
+          width: 100%;
+          aspect-ratio: 16/9;
+          padding: 0;
+          border: none;
+          overflow: hidden;
+          border-radius: 22px;
+          background: var(--surface);
+          cursor: pointer;
+          font-family: inherit;
+          box-shadow: 0 40px 90px -40px rgba(0, 0, 0, .9);
+          transition: transform .7s var(--ease), box-shadow .7s var(--ease);
+        }
+
+        .reel-stage:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 52px 110px -44px rgba(0, 0, 0, .95)
+        }
+
+        .reel-stage:focus-visible {
+          outline: 3px solid var(--a);
+          outline-offset: 4px
+        }
+
+        .reel-thumb {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 1.2s var(--ease);
+        }
+
+        .reel-stage:hover .reel-thumb {
+          transform: scale(1.04)
+        }
+
+        .reel-scrim {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background:
+            radial-gradient(60% 60% at 50% 50%, rgba(0, 0, 0, .15), rgba(0, 0, 0, .55) 100%),
+            linear-gradient(to top, rgba(0, 0, 0, .7), rgba(0, 0, 0, .1) 55%, rgba(0, 0, 0, .25));
+        }
+
+        /* Play control: a filled brand disc with a ring that pushes out on hover. */
+        .reel-play {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: clamp(72px, 9vw, 116px);
+          aspect-ratio: 1;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: none;
+          background: var(--a);
+          color: #fff;
+          box-shadow: 0 20px 50px -14px color-mix(in oklab, var(--a) 80%, transparent);
+          transition: transform .5s var(--ease-spring), background .4s var(--ease);
+        }
+
+        .reel-stage:hover .reel-play {
+          transform: translate(-50%, -50%) scale(1.08)
+        }
+
+        .reel-play-tri {
+          font-size: clamp(22px, 2.6vw, 34px);
+          margin-left: .12em;
+          line-height: 1
+        }
+
+        .reel-play-ring {
+          position: absolute;
+          inset: -14px;
+          border-radius: 50%;
+          border: 1px solid color-mix(in oklab, #fff 55%, transparent);
+          opacity: .55;
+          transition: transform .6s var(--ease), opacity .6s var(--ease);
+        }
+
+        .reel-stage:hover .reel-play-ring {
+          transform: scale(1.18);
+          opacity: 0
+        }
+
+        .reel-meta {
+          position: absolute;
+          left: clamp(20px, 3vw, 36px);
+          bottom: clamp(18px, 2.6vw, 30px);
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 1.6px;
+          text-transform: uppercase;
+          color: #fff;
+          text-shadow: 0 1px 8px rgba(0, 0, 0, .9);
+        }
+
+        @media (hover:none) {
+          .reel-stage:hover {
+            transform: none
+          }
+
+          .reel-stage:hover .reel-thumb {
+            transform: none
+          }
+
+          .reel-stage:hover .reel-play {
+            transform: translate(-50%, -50%)
+          }
+
+          .reel-stage:hover .reel-play-ring {
+            transform: none;
+            opacity: .55
+          }
+        }
+
+        /* ---------- poster typography (video cards) ----------
    Shared by the gallery tiles and the wide Selected Work cards so the two can't
    drift apart. Type is the original Anton title over a Manrope kicker; the
    text-shadows are not decoration — they're what keeps this readable over
    uncontrolled YouTube thumbnail artwork, several of which are near-white. */
-.poster-kicker{
-  display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;
-  color:var(--a);margin-bottom:10px;
-  text-shadow:0 1px 6px rgba(0,0,0,.9), 0 0 18px rgba(0,0,0,.7);
-}
-.poster-title{
-  display:block;font-family:'Anton',sans-serif;font-weight:400;line-height:1.05;color:#fff;
-  text-shadow:0 2px 18px rgba(0,0,0,.55);
-}
-/* Sizes live here rather than inline so the mobile block below can override
+        .poster-kicker {
+          display: block;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 1.5px;
+          color: var(--a);
+          margin-bottom: 10px;
+          text-shadow: 0 1px 6px rgba(0, 0, 0, .9), 0 0 18px rgba(0, 0, 0, .7);
+        }
+
+        .poster-title {
+          display: block;
+          font-family: 'Anton', sans-serif;
+          font-weight: 400;
+          line-height: 1.05;
+          color: #fff;
+          text-shadow: 0 2px 18px rgba(0, 0, 0, .55);
+        }
+
+        /* Sizes live here rather than inline so the mobile block below can override
    them — an inline font-size would win over any stylesheet rule. */
-.project-card .poster-kicker{font-size:12px;margin-bottom:12px}
-.project-card .poster-title{font-size:clamp(26px,4.2vw,54px)}
-.gallery-card .poster-kicker{font-size:13px;letter-spacing:1.8px;margin-bottom:6px}
-.gallery-card .poster-title{font-size:22px;line-height:1.15}
-.timeline-row{display:grid;grid-template-columns:56px 1fr;gap:20px;padding:26px 0;border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent);transition:padding-left .6s var(--ease)}
-.timeline-row:hover{padding-left:10px}
+        .project-card .poster-kicker {
+          font-size: 12px;
+          margin-bottom: 12px
+        }
 
-/* ---------- toolkit: star + glass ---------- */
-.tools-panel{position:relative;overflow:hidden}
-.tools-bg{
-  position:absolute;inset:-12% -6%;z-index:0;pointer-events:none;
-  will-change:transform;
-  background-repeat:no-repeat;
-  background-image:
-    radial-gradient(48% 38% at 22% 18%, color-mix(in oklab, var(--a) 46%, transparent), transparent 70%),
-    radial-gradient(42% 34% at 82% 26%, color-mix(in oklab, var(--b) 40%, transparent), transparent 72%),
-    radial-gradient(56% 44% at 62% 88%, color-mix(in oklab, var(--a) 26%, transparent), transparent 74%),
-    conic-gradient(from 210deg at 50% 45%, color-mix(in oklab, var(--surface) 90%, black) 0deg, color-mix(in oklab, var(--b) 22%, var(--surface)) 120deg, color-mix(in oklab, var(--surface) 92%, black) 240deg, color-mix(in oklab, var(--a) 20%, var(--surface)) 360deg);
-  background-size:cover;
-  filter:blur(30px) saturate(125%);
-}
-/* film-grain / texture pass so the backdrop reads as a photographic image, not a flat gradient */
-.tools-bg-grain{
-  position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.22;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
-}
-.tools-veil{
-  position:absolute;inset:0;z-index:2;pointer-events:none;
-  background:linear-gradient(to bottom, var(--bg), color-mix(in oklab, var(--bg) 42%, transparent) 24%, color-mix(in oklab, var(--bg) 48%, transparent) 76%, var(--bg));
-}
-.tools-content{position:relative;z-index:3}
+        .project-card .poster-title {
+          font-size: clamp(26px, 4.2vw, 54px)
+        }
 
-/* two well-spaced groups: AI tools, then software */
-.tool-group{margin-top:clamp(48px,7vw,84px)}
-.tool-group-head{display:flex;align-items:center;gap:18px;margin-bottom:clamp(22px,3vw,34px)}
-.tool-group-label{font-size:12px;letter-spacing:4px;font-weight:700;color:var(--a);white-space:nowrap}
-.tool-group-rule{flex:1;height:1px;background:linear-gradient(to right, color-mix(in oklab, var(--text) 22%, transparent), transparent)}
-.tool-group-count{font-family:'Anton',sans-serif;font-size:13px;letter-spacing:1px;color:var(--muted)}
-.tool-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(122px,1fr));
-  gap:clamp(16px,2.2vw,28px);
-}
+        .gallery-card .poster-kicker {
+          font-size: 13px;
+          letter-spacing: 1.8px;
+          margin-bottom: 6px
+        }
 
-/* The card itself stays a bare flex column — all the chrome lives on the icon
+        .gallery-card .poster-title {
+          font-size: 22px;
+          line-height: 1.15
+        }
+
+        .timeline-row {
+          display: grid;
+          grid-template-columns: 56px 1fr;
+          gap: 20px;
+          padding: 26px 0;
+          border-top: 1px solid color-mix(in oklab, var(--text) 10%, transparent);
+          transition: padding-left .6s var(--ease)
+        }
+
+        .timeline-row:hover {
+          padding-left: 10px
+        }
+
+        /* ---------- toolkit: star + glass ---------- */
+        .tools-panel {
+          position: relative;
+          overflow: hidden
+        }
+
+        .tools-bg {
+          position: absolute;
+          inset: -12% -6%;
+          z-index: 0;
+          pointer-events: none;
+          will-change: transform;
+          background-repeat: no-repeat;
+          background-image:
+            radial-gradient(48% 38% at 22% 18%, color-mix(in oklab, var(--a) 46%, transparent), transparent 70%),
+            radial-gradient(42% 34% at 82% 26%, color-mix(in oklab, var(--b) 40%, transparent), transparent 72%),
+            radial-gradient(56% 44% at 62% 88%, color-mix(in oklab, var(--a) 26%, transparent), transparent 74%),
+            conic-gradient(from 210deg at 50% 45%, color-mix(in oklab, var(--surface) 90%, black) 0deg, color-mix(in oklab, var(--b) 22%, var(--surface)) 120deg, color-mix(in oklab, var(--surface) 92%, black) 240deg, color-mix(in oklab, var(--a) 20%, var(--surface)) 360deg);
+          background-size: cover;
+          filter: blur(30px) saturate(125%);
+        }
+
+        /* film-grain / texture pass so the backdrop reads as a photographic image, not a flat gradient */
+        .tools-bg-grain {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          pointer-events: none;
+          opacity: .22;
+          mix-blend-mode: overlay;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+        }
+
+        .tools-veil {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          pointer-events: none;
+          background: linear-gradient(to bottom, var(--bg), color-mix(in oklab, var(--bg) 42%, transparent) 24%, color-mix(in oklab, var(--bg) 48%, transparent) 76%, var(--bg));
+        }
+
+        .tools-content {
+          position: relative;
+          z-index: 3
+        }
+
+        /* two well-spaced groups: AI tools, then software */
+        .tool-group {
+          margin-top: clamp(48px, 7vw, 84px)
+        }
+
+        .tool-group-head {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          margin-bottom: clamp(22px, 3vw, 34px)
+        }
+
+        .tool-group-label {
+          font-size: 12px;
+          letter-spacing: 4px;
+          font-weight: 700;
+          color: var(--a);
+          white-space: nowrap
+        }
+
+        .tool-group-rule {
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(to right, color-mix(in oklab, var(--text) 22%, transparent), transparent)
+        }
+
+        .tool-group-count {
+          font-family: 'Anton', sans-serif;
+          font-size: 13px;
+          letter-spacing: 1px;
+          color: var(--muted)
+        }
+
+        .tool-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(122px, 1fr));
+          gap: clamp(16px, 2.2vw, 28px);
+        }
+
+        /* The card itself stays a bare flex column — all the chrome lives on the icon
    tile below, so there's still only one decorated element per tool. */
-.tool-card{
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;
-  width:100%;padding:8px 4px;
-  background:none;border:none;box-shadow:none;
-  transition:transform .5s var(--ease-spring);
-}
-.tool-card:hover{transform:translateY(-6px)}
+        .tool-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 14px;
+          width: 100%;
+          padding: 8px 4px;
+          background: none;
+          border: none;
+          box-shadow: none;
+          transition: transform .5s var(--ease-spring);
+        }
 
-/* ---- app-icon tile, glassmorphic ----
+        .tool-card:hover {
+          transform: translateY(-6px)
+        }
+
+        /* ---- app-icon tile, glassmorphic ----
    The glass is painted, not sampled: a translucent gradient fill, a hairline
    rim, and an inset top highlight. Deliberately NO backdrop-filter — there are
    18 of these in one panel, and each real backdrop blur forces the compositor
    to read back and blur everything behind it, which is exactly what made this
    section stutter on phones. The tools panel already carries a blurred gradient
    backdrop, so a sampled blur would have had little left to reveal anyway. */
-.tool-logo{
-  position:relative;overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
-  width:clamp(60px,7.6vw,76px);aspect-ratio:1;
-  /* iOS-squircle proportion — ~22.5% of the side */
-  border-radius:22.5%;
-  /* NB: no percentage padding here. Percentage padding resolves against the
+        .tool-logo {
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: clamp(60px, 7.6vw, 76px);
+          aspect-ratio: 1;
+          /* iOS-squircle proportion — ~22.5% of the side */
+          border-radius: 22.5%;
+          /* NB: no percentage padding here. Percentage padding resolves against the
      containing block's width — the grid cell, not the tile — which collapsed
      the glyph to a few pixels. The mark sizes itself instead, below. */
-  /* White base: the supplied tiles mostly sit on white, and the SVG-mask tools
+          /* White base: the supplied tiles mostly sit on white, and the SVG-mask tools
      are drawn on it directly, so both families read as one set. */
-  background:#fff;
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, #fff 26%, transparent),
-    inset 0 0 0 1px color-mix(in oklab, var(--text) 13%, transparent),
-    0 10px 24px -12px rgba(0,0,0,.75);
-  transition:transform .6s var(--ease-spring), box-shadow .5s var(--ease);
-}
-.tool-card:hover .tool-logo{
-  transform:scale(1.08);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, #fff 34%, transparent),
-    inset 0 0 0 1px color-mix(in oklab, var(--glow, var(--a)) 48%, transparent),
-    0 16px 32px -14px rgba(0,0,0,.8);
-}
-/* Specular sheen across the top half, the way an app icon catches light. Sits
-   above the artwork so image tiles get the same glass read as the mask ones. */
-.tool-logo::before{
-  content:"";position:absolute;left:0;right:0;top:0;height:52%;z-index:2;
-  border-radius:inherit;pointer-events:none;
-  background:linear-gradient(to bottom, rgba(255,255,255,.28), rgba(255,255,255,0));
-}
-/* ...and a hairline inner rim over the top, so the artwork can't reach the
-   very edge of the squircle and flatten the bevel. */
-.tool-logo::after{
-  content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
-  border-radius:inherit;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.5);
-}
+          background: #fff;
+          box-shadow:
+            inset 0 1px 0 color-mix(in oklab, #fff 26%, transparent),
+            inset 0 0 0 1px color-mix(in oklab, var(--text) 13%, transparent),
+            0 10px 24px -12px rgba(0, 0, 0, .75);
+          transition: transform .6s var(--ease-spring), box-shadow .5s var(--ease);
+        }
 
-/* the mark itself: a tinted CSS mask for real logos, text for lettermarks */
-/* Flex-centred so lettermarks sit dead centre in the tile; the mask case is
+        .tool-card:hover .tool-logo {
+          transform: scale(1.08);
+          box-shadow:
+            inset 0 1px 0 color-mix(in oklab, #fff 34%, transparent),
+            inset 0 0 0 1px color-mix(in oklab, var(--glow, var(--a)) 48%, transparent),
+            0 16px 32px -14px rgba(0, 0, 0, .8);
+        }
+
+        /* Specular sheen across the top half, the way an app icon catches light. Sits
+   above the artwork so image tiles get the same glass read as the mask ones. */
+        .tool-logo::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: 52%;
+          z-index: 2;
+          border-radius: inherit;
+          pointer-events: none;
+          background: linear-gradient(to bottom, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0));
+        }
+
+        /* ...and a hairline inner rim over the top, so the artwork can't reach the
+   very edge of the squircle and flatten the bevel. */
+        .tool-logo::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 3;
+          pointer-events: none;
+          border-radius: inherit;
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .10), inset 0 1px 0 rgba(255, 255, 255, .5);
+        }
+
+        /* the mark itself: a tinted CSS mask for real logos, text for lettermarks */
+        /* Flex-centred so lettermarks sit dead centre in the tile; the mask case is
    unaffected, since it fills the same 100%×100% box either way. */
-.tool-glyph{
-  position:relative;z-index:1;
-  display:flex;align-items:center;justify-content:center;
-  width:62%;height:62%;flex:0 0 auto;
-  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-  -webkit-mask-position:center;mask-position:center;
-  -webkit-mask-size:contain;mask-size:contain;
-  font-family:'Anton',sans-serif;font-size:clamp(17px,2.1vw,21px);letter-spacing:.5px;
-  line-height:1;text-align:center;
-}
-/* The brand halo that used to sit behind these marks is gone: it existed to
+        .tool-glyph {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 62%;
+          height: 62%;
+          flex: 0 0 auto;
+          -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+          -webkit-mask-position: center;
+          mask-position: center;
+          -webkit-mask-size: contain;
+          mask-size: contain;
+          font-family: 'Anton', sans-serif;
+          font-size: clamp(17px, 2.1vw, 21px);
+          letter-spacing: .5px;
+          line-height: 1;
+          text-align: center;
+        }
+
+        /* The brand halo that used to sit behind these marks is gone: it existed to
    anchor bare logos floating on the dark panel, and now every mark sits on its
    own white tile. That also drops a per-logo filter off the paint path. */
-/* Supplied brand tiles fill the squircle edge to edge, like a real app icon.
+        /* Supplied brand tiles fill the squircle edge to edge, like a real app icon.
    They're pre-normalised to one 288x288 square with their own background baked
    in, so `cover` never crops anything that matters. */
-.tool-img{
-  position:absolute;inset:0;z-index:1;
-  display:block;width:100%;height:100%;object-fit:cover;
-}
-.tool-name{font-size:12px;font-weight:600;letter-spacing:.2px;text-align:center;line-height:1.3;color:var(--text);opacity:.86}
+        .tool-img {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
 
-/* ---------- selected work ----------
+        .tool-name {
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: .2px;
+          text-align: center;
+          line-height: 1.3;
+          color: var(--text);
+          opacity: .86
+        }
+
+        /* ---------- selected work ----------
    A native horizontal scroller at every width — no pin, no scroll-linked
    transform, nothing that can be mis-measured. Height comes from the cards
    rather than the viewport, so browser-chrome changes can't resize it. */
-.work-head{padding:0 clamp(20px,4vw,56px);margin-bottom:44px}
+        .work-head {
+          padding: 0 clamp(20px, 4vw, 56px);
+          margin-bottom: 44px
+        }
 
-/* The rail carries the arrows at the row's own left and right edges, overlaid
+        /* The rail carries the arrows at the row's own left and right edges, overlaid
    on the cards and vertically centred. */
-.work-rail{position:relative}
-.work-arrow{
-  position:absolute;top:50%;z-index:6;
-  width:clamp(52px,5.4vw,68px);aspect-ratio:1;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:clamp(20px,2.2vw,26px);font-family:inherit;line-height:1;cursor:pointer;
-  color:#fff;background:color-mix(in oklab, var(--a) 92%, black);
-  border:1px solid color-mix(in oklab, #fff 22%, transparent);
-  box-shadow:0 14px 34px -10px rgba(0,0,0,.85), 0 0 0 6px color-mix(in oklab, var(--bg) 55%, transparent);
-  transition:background .3s var(--ease), transform .3s var(--ease-spring), opacity .3s var(--ease);
-}
-.work-arrow--prev{left:clamp(8px,1.6vw,22px);transform:translateY(-50%)}
-.work-arrow--next{right:clamp(8px,1.6vw,22px);transform:translateY(-50%)}
-.work-arrow:hover:not(:disabled){background:var(--a)}
-.work-arrow--prev:hover:not(:disabled){transform:translateY(-50%) scale(1.1)}
-.work-arrow--next:hover:not(:disabled){transform:translateY(-50%) scale(1.1)}
-.work-arrow:focus-visible{outline:3px solid #fff;outline-offset:3px}
-/* Dimmed rather than hidden at the ends, so the control never disappears and
+        .work-rail {
+          position: relative
+        }
+
+        .work-arrow {
+          position: absolute;
+          top: 50%;
+          z-index: 6;
+          width: clamp(52px, 5.4vw, 68px);
+          aspect-ratio: 1;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(20px, 2.2vw, 26px);
+          font-family: inherit;
+          line-height: 1;
+          cursor: pointer;
+          color: #fff;
+          background: color-mix(in oklab, var(--a) 92%, black);
+          border: 1px solid color-mix(in oklab, #fff 22%, transparent);
+          box-shadow: 0 14px 34px -10px rgba(0, 0, 0, .85), 0 0 0 6px color-mix(in oklab, var(--bg) 55%, transparent);
+          transition: background .3s var(--ease), transform .3s var(--ease-spring), opacity .3s var(--ease);
+        }
+
+        .work-arrow--prev {
+          left: clamp(8px, 1.6vw, 22px);
+          transform: translateY(-50%)
+        }
+
+        .work-arrow--next {
+          right: clamp(8px, 1.6vw, 22px);
+          transform: translateY(-50%)
+        }
+
+        .work-arrow:hover:not(:disabled) {
+          background: var(--a)
+        }
+
+        .work-arrow--prev:hover:not(:disabled) {
+          transform: translateY(-50%) scale(1.1)
+        }
+
+        .work-arrow--next:hover:not(:disabled) {
+          transform: translateY(-50%) scale(1.1)
+        }
+
+        .work-arrow:focus-visible {
+          outline: 3px solid #fff;
+          outline-offset: 3px
+        }
+
+        /* Dimmed rather than hidden at the ends, so the control never disappears and
    the row's position stays legible. */
-.work-arrow:disabled{opacity:.3;cursor:default}
-@media (hover:none){
-  .work-arrow:hover:not(:disabled){transform:translateY(-50%)}
-}
+        .work-arrow:disabled {
+          opacity: .3;
+          cursor: default
+        }
 
-.work-viewport{
-  position:relative;
-  overflow-x:auto;overflow-y:hidden;
-  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
-  overscroll-behavior-x:contain;
-  padding:0 clamp(20px,4vw,56px);
-  scrollbar-width:none;
-  cursor:grab;
-}
-.work-viewport:active{cursor:grabbing}
-.work-viewport::-webkit-scrollbar{display:none}
-.work-track{display:flex;width:max-content}
+        @media (hover:none) {
+          .work-arrow:hover:not(:disabled) {
+            transform: translateY(-50%)
+          }
+        }
 
-.project-card{
-  position:relative;flex-shrink:0;overflow:hidden;display:block;
-  width:min(58vw,820px);aspect-ratio:16/9;margin-right:2.4vw;
-  padding:0;border:none;background:var(--surface);cursor:pointer;font-family:inherit;
-  border-radius:20px;transition:transform .8s var(--ease);
-  scroll-snap-align:center;
-}
-.project-card:focus-visible{outline:2px solid var(--a);outline-offset:3px}
-.project-thumb{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  transition:transform 1.2s var(--ease);
-}
-.project-card:hover .project-thumb{transform:scale(1.04)}
-.project-scrim{
-  position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,.15) 55%, transparent);
-}
+        .work-viewport {
+          position: relative;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior-x: contain;
+          padding: 0 clamp(20px, 4vw, 56px);
+          scrollbar-width: none;
+          cursor: grab;
+        }
 
-/* ---------- lightfall ---------- */
-.lightfall{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
-.lightfall-canvas{display:block;width:100%;height:100%}
-/* Feathers the plate into the page on every edge, and darkens the lower half
+        .work-viewport:active {
+          cursor: grabbing
+        }
+
+        .work-viewport::-webkit-scrollbar {
+          display: none
+        }
+
+        .work-track {
+          display: flex;
+          width: max-content
+        }
+
+        .project-card {
+          position: relative;
+          flex-shrink: 0;
+          overflow: hidden;
+          display: block;
+          width: min(58vw, 820px);
+          aspect-ratio: 16/9;
+          margin-right: 2.4vw;
+          padding: 0;
+          border: none;
+          background: var(--surface);
+          cursor: pointer;
+          font-family: inherit;
+          border-radius: 20px;
+          transition: transform .8s var(--ease);
+          scroll-snap-align: center;
+        }
+
+        .project-card:focus-visible {
+          outline: 2px solid var(--a);
+          outline-offset: 3px
+        }
+
+        .project-thumb {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 1.2s var(--ease);
+        }
+
+        .project-card:hover .project-thumb {
+          transform: scale(1.04)
+        }
+
+        .project-scrim {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background: linear-gradient(to top, rgba(0, 0, 0, .9), rgba(0, 0, 0, .15) 55%, transparent);
+        }
+
+        /* ---------- lightfall ---------- */
+        .lightfall {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          overflow: hidden;
+          z-index: 0
+        }
+
+        .lightfall-canvas {
+          display: block;
+          width: 100%;
+          height: 100%
+        }
+
+        /* Feathers the plate into the page on every edge, and darkens the lower half
    so the closing headline and the CTA keep their contrast over it. */
-.lightfall-veil{
-  position:absolute;inset:0;
-  background:
-    linear-gradient(to bottom, var(--bg) 0%, transparent 26%, color-mix(in oklab, var(--bg) 45%, transparent) 72%, var(--bg) 100%),
-    linear-gradient(to right, var(--bg) 0%, transparent 22%, transparent 78%, var(--bg) 100%);
-}
+        .lightfall-veil {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(to bottom, var(--bg) 0%, transparent 26%, color-mix(in oklab, var(--bg) 45%, transparent) 72%, var(--bg) 100%),
+            linear-gradient(to right, var(--bg) 0%, transparent 22%, transparent 78%, var(--bg) 100%);
+        }
 
-/* ---------- contact ---------- */
-.contact-lines{
-  display:flex;flex-wrap:wrap;justify-content:center;gap:14px 34px;margin-top:44px;
-}
-.contact-line{
-  position:relative;font-size:15px;color:var(--muted);text-decoration:none;letter-spacing:.3px;
-  transition:color .4s var(--ease);
-}
-.contact-line::after{
-  content:"";position:absolute;left:0;right:0;bottom:-5px;height:1px;background:var(--a);
-  transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--ease);
-}
-.contact-line:hover{color:var(--text)}
-.contact-line:hover::after{transform:scaleX(1)}
+        /* ---------- contact ---------- */
+        .contact-lines {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 14px 34px;
+          margin-top: 44px;
+        }
 
-/* ---------- video lightbox ---------- */
-.lightbox{
-  position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.93);
-  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
-  padding:clamp(20px,5vw,56px);
-}
-.lightbox-frame{
-  position:relative;border-radius:14px;overflow:hidden;background:#000;
-  box-shadow:0 40px 90px -30px rgba(0,0,0,.9);
-}
-.lightbox-title{
-  font-size:14px;letter-spacing:.4px;color:rgba(255,255,255,.8);text-align:center;max-width:90vw;
-}
+        .contact-line {
+          position: relative;
+          font-size: 15px;
+          color: var(--muted);
+          text-decoration: none;
+          letter-spacing: .3px;
+          transition: color .4s var(--ease);
+        }
 
-/* three short cards sit happily side by side well before the desktop cut */
-@media (min-width:560px){
-  .stats-grid{grid-template-columns:repeat(3,1fr)}
-}
+        .contact-line::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: -5px;
+          height: 1px;
+          background: var(--a);
+          transform: scaleX(0);
+          transform-origin: 0 50%;
+          transition: transform .5s var(--ease);
+        }
 
-/* ---------- desktop breakpoints ---------- */
-@media (min-width:861px){
-  .nav-links,.nav-swatches{display:flex}
-  .about-grid{grid-template-columns:1.15fr .85fr;gap:60px}
-  .stats-grid{gap:30px}
-  .timeline-row{grid-template-columns:70px 1fr;gap:24px}
-}
+        .contact-line:hover {
+          color: var(--text)
+        }
 
-/* ---------- mobile / touch performance ---------- */
-/* backdrop-filter and large blurs are the expensive parts of this design;
+        .contact-line:hover::after {
+          transform: scaleX(1)
+        }
+
+        /* ---------- video lightbox ---------- */
+        .lightbox {
+          position: fixed;
+          inset: 0;
+          z-index: 900;
+          background: rgba(0, 0, 0, .93);
+          -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 18px;
+          padding: clamp(20px, 5vw, 56px);
+        }
+
+        .lightbox-frame {
+          position: relative;
+          border-radius: 14px;
+          overflow: hidden;
+          background: #000;
+          box-shadow: 0 40px 90px -30px rgba(0, 0, 0, .9);
+        }
+
+        .lightbox-title {
+          font-size: 14px;
+          letter-spacing: .4px;
+          color: rgba(255, 255, 255, .8);
+          text-align: center;
+          max-width: 90vw;
+        }
+
+        /* three short cards sit happily side by side well before the desktop cut */
+        @media (min-width:560px) {
+          .stats-grid {
+            grid-template-columns: repeat(3, 1fr)
+          }
+        }
+
+        /* ---------- desktop breakpoints ---------- */
+        @media (min-width:861px) {
+
+          .nav-links,
+          .nav-swatches {
+            display: flex
+          }
+
+          .about-grid {
+            grid-template-columns: 1.15fr .85fr;
+            gap: 60px
+          }
+
+          .stats-grid {
+            gap: 30px
+          }
+
+          .timeline-row {
+            grid-template-columns: 70px 1fr;
+            gap: 24px
+          }
+        }
+
+        /* ---------- mobile / touch performance ---------- */
+        /* backdrop-filter and large blurs are the expensive parts of this design;
    dial them back where the GPU budget is smallest. */
-@media (max-width:900px){
-  .tools-bg{filter:none}
-  .lightbox{-webkit-backdrop-filter:none;backdrop-filter:none}
-  .nav{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-  .panel-inner{box-shadow:0 -18px 40px -18px rgba(0,0,0,.7)}
-  /* Two columns halves a gallery panel that was ~10,000px tall at one column. */
-  .gallery-grid{grid-template-columns:repeat(2,1fr);gap:12px}
-  .project-card{width:84vw;aspect-ratio:4/3;margin-right:4vw}
-  /* A phone-width card is short, so the title block reaches well past where the
+        @media (max-width:900px) {
+          .tools-bg {
+            filter: none
+          }
+
+          .lightbox {
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none
+          }
+
+          .nav {
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px)
+          }
+
+          .panel-inner {
+            box-shadow: 0 -18px 40px -18px rgba(0, 0, 0, .7)
+          }
+
+          /* Two columns halves a gallery panel that was ~10,000px tall at one column. */
+          .gallery-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px
+          }
+
+          .project-card {
+            width: 84vw;
+            aspect-ratio: 4/3;
+            margin-right: 4vw
+          }
+
+          /* A phone-width card is short, so the title block reaches well past where the
      desktop gradient has already faded out — several thumbnails are bright
      enough there to swallow the text. Hold the dark end higher up the card. */
-  .project-scrim{
-    background:linear-gradient(to top, rgba(0,0,0,.94), rgba(0,0,0,.82) 30%, rgba(0,0,0,.46) 58%, rgba(0,0,0,.14) 80%, transparent);
-  }
-  .project-card .poster-title{font-size:clamp(22px,6.4vw,30px)}
-  .gallery-meta{padding:12px}
-  /* Named explicitly rather than the old `.gallery-meta span:last-child`, which
+          .project-scrim {
+            background: linear-gradient(to top, rgba(0, 0, 0, .94), rgba(0, 0, 0, .82) 30%, rgba(0, 0, 0, .46) 58%, rgba(0, 0, 0, .14) 80%, transparent);
+          }
+
+          .project-card .poster-title {
+            font-size: clamp(22px, 6.4vw, 30px)
+          }
+
+          .gallery-meta {
+            padding: 12px
+          }
+
+          /* Named explicitly rather than the old `.gallery-meta span:last-child`, which
      out-specified `.gallery-card .poster-title` and silently pinned the phone
      size no matter what the desktop rule said. Tiles are two-up here, so this
      is a step down from desktop but still well up on where it was. */
-  .gallery-card .poster-kicker{font-size:11px;letter-spacing:1.4px;margin-bottom:4px}
-  .gallery-card .poster-title{font-size:17px;line-height:1.15}
-  /* 16 tiny blurred circles in one panel isn't worth a readback each */
-  .gallery-play{width:40px;height:40px;font-size:13px}
-}
-/* Touch devices latch :hover after a tap — keep transforms off so cards
+          .gallery-card .poster-kicker {
+            font-size: 11px;
+            letter-spacing: 1.4px;
+            margin-bottom: 4px
+          }
+
+          .gallery-card .poster-title {
+            font-size: 17px;
+            line-height: 1.15
+          }
+
+          /* 16 tiny blurred circles in one panel isn't worth a readback each */
+          .gallery-play {
+            width: 40px;
+            height: 40px;
+            font-size: 13px
+          }
+        }
+
+        /* Touch devices latch :hover after a tap — keep transforms off so cards
    don't stay lifted, and drop the sheen animation entirely. */
-@media (hover:none){
-  .tool-card:hover,.gallery-card:hover,.stat-card:hover,.project-card:hover{transform:none}
-  .tool-card:hover .tool-logo{transform:none;box-shadow:
-    inset 0 1px 0 color-mix(in oklab, #fff 26%, transparent),
-    inset 0 0 0 1px color-mix(in oklab, var(--text) 13%, transparent),
-    0 10px 24px -12px rgba(0,0,0,.75)}
-  .gallery-card:hover .gallery-thumb,.project-card:hover .project-thumb{transform:none}
-  .gallery-card:hover .gallery-play{transform:translate(-50%,-50%) scale(.9);background:rgba(255,255,255,.16)}
-}
+        @media (hover:none) {
 
-/* ---------- reduced motion ---------- */
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
-  [data-reveal-ready] .reveal{opacity:1;transform:none}
-  .panel{position:relative;top:0 !important}
-  .panel-scrim{display:none}
-}
-</style>
-</helmet>
-<div ref="{{rootRef}}" style="{{rootStyle}}">
+          .tool-card:hover,
+          .gallery-card:hover,
+          .stat-card:hover,
+          .project-card:hover {
+            transform: none
+          }
 
-<div style="position:fixed;inset:0;z-index:400;pointer-events:none;opacity:.05;background-image:radial-gradient(rgba(255,255,255,.9) 1px, transparent 1px);background-size:3px 3px;animation:grain 0.4s steps(2) infinite"></div>
+          .tool-card:hover .tool-logo {
+            transform: none;
+            box-shadow:
+              inset 0 1px 0 color-mix(in oklab, #fff 26%, transparent),
+              inset 0 0 0 1px color-mix(in oklab, var(--text) 13%, transparent),
+              0 10px 24px -12px rgba(0, 0, 0, .75)
+          }
 
-<sc-if value="{{loading}}" hint-placeholder-val="{{true}}">
-<div style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px">
-  <div class="display" style="font-size:clamp(40px,7vw,90px);letter-spacing:2px;color:var(--text);opacity:.92">ABHAY JAIN</div>
-  <div style="width:min(60vw,420px);height:2px;background:color-mix(in oklab, var(--text) 12%, transparent);position:relative;overflow:hidden">
-    <div ref="{{loaderBarRef}}" style="position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--a),var(--b))"></div>
-  </div>
-  <div ref="{{loaderPctRef}}" style="font-size:13px;letter-spacing:3px;color:var(--muted)">0%</div>
-</div>
-</sc-if>
+          .gallery-card:hover .gallery-thumb,
+          .project-card:hover .project-thumb {
+            transform: none
+          }
 
-<sc-if value="{{enableCursorFlag}}" hint-placeholder-val="{{true}}">
-<div ref="{{cursorDotRef}}" class="cursor-dot" aria-hidden="true"></div>
-<div ref="{{cursorRingRef}}" class="cursor-ring" aria-hidden="true">
-  <span ref="{{cursorLabelRef}}" class="cursor-label"></span>
-</div>
-</sc-if>
+          .gallery-card:hover .gallery-play {
+            transform: translate(-50%, -50%) scale(.9);
+            background: rgba(255, 255, 255, .16)
+          }
+        }
 
-<nav class="nav">
-  <a href="#top" class="display" style="font-size:20px;letter-spacing:1px;color:var(--text);text-decoration:none">AJ<span style="color:var(--a)">.</span></a>
-  <div class="nav-links">
-    <sc-for list="{{navLinks}}" as="link" hint-placeholder-count="5">
-      <a href="{{link.href}}" class="nav-link">{{link.label}}</a>
-    </sc-for>
-  </div>
-  <div style="display:flex;align-items:center;gap:16px">
-    <div class="nav-swatches">
-      <sc-for list="{{themeSwatches}}" as="t" hint-placeholder-count="6">
-        <button onClick="{{t.onClick}}" class="swatch" title="{{t.name}}" aria-label="{{t.name}}" style="{{t.style}}"></button>
-      </sc-for>
-    </div>
-    <sc-if value="{{enableMusicFlag}}" hint-placeholder-val="{{true}}">
-    <button onClick="{{toggleSound}}" data-sound-toggle="" class="icon-btn" aria-label="{{soundLabel}}" aria-pressed="{{soundOn}}" title="{{soundLabel}}">{{soundIcon}}</button>
-    </sc-if>
-    <button onClick="{{toggleMenu}}" class="icon-btn" aria-label="{{menuAria}}" aria-expanded="{{menuOpen}}">{{menuLabel}}</button>
-  </div>
-</nav>
+        /* ---------- reduced motion ---------- */
+        @media (prefers-reduced-motion:reduce) {
+          html {
+            scroll-behavior: auto
+          }
 
-<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
-<div style="position:fixed;inset:0;z-index:600;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px">
-  <button onClick="{{toggleMenu}}" class="icon-btn" aria-label="Close menu" style="position:absolute;top:26px;right:clamp(20px,4vw,56px)">✕</button>
-  <sc-for list="{{navLinks}}" as="link" hint-placeholder-count="5">
-    <a href="{{link.href}}" onClick="{{toggleMenu}}" class="display" style="font-size:clamp(30px,7vw,48px);color:var(--text);text-decoration:none">{{link.label}}</a>
-  </sc-for>
-  <div style="display:flex;gap:12px;margin-top:20px">
-    <sc-for list="{{themeSwatches}}" as="t" hint-placeholder-count="6">
-      <button onClick="{{t.onClick}}" class="swatch" title="{{t.name}}" aria-label="{{t.name}}" style="{{t.styleLg}}"></button>
-    </sc-for>
-  </div>
-</div>
-</sc-if>
+          *,
+          *::before,
+          *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important
+          }
 
-<div class="stack">
+          [data-reveal-ready] .reveal {
+            opacity: 1;
+            transform: none
+          }
 
-<!-- ============ PANEL 1 — HERO ============ -->
-<section class="panel" data-panel="1">
-<div class="panel-inner" data-panel-inner>
-  <div id="top" style="position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;padding:120px clamp(20px,4vw,56px) 60px">
-    <div style="position:absolute;inset:0;background:radial-gradient(60% 50% at 30% 20%, color-mix(in oklab, var(--a) 25%, transparent), transparent),radial-gradient(50% 40% at 80% 80%, color-mix(in oklab, var(--b) 18%, transparent), transparent)"></div>
+          .panel {
+            position: relative;
+            top: 0 !important
+          }
 
-    <sc-for list="{{particles}}" as="p" hint-placeholder-count="24">
-      <div style="{{p.style}}"></div>
-    </sc-for>
+          .panel-scrim {
+            display: none
+          }
+        }
+      </style>
+    </helmet>
+    <div ref="{{rootRef}}" style="{{rootStyle}}">
 
-    <div ref="{{heroObjRef}}" style="position:absolute;right:6%;top:18%;width:min(38vw,420px);height:min(38vw,420px);perspective:900px;transform-style:preserve-3d;pointer-events:none;opacity:.9;will-change:transform">
-      <div style="position:absolute;inset:0;transform-style:preserve-3d;animation:spin360 18s linear infinite">
-        <div style="position:absolute;inset:8%;border-radius:50%;border:2px solid color-mix(in oklab, var(--a) 70%, transparent);transform:rotateX(70deg)"></div>
-        <div style="position:absolute;inset:18%;border-radius:50%;border:2px solid color-mix(in oklab, var(--b) 60%, transparent);transform:rotateY(70deg)"></div>
-        <div style="position:absolute;inset:32%;border-radius:50%;border:1px solid var(--text);opacity:.5"></div>
-        <div style="position:absolute;inset:44%;border-radius:50%;background:radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--a) 60%, white 10%), var(--surface));box-shadow:0 0 60px color-mix(in oklab, var(--a) 50%, transparent)"></div>
+      <div
+        style="position:fixed;inset:0;z-index:400;pointer-events:none;opacity:.05;background-image:radial-gradient(rgba(255,255,255,.9) 1px, transparent 1px);background-size:3px 3px;animation:grain 0.4s steps(2) infinite">
       </div>
-    </div>
 
-    <div style="position:absolute;left:0;right:0;top:8%;height:64px;opacity:.16;background-image:repeating-linear-gradient(90deg, var(--text) 0 6px, transparent 6px 26px);animation:floatY 7s ease-in-out infinite"></div>
-    <div style="position:absolute;left:0;right:0;bottom:16%;height:40px;opacity:.1;background-image:repeating-linear-gradient(90deg, var(--text) 0 4px, transparent 4px 20px);animation:floatY 9s ease-in-out infinite reverse"></div>
-
-    <div style="position:relative;z-index:2;max-width:1100px">
-      <h1 class="display reveal" style="font-size:clamp(44px,9vw,132px);line-height:.96;letter-spacing:.5px">
-        I DON'T JUST EDIT VIDEOS.<br>I CREATE <span style="color:var(--a);text-shadow:0 0 40px color-mix(in oklab, var(--a) 60%, transparent)">EXPERIENCES.</span>
-      </h1>
-      <div class="reveal hero-roles" style="margin-top:30px">
-        <sc-for list="{{roles}}" as="r" hint-placeholder-count="4">
-          <span>{{r}}</span>
-        </sc-for>
-      </div>
-      <div class="reveal" style="display:flex;flex-wrap:wrap;gap:18px;margin-top:44px">
-        <a href="#work" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}" data-cursor="view" class="btn btn--solid">View Work →</a>
-        <a href="#contact" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}" class="btn btn--ghost">Let's Work Together</a>
-      </div>
-    </div>
-
-    <div style="position:absolute;bottom:36px;left:clamp(20px,4vw,56px);display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:2px;color:var(--muted)">
-      <span style="width:1px;height:36px;background:linear-gradient(var(--muted),transparent);display:inline-block"></span>SCROLL
-    </div>
-  </div>
-  <div class="panel-scrim" data-panel-scrim></div>
-</div>
-</section>
-
-
-<!-- ============ PANEL 3 — ABOUT / STATS ============ -->
-<section class="panel" data-panel="2">
-<div class="panel-inner" data-panel-inner>
-  <div class="marquee-strip" style="border-top:none;border-radius:34px 34px 0 0">
-    <div class="marquee-track">
-      <sc-for list="{{marqueeWords}}" as="w" hint-placeholder-count="18">
-        <span class="display" style="font-size:28px;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:16px">{{w}} <span style="width:6px;height:6px;border-radius:50%;background:var(--a)"></span></span>
-      </sc-for>
-    </div>
-  </div>
-
-  <section id="about" style="padding:clamp(110px,14vw,180px) clamp(20px,4vw,56px) clamp(110px,14vw,180px);max-width:1400px;margin:0 auto">
-    <div class="about-grid">
-      <div class="reveal" style="max-width:800px">
-        <div class="eyebrow">ABOUT</div>
-        <p class="display" style="font-size:clamp(28px,4.2vw,56px);line-height:1.15">
-          Every edit should make people feel something. That’s what I aim for.
-        </p>
-        <p style="font-size:17px;line-height:1.7;color:var(--muted);max-width:560px;margin-top:34px">I’m Abhay, a Video Editor &amp; AI Creative specializing in cinematic edits, and AI-powered visuals that help brands tell unforgettable stories.</p>
-      </div>
-      <div class="reveal" style="position:relative;width:min(100%,420px);aspect-ratio:4/5;justify-self:end">
-        <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="about-portrait" shape="rounded" radius="18" src="./assets/portrait.jpg" placeholder="Drop portrait photo" style="width:100%;height:100%" hint-size="360px,450px"></x-import>
-      </div>
-    </div>
-  </section>
-
-  <section ref="{{statsWrapRef}}" class="stats-band">
-    <div class="sunburst" aria-hidden="true"></div>
-    <div class="paper-grain" aria-hidden="true"></div>
-    <div class="stats-grid">
-      <sc-for list="{{stats}}" as="s" hint-placeholder-count="3">
-        <div class="stat-card">
-          <div class="display" style="font-size:clamp(34px,5vw,58px);color:var(--a);display:flex;align-items:baseline;justify-content:center;gap:2px">
-            <span ref="{{s.ref}}">0</span><span>{{s.suffix}}</span>
+      <sc-if value="{{loading}}" hint-placeholder-val="{{true}}">
+        <div
+          style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px">
+          <div class="display" style="font-size:clamp(40px,7vw,90px);letter-spacing:2px;color:var(--text);opacity:.92">
+            ABHAY JAIN</div>
+          <div
+            style="width:min(60vw,420px);height:2px;background:color-mix(in oklab, var(--text) 12%, transparent);position:relative;overflow:hidden">
+            <div ref="{{loaderBarRef}}"
+              style="position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--a),var(--b))">
+            </div>
           </div>
-          <div style="font-size:13px;color:var(--muted);letter-spacing:.5px;margin-top:8px">{{s.label}}</div>
+          <div ref="{{loaderPctRef}}" style="font-size:13px;letter-spacing:3px;color:var(--muted)">0%</div>
         </div>
-      </sc-for>
-    </div>
-  </section>
-  <div class="panel-scrim" data-panel-scrim></div>
-</div>
-</section>
+      </sc-if>
 
-<!-- ============ PANEL 3 — WORK (GSAP-pinned horizontal, kept out of the sticky stack) ============ -->
-<section class="panel panel--flow" data-panel="flow">
-<div class="panel-inner" data-panel-inner>
-  <div id="work" style="padding:clamp(110px,14vw,180px) 0 clamp(80px,10vw,120px)">
-    <!-- No `reveal` in this section: it and the stats band above it stay fully
+      <sc-if value="{{enableCursorFlag}}" hint-placeholder-val="{{true}}">
+        <div ref="{{cursorDotRef}}" class="cursor-dot" aria-hidden="true"></div>
+        <div ref="{{cursorRingRef}}" class="cursor-ring" aria-hidden="true">
+          <span ref="{{cursorLabelRef}}" class="cursor-label"></span>
+        </div>
+      </sc-if>
+
+      <nav class="nav">
+        <a href="#top" class="display"
+          style="font-size:20px;letter-spacing:1px;color:var(--text);text-decoration:none">AJ<span
+            style="color:var(--a)">.</span></a>
+        <div class="nav-links">
+          <sc-for list="{{navLinks}}" as="link" hint-placeholder-count="5">
+            <a href="{{link.href}}" class="nav-link">{{link.label}}</a>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="nav-swatches">
+            <sc-for list="{{themeSwatches}}" as="t" hint-placeholder-count="6">
+              <button onClick="{{t.onClick}}" class="swatch" title="{{t.name}}" aria-label="{{t.name}}"
+                style="{{t.style}}"></button>
+            </sc-for>
+          </div>
+          <sc-if value="{{enableMusicFlag}}" hint-placeholder-val="{{true}}">
+            <button onClick="{{toggleSound}}" data-sound-toggle="" class="icon-btn" aria-label="{{soundLabel}}"
+              aria-pressed="{{soundOn}}" title="{{soundLabel}}">{{soundIcon}}</button>
+          </sc-if>
+          <button onClick="{{toggleMenu}}" class="icon-btn" aria-label="{{menuAria}}"
+            aria-expanded="{{menuOpen}}">{{menuLabel}}</button>
+        </div>
+      </nav>
+
+      <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+        <div
+          style="position:fixed;inset:0;z-index:600;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px">
+          <button onClick="{{toggleMenu}}" class="icon-btn" aria-label="Close menu"
+            style="position:absolute;top:26px;right:clamp(20px,4vw,56px)">✕</button>
+          <sc-for list="{{navLinks}}" as="link" hint-placeholder-count="5">
+            <a href="{{link.href}}" onClick="{{toggleMenu}}" class="display"
+              style="font-size:clamp(30px,7vw,48px);color:var(--text);text-decoration:none">{{link.label}}</a>
+          </sc-for>
+          <div style="display:flex;gap:12px;margin-top:20px">
+            <sc-for list="{{themeSwatches}}" as="t" hint-placeholder-count="6">
+              <button onClick="{{t.onClick}}" class="swatch" title="{{t.name}}" aria-label="{{t.name}}"
+                style="{{t.styleLg}}"></button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <div class="stack">
+
+        <!-- ============ PANEL 1 — HERO ============ -->
+        <section class="panel" data-panel="1">
+          <div class="panel-inner" data-panel-inner>
+            <div id="top"
+              style="position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;padding:120px clamp(20px,4vw,56px) 60px">
+              <div
+                style="position:absolute;inset:0;background:radial-gradient(60% 50% at 30% 20%, color-mix(in oklab, var(--a) 25%, transparent), transparent),radial-gradient(50% 40% at 80% 80%, color-mix(in oklab, var(--b) 18%, transparent), transparent)">
+              </div>
+
+              <sc-for list="{{particles}}" as="p" hint-placeholder-count="24">
+                <div style="{{p.style}}"></div>
+              </sc-for>
+
+              <div ref="{{heroObjRef}}"
+                style="position:absolute;right:6%;top:18%;width:min(38vw,420px);height:min(38vw,420px);perspective:900px;transform-style:preserve-3d;pointer-events:none;opacity:.9;will-change:transform">
+                <div
+                  style="position:absolute;inset:0;transform-style:preserve-3d;animation:spin360 18s linear infinite">
+                  <div
+                    style="position:absolute;inset:8%;border-radius:50%;border:2px solid color-mix(in oklab, var(--a) 70%, transparent);transform:rotateX(70deg)">
+                  </div>
+                  <div
+                    style="position:absolute;inset:18%;border-radius:50%;border:2px solid color-mix(in oklab, var(--b) 60%, transparent);transform:rotateY(70deg)">
+                  </div>
+                  <div style="position:absolute;inset:32%;border-radius:50%;border:1px solid var(--text);opacity:.5">
+                  </div>
+                  <div
+                    style="position:absolute;inset:44%;border-radius:50%;background:radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--a) 60%, white 10%), var(--surface));box-shadow:0 0 60px color-mix(in oklab, var(--a) 50%, transparent)">
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="position:absolute;left:0;right:0;top:8%;height:64px;opacity:.16;background-image:repeating-linear-gradient(90deg, var(--text) 0 6px, transparent 6px 26px);animation:floatY 7s ease-in-out infinite">
+              </div>
+              <div
+                style="position:absolute;left:0;right:0;bottom:16%;height:40px;opacity:.1;background-image:repeating-linear-gradient(90deg, var(--text) 0 4px, transparent 4px 20px);animation:floatY 9s ease-in-out infinite reverse">
+              </div>
+
+              <div style="position:relative;z-index:2;max-width:1100px">
+                <h1 class="display reveal" style="font-size:clamp(44px,9vw,132px);line-height:.96;letter-spacing:.5px">
+                  I DON'T JUST EDIT VIDEOS.<br>I CREATE <span
+                    style="color:var(--a);text-shadow:0 0 40px color-mix(in oklab, var(--a) 60%, transparent)">EXPERIENCES.</span>
+                </h1>
+                <div class="reveal hero-roles" style="margin-top:30px">
+                  <sc-for list="{{roles}}" as="r" hint-placeholder-count="4">
+                    <span>{{r}}</span>
+                  </sc-for>
+                </div>
+                <div class="reveal" style="display:flex;flex-wrap:wrap;gap:18px;margin-top:44px">
+                  <a href="#work" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}" data-cursor="view"
+                    class="btn btn--solid">View Work →</a>
+                  <a href="#contact" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}"
+                    class="btn btn--ghost">Let's Work Together</a>
+                </div>
+              </div>
+
+              <div
+                style="position:absolute;bottom:36px;left:clamp(20px,4vw,56px);display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:2px;color:var(--muted)">
+                <span
+                  style="width:1px;height:36px;background:linear-gradient(var(--muted),transparent);display:inline-block"></span>SCROLL
+              </div>
+            </div>
+            <div class="panel-scrim" data-panel-scrim></div>
+          </div>
+        </section>
+
+
+        <!-- ============ PANEL 3 — ABOUT / STATS ============ -->
+        <section class="panel" data-panel="2">
+          <div class="panel-inner" data-panel-inner>
+            <div class="marquee-strip" style="border-top:none;border-radius:34px 34px 0 0">
+              <div class="marquee-track">
+                <sc-for list="{{marqueeWords}}" as="w" hint-placeholder-count="18">
+                  <span class="display"
+                    style="font-size:28px;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:16px">{{w}}
+                    <span style="width:6px;height:6px;border-radius:50%;background:var(--a)"></span></span>
+                </sc-for>
+              </div>
+            </div>
+
+            <section id="about"
+              style="padding:clamp(110px,14vw,180px) clamp(20px,4vw,56px) clamp(110px,14vw,180px);max-width:1400px;margin:0 auto">
+              <div class="about-grid">
+                <div class="reveal" style="max-width:800px">
+                  <div class="eyebrow">ABOUT</div>
+                  <p class="display" style="font-size:clamp(28px,4.2vw,56px);line-height:1.15">
+                    Every edit should make people feel something. That’s what I aim for.
+                  </p>
+                  <p style="font-size:17px;line-height:1.7;color:var(--muted);max-width:560px;margin-top:34px">I’m
+                    Abhay, a Video Editor &amp; AI Creative specializing in cinematic edits, and AI-powered visuals that
+                    help brands tell unforgettable stories.</p>
+                </div>
+                <div class="reveal" style="position:relative;width:min(100%,420px);aspect-ratio:4/5;justify-self:end">
+                  <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="about-portrait"
+                    shape="rounded" radius="18" src="./assets/portrait.jpg" placeholder="Drop portrait photo"
+                    style="width:100%;height:100%" hint-size="360px,450px"></x-import>
+                </div>
+              </div>
+            </section>
+
+            <section ref="{{statsWrapRef}}" class="stats-band">
+              <div class="sunburst" aria-hidden="true"></div>
+              <div class="paper-grain" aria-hidden="true"></div>
+              <div class="stats-grid">
+                <sc-for list="{{stats}}" as="s" hint-placeholder-count="3">
+                  <div class="stat-card">
+                    <div class="display"
+                      style="font-size:clamp(34px,5vw,58px);color:var(--a);display:flex;align-items:baseline;justify-content:center;gap:2px">
+                      <span ref="{{s.ref}}">0</span><span>{{s.suffix}}</span>
+                    </div>
+                    <div style="font-size:13px;color:var(--muted);letter-spacing:.5px;margin-top:8px">{{s.label}}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+            <div class="panel-scrim" data-panel-scrim></div>
+          </div>
+        </section>
+
+        <!-- ============ PANEL 3 — WORK (GSAP-pinned horizontal, kept out of the sticky stack) ============ -->
+        <section class="panel panel--flow" data-panel="flow">
+          <div class="panel-inner" data-panel-inner>
+            <div id="work" style="padding:clamp(110px,14vw,180px) 0 clamp(80px,10vw,120px)">
+              <!-- No `reveal` in this section: it and the stats band above it stay fully
          painted at all times, per the brief. -->
-    <div class="work-head">
-      <div class="eyebrow">SELECTED WORK</div>
-      <p class="display" style="font-size:clamp(30px,5vw,64px)">Projects worth pausing for.</p>
-    </div>
-    <!-- Arrows sit on the rail beside the cards, not above them: at the row's
+              <div class="work-head">
+                <div class="eyebrow">SELECTED WORK</div>
+                <p class="display" style="font-size:clamp(30px,5vw,64px)">Projects worth pausing for.</p>
+              </div>
+              <!-- Arrows sit on the rail beside the cards, not above them: at the row's
          own edges they read as "this moves sideways" without needing a label.
          No bindings on these buttons at all — this runtime drops *every*
          binding on an element when one of them is unsupported, and a bound
          `disabled` was enough to silently take `onClick` with it, so the arrows
          rendered but did nothing. Clicks and disabled state are wired up
          imperatively in setupWorkDrag(). -->
-    <div class="work-rail">
-      <button class="work-arrow work-arrow--prev" data-work-prev aria-label="Previous projects">
-        <span aria-hidden="true">←</span>
-      </button>
-      <button class="work-arrow work-arrow--next" data-work-next aria-label="More projects">
-        <span aria-hidden="true">→</span>
-      </button>
-      <!-- The scroll listener is attached in setupWorkDrag, not as an onScroll
+              <div class="work-rail">
+                <button class="work-arrow work-arrow--prev" data-work-prev aria-label="Previous projects">
+                  <span aria-hidden="true">←</span>
+                </button>
+                <button class="work-arrow work-arrow--next" data-work-next aria-label="More projects">
+                  <span aria-hidden="true">→</span>
+                </button>
+                <!-- The scroll listener is attached in setupWorkDrag, not as an onScroll
            binding: adding one here stopped `ref` from resolving on this element,
            which silently took the arrows and drag-to-scroll down with it. -->
-      <div ref="{{horizWrapRef}}" class="work-viewport">
-      <div ref="{{trackRef}}" class="work-track">
-        <sc-for list="{{projects}}" as="pr" hint-placeholder-count="6">
-          <button onClick="{{pr.onClick}}" data-cursor="play" class="project-card" aria-label="{{pr.aria}}">
-            <img src="{{pr.thumb}}" alt="" loading="lazy" decoding="async" class="project-thumb">
-            <span class="project-scrim"></span>
-            <span style="position:absolute;left:0;right:0;bottom:0;padding:clamp(24px,4vw,56px);color:#fff;text-align:left;display:block">
-              <span class="poster-kicker">{{pr.category}}</span>
-              <span class="poster-title">{{pr.title}}</span>
-              <span style="display:inline-flex;align-items:center;gap:10px;margin-top:18px;font-size:14px;color:#fff;font-weight:700">▶ Watch film</span>
-            </span>
-          </button>
-        </sc-for>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="panel-scrim" data-panel-scrim></div>
-</div>
-</section>
-
-<!-- ============ PANEL 4 — GALLERY ============ -->
-<section class="panel" data-panel="4">
-<div class="panel-inner" data-panel-inner>
-  <section id="gallery" style="padding:clamp(110px,14vw,180px) clamp(20px,4vw,56px);max-width:1400px;margin:0 auto">
-    <div class="reveal" style="margin-bottom:40px">
-      <div class="eyebrow">VIDEO GALLERY</div>
-      <p class="display" style="font-size:clamp(28px,4.5vw,56px)">Every format. Every story.</p>
-    </div>
-    <div class="reveal" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px">
-      <sc-for list="{{filterTabs}}" as="f" hint-placeholder-count="10">
-        <button onClick="{{f.onClick}}" class="filter-btn" aria-pressed="{{f.active}}" style="{{f.style}}">{{f.label}}</button>
-      </sc-for>
-    </div>
-    <div class="gallery-grid">
-      <sc-for list="{{galleryFiltered}}" as="g" hint-placeholder-count="10">
-        <button onClick="{{g.onClick}}" data-cursor="play" class="gallery-card reveal" aria-label="{{g.aria}}" style="{{g.style}}">
-          <img src="{{g.thumb}}" alt="" loading="lazy" decoding="async" class="gallery-thumb">
-          <span class="gallery-meta">
-            <span class="poster-kicker">{{g.tag}}</span>
-            <span class="poster-title">{{g.title}}</span>
-          </span>
-          <span class="gallery-play">▶</span>
-        </button>
-      </sc-for>
-    </div>
-  </section>
-  <div class="panel-scrim" data-panel-scrim></div>
-</div>
-</section>
-
-<!-- ============ PANEL 5 — SHOWREEL ============ -->
-<section class="panel" data-panel="reel">
-<div class="panel-inner" data-panel-inner>
-  <section id="showreel" class="reel-section">
-    <div class="reel-head reveal">
-      <div class="eyebrow">SHOWREEL</div>
-      <p class="display" style="font-size:clamp(30px,5.2vw,68px);line-height:1.02">{{showreel.heading}}</p>
-      <p class="reel-sub">{{showreel.blurb}}</p>
-    </div>
-
-    <button onClick="{{showreel.onClick}}" data-cursor="play" class="reel-stage reveal" aria-label="{{showreel.aria}}">
-      <img src="{{showreel.thumb}}" alt="" decoding="async" class="reel-thumb">
-      <span class="reel-scrim"></span>
-      <span class="reel-play" aria-hidden="true">
-        <span class="reel-play-ring"></span>
-        <span class="reel-play-tri">▶</span>
-      </span>
-      <span class="reel-meta">Watch the reel</span>
-    </button>
-  </section>
-  <div class="panel-scrim" data-panel-scrim></div>
-</div>
-</section>
-
-<!-- ============ PANEL 6 — PROCESS ============ -->
-<section class="panel" data-panel="5">
-<div class="panel-inner" data-panel-inner>
-  <section id="process" style="padding:clamp(115px,15vw,190px) clamp(20px,4vw,56px);max-width:1100px;margin:0 auto">
-    <div class="reveal" style="margin-bottom:50px">
-      <div class="eyebrow">HOW IT'S MADE</div>
-      <p class="display" style="font-size:clamp(28px,4.5vw,56px)">The editing process.</p>
-    </div>
-    <div style="display:flex;flex-direction:column">
-      <sc-for list="{{timeline}}" as="step" hint-placeholder-count="6">
-        <div class="timeline-row reveal">
-          <div class="display" style="font-size:28px;color:var(--a)">{{step.n}}</div>
-          <div>
-            <div style="font-size:22px;font-weight:700">{{step.title}}</div>
-            <div style="font-size:15px;color:var(--muted);margin-top:6px;max-width:560px">{{step.desc}}</div>
+                <div ref="{{horizWrapRef}}" class="work-viewport">
+                  <div ref="{{trackRef}}" class="work-track">
+                    <sc-for list="{{projects}}" as="pr" hint-placeholder-count="6">
+                      <button onClick="{{pr.onClick}}" data-cursor="play" class="project-card" aria-label="{{pr.aria}}">
+                        <img src="{{pr.thumb}}" alt="" loading="lazy" decoding="async" class="project-thumb">
+                        <span class="project-scrim"></span>
+                        <span
+                          style="position:absolute;left:0;right:0;bottom:0;padding:clamp(24px,4vw,56px);color:#fff;text-align:left;display:block">
+                          <span class="poster-kicker">{{pr.category}}</span>
+                          <span class="poster-title">{{pr.title}}</span>
+                          <span
+                            style="display:inline-flex;align-items:center;gap:10px;margin-top:18px;font-size:14px;color:#fff;font-weight:700">▶
+                            Watch film</span>
+                        </span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel-scrim" data-panel-scrim></div>
           </div>
-        </div>
-      </sc-for>
-    </div>
-  </section>
-  <div class="panel-scrim" data-panel-scrim></div>
-</div>
-</section>
+        </section>
 
-<!-- ============ PANEL 6 — CLIENTS + TESTIMONIALS ============ -->
-<section class="panel" data-panel="6">
-<div class="panel-inner" data-panel-inner>
-  <div class="marquee-strip" style="border-top:none;border-radius:34px 34px 0 0">
-    <div class="marquee-track marquee-track--rev">
-      <sc-for list="{{clientLogos}}" as="c" hint-placeholder-count="16">
-        <span class="client-chip" title="{{c.name}}">
-          <img class="client-mark" src="{{c.imgSrc}}" alt="" aria-hidden="true" loading="lazy" decoding="async" style="{{c.imgStyle}}">
-          <span class="client-word" style="{{c.wordStyle}}">{{c.name}}</span>
-        </span>
-      </sc-for>
-    </div>
-  </div>
+        <!-- ============ PANEL 4 — GALLERY ============ -->
+        <section class="panel" data-panel="4">
+          <div class="panel-inner" data-panel-inner>
+            <section id="gallery"
+              style="padding:clamp(110px,14vw,180px) clamp(20px,4vw,56px);max-width:1400px;margin:0 auto">
+              <div class="reveal" style="margin-bottom:40px">
+                <div class="eyebrow">VIDEO GALLERY</div>
+                <p class="display" style="font-size:clamp(28px,4.5vw,56px)">Every format. Every story.</p>
+              </div>
+              <div class="reveal" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px">
+                <sc-for list="{{filterTabs}}" as="f" hint-placeholder-count="10">
+                  <button onClick="{{f.onClick}}" class="filter-btn" aria-pressed="{{f.active}}"
+                    style="{{f.style}}">{{f.label}}</button>
+                </sc-for>
+              </div>
+              <div class="gallery-grid">
+                <sc-for list="{{galleryFiltered}}" as="g" hint-placeholder-count="10">
+                  <button onClick="{{g.onClick}}" data-cursor="play" class="gallery-card reveal" aria-label="{{g.aria}}"
+                    style="{{g.style}}">
+                    <img src="{{g.thumb}}" alt="" loading="lazy" decoding="async" class="gallery-thumb">
+                    <span class="gallery-meta">
+                      <span class="poster-kicker">{{g.tag}}</span>
+                      <span class="poster-title">{{g.title}}</span>
+                    </span>
+                    <span class="gallery-play">▶</span>
+                  </button>
+                </sc-for>
+              </div>
+            </section>
+            <div class="panel-scrim" data-panel-scrim></div>
+          </div>
+        </section>
 
-  <section style="padding:clamp(115px,15vw,190px) clamp(20px,4vw,56px);max-width:900px;margin:0 auto;text-align:center">
-    <div class="eyebrow reveal" style="margin-bottom:40px">CLIENT WORDS</div>
-    <!-- Reserves enough height that the dots below don't jump as slides rotate.
+        <!-- ============ PANEL 5 — SHOWREEL ============ -->
+        <section class="panel" data-panel="reel">
+          <div class="panel-inner" data-panel-inner>
+            <section id="showreel" class="reel-section">
+              <div class="reel-head reveal">
+                <div class="eyebrow">SHOWREEL</div>
+                <p class="display" style="font-size:clamp(30px,5.2vw,68px);line-height:1.02">{{showreel.heading}}</p>
+                <p class="reel-sub">{{showreel.blurb}}</p>
+              </div>
+
+              <button onClick="{{showreel.onClick}}" data-cursor="play" class="reel-stage reveal"
+                aria-label="{{showreel.aria}}">
+                <img src="{{showreel.thumb}}" alt="" decoding="async" class="reel-thumb">
+                <span class="reel-scrim"></span>
+                <span class="reel-play" aria-hidden="true">
+                  <span class="reel-play-ring"></span>
+                  <span class="reel-play-tri">▶</span>
+                </span>
+                <span class="reel-meta">Watch the reel</span>
+              </button>
+            </section>
+            <div class="panel-scrim" data-panel-scrim></div>
+          </div>
+        </section>
+
+        <!-- ============ PANEL 6 — PROCESS ============ -->
+        <section class="panel" data-panel="5">
+          <div class="panel-inner" data-panel-inner>
+            <section id="process"
+              style="padding:clamp(115px,15vw,190px) clamp(20px,4vw,56px);max-width:1100px;margin:0 auto">
+              <div class="reveal" style="margin-bottom:50px">
+                <div class="eyebrow">HOW IT'S MADE</div>
+                <p class="display" style="font-size:clamp(28px,4.5vw,56px)">The editing process.</p>
+              </div>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{timeline}}" as="step" hint-placeholder-count="6">
+                  <div class="timeline-row reveal">
+                    <div class="display" style="font-size:28px;color:var(--a)">{{step.n}}</div>
+                    <div>
+                      <div style="font-size:22px;font-weight:700">{{step.title}}</div>
+                      <div style="font-size:15px;color:var(--muted);margin-top:6px;max-width:560px">{{step.desc}}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+            <div class="panel-scrim" data-panel-scrim></div>
+          </div>
+        </section>
+
+        <!-- ============ PANEL 6 — CLIENTS + TESTIMONIALS ============ -->
+        <section class="panel" data-panel="6">
+          <div class="panel-inner" data-panel-inner>
+            <div class="marquee-strip" style="border-top:none;border-radius:34px 34px 0 0">
+              <div class="marquee-track marquee-track--rev">
+                <sc-for list="{{clientLogos}}" as="c" hint-placeholder-count="16">
+                  <span class="client-chip" title="{{c.name}}">
+                    <img class="client-mark" src="{{c.imgSrc}}" alt="" aria-hidden="true" loading="lazy"
+                      decoding="async" style="{{c.imgStyle}}">
+                    <span class="client-word" style="{{c.wordStyle}}">{{c.name}}</span>
+                  </span>
+                </sc-for>
+              </div>
+            </div>
+
+            <section
+              style="padding:clamp(115px,15vw,190px) clamp(20px,4vw,56px);max-width:900px;margin:0 auto;text-align:center">
+              <div class="eyebrow reveal" style="margin-bottom:40px">CLIENT WORDS</div>
+              <!-- Reserves enough height that the dots below don't jump as slides rotate.
          Dropping the job-title line took ~40px off every slide, so this came
          down from a flat 280px, which now left a visible hole under the name. -->
-    <div style="position:relative;min-height:clamp(150px,24vw,190px);perspective:1200px">
-      <sc-for list="{{testimonialsRendered}}" as="t" hint-placeholder-count="4">
-        <div style="{{t.style}}">
-          <p class="display" style="font-size:clamp(20px,2.6vw,32px);line-height:1.3;margin:0 0 22px">{{t.quote}}</p>
-          <div style="font-size:14px;font-weight:700">{{t.name}}</div>
-        </div>
-      </sc-for>
-    </div>
-    <div style="display:flex;justify-content:center;gap:10px;margin-top:30px">
-      <sc-for list="{{testDots}}" as="d" hint-placeholder-count="4">
-        <button onClick="{{d.onClick}}" aria-label="{{d.label}}" style="{{d.style}}"></button>
-      </sc-for>
-    </div>
-  </section>
-  <div class="panel-scrim" data-panel-scrim></div>
-</div>
-</section>
-
-<!-- ============ PANEL 7 — TOOLKIT (star + glassmorphism) ============ -->
-<section class="panel" data-panel="7">
-<div class="panel-inner tools-panel" data-panel-inner>
-  <div ref="{{toolsBgRef}}" class="tools-bg" aria-hidden="true"></div>
-  <div class="tools-bg-grain" aria-hidden="true"></div>
-  <div class="tools-veil" aria-hidden="true"></div>
-
-  <section id="skills" class="tools-content" style="padding:clamp(115px,15vw,190px) clamp(20px,4vw,56px);max-width:1300px;margin:0 auto">
-    <div class="reveal" style="margin-bottom:clamp(40px,6vw,64px);text-align:center">
-      <div class="eyebrow">TOOLKIT</div>
-      <p class="display" style="font-size:clamp(28px,4.5vw,56px)">Built with the right tools.</p>
-      <p style="font-size:15px;color:var(--muted);max-width:540px;margin:18px auto 0;line-height:1.7">The AI stack and the editing suite behind every cut, grade and composite.</p>
-    </div>
-
-    <div class="tool-group reveal">
-      <div class="tool-group-head">
-        <span class="tool-group-label">AI TOOLS</span>
-        <span class="tool-group-rule" aria-hidden="true"></span>
-        <span class="tool-group-count">{{aiCount}}</span>
-      </div>
-      <div class="tool-grid">
-        <sc-for list="{{aiTools}}" as="t" hint-placeholder-count="12">
-          <div class="tool-card" data-cursor="expand">
-            <span class="tool-logo" style="{{t.tileStyle}}">
-              <span class="tool-glyph" style="{{t.glyphStyle}}"></span>
-              <img class="tool-img" src="{{t.imgSrc}}" alt="" aria-hidden="true" loading="lazy" decoding="async" style="{{t.imgStyle}}">
-            </span>
-            <span class="tool-name">{{t.name}}</span>
+              <div style="position:relative;min-height:clamp(150px,24vw,190px);perspective:1200px">
+                <sc-for list="{{testimonialsRendered}}" as="t" hint-placeholder-count="4">
+                  <div style="{{t.style}}">
+                    <p class="display" style="font-size:clamp(20px,2.6vw,32px);line-height:1.3;margin:0 0 22px">
+                      {{t.quote}}</p>
+                    <div style="font-size:14px;font-weight:700">{{t.name}}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:center;gap:10px;margin-top:30px">
+                <sc-for list="{{testDots}}" as="d" hint-placeholder-count="4">
+                  <button onClick="{{d.onClick}}" aria-label="{{d.label}}" style="{{d.style}}"></button>
+                </sc-for>
+              </div>
+            </section>
+            <div class="panel-scrim" data-panel-scrim></div>
           </div>
-        </sc-for>
-      </div>
-    </div>
+        </section>
 
-    <div class="tool-group reveal">
-      <div class="tool-group-head">
-        <span class="tool-group-label">SOFTWARE</span>
-        <span class="tool-group-rule" aria-hidden="true"></span>
-        <span class="tool-group-count">{{swCount}}</span>
-      </div>
-      <div class="tool-grid">
-        <sc-for list="{{software}}" as="t" hint-placeholder-count="6">
-          <div class="tool-card" data-cursor="expand">
-            <span class="tool-logo" style="{{t.tileStyle}}">
-              <span class="tool-glyph" style="{{t.glyphStyle}}"></span>
-              <img class="tool-img" src="{{t.imgSrc}}" alt="" aria-hidden="true" loading="lazy" decoding="async" style="{{t.imgStyle}}">
-            </span>
-            <span class="tool-name">{{t.name}}</span>
+        <!-- ============ PANEL 7 — TOOLKIT (star + glassmorphism) ============ -->
+        <section class="panel" data-panel="7">
+          <div class="panel-inner tools-panel" data-panel-inner>
+            <div ref="{{toolsBgRef}}" class="tools-bg" aria-hidden="true"></div>
+            <div class="tools-bg-grain" aria-hidden="true"></div>
+            <div class="tools-veil" aria-hidden="true"></div>
+
+            <section id="skills" class="tools-content"
+              style="padding:clamp(115px,15vw,190px) clamp(20px,4vw,56px);max-width:1300px;margin:0 auto">
+              <div class="reveal" style="margin-bottom:clamp(40px,6vw,64px);text-align:center">
+                <div class="eyebrow">TOOLKIT</div>
+                <p class="display" style="font-size:clamp(28px,4.5vw,56px)">Built with the right tools.</p>
+                <p style="font-size:15px;color:var(--muted);max-width:540px;margin:18px auto 0;line-height:1.7">The AI
+                  stack and the editing suite behind every cut, grade and composite.</p>
+              </div>
+
+              <div class="tool-group reveal">
+                <div class="tool-group-head">
+                  <span class="tool-group-label">AI TOOLS</span>
+                  <span class="tool-group-rule" aria-hidden="true"></span>
+                  <span class="tool-group-count">{{aiCount}}</span>
+                </div>
+                <div class="tool-grid">
+                  <sc-for list="{{aiTools}}" as="t" hint-placeholder-count="12">
+                    <div class="tool-card" data-cursor="expand">
+                      <span class="tool-logo" style="{{t.tileStyle}}">
+                        <span class="tool-glyph" style="{{t.glyphStyle}}"></span>
+                        <img class="tool-img" src="{{t.imgSrc}}" alt="" aria-hidden="true" loading="lazy"
+                          decoding="async" style="{{t.imgStyle}}">
+                      </span>
+                      <span class="tool-name">{{t.name}}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div class="tool-group reveal">
+                <div class="tool-group-head">
+                  <span class="tool-group-label">SOFTWARE</span>
+                  <span class="tool-group-rule" aria-hidden="true"></span>
+                  <span class="tool-group-count">{{swCount}}</span>
+                </div>
+                <div class="tool-grid">
+                  <sc-for list="{{software}}" as="t" hint-placeholder-count="6">
+                    <div class="tool-card" data-cursor="expand">
+                      <span class="tool-logo" style="{{t.tileStyle}}">
+                        <span class="tool-glyph" style="{{t.glyphStyle}}"></span>
+                        <img class="tool-img" src="{{t.imgSrc}}" alt="" aria-hidden="true" loading="lazy"
+                          decoding="async" style="{{t.imgStyle}}">
+                      </span>
+                      <span class="tool-name">{{t.name}}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </section>
+            <div class="panel-scrim" data-panel-scrim></div>
           </div>
-        </sc-for>
-      </div>
-    </div>
-  </section>
-  <div class="panel-scrim" data-panel-scrim></div>
-</div>
-</section>
+        </section>
 
-<!-- ============ PANEL 8 — CONTACT + FOOTER ============ -->
-<section class="panel" data-panel="8">
-<div class="panel-inner" data-panel-inner>
-  <section id="contact" style="position:relative;padding:clamp(120px,16vw,180px) clamp(20px,4vw,56px);text-align:center;overflow:hidden">
-    <!-- Lightfall. The reference is a React/WebGL component, so this is a
+        <!-- ============ PANEL 8 — CONTACT + FOOTER ============ -->
+        <section class="panel" data-panel="8">
+          <div class="panel-inner" data-panel-inner>
+            <section id="contact"
+              style="position:relative;padding:clamp(120px,16vw,180px) clamp(20px,4vw,56px);text-align:center;overflow:hidden">
+              <!-- Lightfall. The reference is a React/WebGL component, so this is a
          canvas 2D port carrying the same knobs (see setupLightfall) — light
          streaks raining from a bloom above the top edge, in the given palette.
          Canvas rather than WebGL keeps it off the GPU-context budget, and it
          only runs while the section is actually on screen.
          The veil feathers the vivid blue plate into the page background so it
          reads as a backdrop rather than a hard rectangle dropped on the page. -->
-    <div class="lightfall" aria-hidden="true">
-      <canvas ref="{{lightfallRef}}" class="lightfall-canvas"></canvas>
-      <div class="lightfall-veil"></div>
-    </div>
-    <div class="reveal" style="position:relative;z-index:1">
-      <p class="display" style="font-size:clamp(34px,7vw,96px);line-height:1;margin:0 0 44px">Let's create something<br>unforgettable.</p>
-      <a href="{{contact.mailto}}" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}" data-cursor="expand" class="btn btn--solid btn--lg">Start a Project →</a>
-      <div class="contact-lines">
-        <a href="{{contact.mailto}}" class="contact-line">{{contact.email}}</a>
-        <a href="{{contact.phoneHref}}" class="contact-line">{{contact.phoneDisplay}}</a>
-        <a href="{{contact.instagram}}" target="_blank" rel="noopener noreferrer" class="contact-line">@abhayy_jain</a>
+              <div class="lightfall" aria-hidden="true">
+                <canvas ref="{{lightfallRef}}" class="lightfall-canvas"></canvas>
+                <div class="lightfall-veil"></div>
+              </div>
+              <div class="reveal" style="position:relative;z-index:1">
+                <p class="display" style="font-size:clamp(34px,7vw,96px);line-height:1;margin:0 0 44px">Let's create
+                  something<br>unforgettable.</p>
+                <a href="{{contact.mailto}}" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}"
+                  data-cursor="expand" class="btn btn--solid btn--lg">Start a Project →</a>
+                <div class="contact-lines">
+                  <a href="{{contact.mailto}}" class="contact-line">{{contact.email}}</a>
+                  <a href="{{contact.phoneHref}}" class="contact-line">{{contact.phoneDisplay}}</a>
+                  <a href="{{contact.instagram}}" target="_blank" rel="noopener noreferrer"
+                    class="contact-line">@abhayy_jain</a>
+                </div>
+              </div>
+            </section>
+
+            <footer
+              style="padding:60px clamp(20px,4vw,56px) 40px;border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent);display:flex;flex-wrap:wrap;justify-content:space-between;gap:30px;max-width:1400px;margin:0 auto">
+              <div>
+                <div class="display" style="font-size:22px">Abhay Jain</div>
+                <div style="font-size:13px;color:var(--muted);margin-top:6px">{{contact.email}}</div>
+              </div>
+              <div style="display:flex;gap:22px;flex-wrap:wrap">
+                <sc-for list="{{socials}}" as="soc" hint-placeholder-count="3">
+                  <a href="{{soc.href}}" target="{{soc.target}}" rel="{{soc.rel}}" class="nav-link"
+                    style="font-size:13px;color:var(--muted)">{{soc.label}}</a>
+                </sc-for>
+              </div>
+              <div class="display" style="font-size:13px;letter-spacing:1px;color:var(--muted)">© 2026 — CUT WITH
+                PURPOSE</div>
+            </footer>
+          </div>
+        </section>
+
       </div>
+
+      <sc-if value="{{videoOpen}}" hint-placeholder-val="{{false}}">
+        <div class="lightbox" onClick="{{onLightboxClick}}" role="dialog" aria-modal="true" aria-label="{{videoTitle}}">
+          <button onClick="{{closeVideo}}" class="icon-btn" aria-label="Close video"
+            style="position:absolute;top:26px;right:clamp(20px,4vw,56px);width:40px;height:40px;color:#fff;border-color:rgba(255,255,255,.3);z-index:2">✕</button>
+          <div class="lightbox-frame" style="{{videoFrameStyle}}">
+            <iframe src="{{videoSrc}}"
+              style="position:absolute;inset:0;width:100%;height:100%;border:none;display:block"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen
+              title="{{videoTitle}}"></iframe>
+          </div>
+          <div class="lightbox-title">{{videoTitle}}</div>
+        </div>
+      </sc-if>
+
     </div>
-  </section>
 
-  <footer style="padding:60px clamp(20px,4vw,56px) 40px;border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent);display:flex;flex-wrap:wrap;justify-content:space-between;gap:30px;max-width:1400px;margin:0 auto">
-    <div>
-      <div class="display" style="font-size:22px">Abhay Jain</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:6px">{{contact.email}}</div>
-    </div>
-    <div style="display:flex;gap:22px;flex-wrap:wrap">
-      <sc-for list="{{socials}}" as="soc" hint-placeholder-count="3">
-        <a href="{{soc.href}}" target="{{soc.target}}" rel="{{soc.rel}}" class="nav-link" style="font-size:13px;color:var(--muted)">{{soc.label}}</a>
-      </sc-for>
-    </div>
-    <div class="display" style="font-size:13px;letter-spacing:1px;color:var(--muted)">© 2026 — CUT WITH PURPOSE</div>
-  </footer>
-</div>
-</section>
-
-</div>
-
-<sc-if value="{{videoOpen}}" hint-placeholder-val="{{false}}">
-<div class="lightbox" onClick="{{onLightboxClick}}" role="dialog" aria-modal="true" aria-label="{{videoTitle}}">
-  <button onClick="{{closeVideo}}" class="icon-btn" aria-label="Close video" style="position:absolute;top:26px;right:clamp(20px,4vw,56px);width:40px;height:40px;color:#fff;border-color:rgba(255,255,255,.3);z-index:2">✕</button>
-  <div class="lightbox-frame" style="{{videoFrameStyle}}">
-    <iframe
-      src="{{videoSrc}}"
-      style="position:absolute;inset:0;width:100%;height:100%;border:none;display:block"
-      allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-      allowfullscreen
-      title="{{videoTitle}}"
-    ></iframe>
-  </div>
-  <div class="lightbox-title">{{videoTitle}}</div>
-</div>
-</sc-if>
-
-</div>
-
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props="{
+  </x-dc>
+  <script type="text/x-dc" data-dc-script data-props="{
   &quot;$preview&quot;: {&quot;width&quot;: 1600, &quot;height&quot;: 1000},
   &quot;defaultTheme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;crimson&quot;, &quot;options&quot;: [&quot;crimson&quot;,&quot;cyber&quot;,&quot;emerald&quot;,&quot;sunset&quot;,&quot;mono&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Behavior&quot;},
   &quot;enableMusic&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Behavior&quot;},
@@ -1077,7 +2044,7 @@ class Component extends DCLogic {
     id: 'ixtIMhxnopc',
     res: 'maxresdefault',
     title: 'Showreel',
-    heading: 'Everything I do, in one cut.',
+    heading: 'Documentary - Maskhra',
     blurb: 'A run through recent work — commercials, AI-generated video, brand films and social.'
   };
 
@@ -2477,4 +3444,5 @@ class Component extends DCLogic {
 }
 </script>
 </body>
+
 </html>
