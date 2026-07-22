@@ -1551,8 +1551,11 @@
         }
 
         /* ---------- mobile responsive fixes (≤ 900px already handled above) ---------- */
-        /* Prevent any section from horizontally overflowing the viewport */
-        .stack, .panel-inner { overflow-x: clip; }
+        /* overflow: clip (not overflow-x: clip) — setting overflow-x alone coerces
+           overflow-y from visible to auto per CSS spec, which creates unintended scroll
+           containers that break position:sticky panels on strict WebKit (iOS 19+).
+           overflow: clip clips both axes WITHOUT creating any scroll container. */
+        .stack, .panel-inner { overflow: clip; }
 
         @media (max-width: 480px) {
 
