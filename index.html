@@ -128,6 +128,38 @@
           }
         }
 
+        /* Aurora bands: skew and slide so the ribbon undulates instead of sliding
+           rigidly. Transform-only, so these stay off the paint path. */
+        @keyframes auroraDriftA {
+          from {
+            transform: translate3d(-6%, 0, 0) scaleY(1) skewY(-2deg)
+          }
+
+          to {
+            transform: translate3d(6%, -8%, 0) scaleY(1.25) skewY(2deg)
+          }
+        }
+
+        @keyframes auroraDriftB {
+          from {
+            transform: translate3d(8%, 4%, 0) scaleY(1.15) skewY(3deg)
+          }
+
+          to {
+            transform: translate3d(-8%, -4%, 0) scaleY(.9) skewY(-3deg)
+          }
+        }
+
+        @keyframes auroraDriftC {
+          from {
+            transform: translate3d(10%, 0, 0) scaleX(.9)
+          }
+
+          to {
+            transform: translate3d(-10%, 0, 0) scaleX(1.2)
+          }
+        }
+
         /* ---------- scroll-overlap panel stack ---------- */
         .stack {
           position: relative;
@@ -1250,16 +1282,12 @@
         .project-card:hover .project-thumb {
           transform: scale(1.04)
         }
-
-        .project-scrim {
-          position: absolute;
-          inset: 0;
           pointer-events: none;
           background: linear-gradient(to top, rgba(0, 0, 0, .9), rgba(0, 0, 0, .15) 55%, transparent);
         }
 
-        /* ---------- lightfall ---------- */
-        .lightfall {
+        /* ---------- aurora ---------- */
+        .aurora {
           position: absolute;
           inset: 0;
           pointer-events: none;
@@ -1267,20 +1295,52 @@
           z-index: 0
         }
 
-        .lightfall-canvas {
-          display: block;
-          width: 100%;
-          height: 100%
+        .aurora-band {
+          position: absolute;
+          left: -30%;
+          right: -30%;
+          height: 46%;
+          top: 27%;
+          border-radius: 50%;
+          filter: blur(58px);
+          opacity: .55;
+          will-change: transform;
         }
 
-        /* Feathers the plate into the page on every edge, and darkens the lower half
-   so the closing headline and the CTA keep their contrast over it. */
-        .lightfall-veil {
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(to bottom, var(--bg) 0%, transparent 26%, color-mix(in oklab, var(--bg) 45%, transparent) 72%, var(--bg) 100%),
-            linear-gradient(to right, var(--bg) 0%, transparent 22%, transparent 78%, var(--bg) 100%);
+        .aurora-band--a {
+          background: radial-gradient(ellipse 50% 100% at 50% 50%,
+              color-mix(in oklab, var(--a) 85%, transparent), transparent 72%);
+          animation: auroraDriftA 22s ease-in-out infinite alternate;
+        }
+
+        .aurora-band--b {
+          background: radial-gradient(ellipse 42% 100% at 42% 50%,
+              color-mix(in oklab, var(--b) 78%, transparent), transparent 70%);
+          animation: auroraDriftB 29s ease-in-out infinite alternate;
+          opacity: .42;
+        }
+
+        .aurora-band--c {
+          height: 26%;
+          top: 37%;
+          background: radial-gradient(ellipse 34% 100% at 58% 50%,
+              color-mix(in oklab, #fff 70%, var(--a)), transparent 68%);
+          animation: auroraDriftC 18s ease-in-out infinite alternate;
+          opacity: .3;
+        }
+
+        @media (max-width: 900px) {
+
+          /* One band and a cheaper blur: three stacked 58px blurs is the single most
+             expensive thing that would be on screen at this size. */
+          .aurora-band {
+            filter: blur(40px)
+          }
+
+          .aurora-band--b,
+          .aurora-band--c {
+            display: none
+          }
         }
 
         /* ---------- contact ---------- */
@@ -1957,19 +2017,15 @@
         <section class="panel" data-panel="8">
           <div class="panel-inner" data-panel-inner>
             <section id="contact"
-              style="position:relative;padding:clamp(120px,16vw,180px) clamp(20px,4vw,56px);text-align:center;overflow:hidden">
-              <!-- Lightfall. The reference is a React/WebGL component, so this is a
-         canvas 2D port carrying the same knobs (see setupLightfall) — light
-         streaks raining from a bloom above the top edge, in the given palette.
-         Canvas rather than WebGL keeps it off the GPU-context budget, and it
-         only runs while the section is actually on screen.
-         The veil feathers the vivid blue plate into the page background so it
-         reads as a backdrop rather than a hard rectangle dropped on the page. -->
-              <div class="lightfall" aria-hidden="true">
-                <canvas ref="{{lightfallRef}}" class="lightfall-canvas"></canvas>
-                <div class="lightfall-veil"></div>
+              <!-- Soft-aurora ribbon behind the closing line. Three overlapping bands
+                   drifting at different rates, which is enough to read as one living
+                   light rather than a static gradient. -->
+              <div class="aurora" aria-hidden="true">
+                <span class="aurora-band aurora-band--a"></span>
+                <span class="aurora-band aurora-band--b"></span>
+                <span class="aurora-band aurora-band--c"></span>
               </div>
-              <div class="reveal" style="position:relative;z-index:1">
+              <div class="reveal" style="position:relative">
                 <p class="display" style="font-size:clamp(34px,7vw,96px);line-height:1;margin:0 0 44px">Let's create
                   something<br>unforgettable.</p>
                 <a href="{{contact.mailto}}" onMouseMove="{{magnetMove}}" onMouseLeave="{{magnetLeave}}"
@@ -2224,7 +2280,7 @@ This project was an incredible learning experience—both behind the camera and 
   trackRef = React.createRef();
   statsWrapRef = React.createRef();
   toolsBgRef = React.createRef();
-  lightfallRef = React.createRef();
+
   numRefs = this.statsData.map(() => React.createRef());
 
   particlesData = Array.from({length:22}).map(() => ({
@@ -2255,8 +2311,7 @@ This project was an incredible learning experience—both behind the camera and 
     this.onResize = this.onResize.bind(this);
     this.onWorkScroll = this.onWorkScroll.bind(this);
     this.syncWorkArrows = this.syncWorkArrows.bind(this);
-    this.lfResize = this.lfResize.bind(this);
-    this.lfMouse = this.lfMouse.bind(this);
+
     this.onWorkPrev = this.onWorkPrev.bind(this);
     this.onWorkNext = this.onWorkNext.bind(this);
     this.workDragStart = this.workDragStart.bind(this);
@@ -2294,7 +2349,7 @@ This project was an incredible learning experience—both behind the camera and 
     }, 6000);
 
     this.setupWorkDrag();
-    this.setupLightfall();
+
     // Six cards always overflow, but resolve it from the DOM rather than assume.
     this.syncWorkArrows();
     document.addEventListener('visibilitychange', this.onVisibility);
@@ -2390,10 +2445,7 @@ This project was an incredible learning experience—both behind the camera and 
     if (this.workNextBtn) this.workNextBtn.removeEventListener('click', this.onWorkNext);
     window.removeEventListener('load', this.syncWorkArrows);
     if (this.workRO) this.workRO.disconnect();
-    this.lfStop();
-    window.removeEventListener('resize', this.lfResize);
-    window.removeEventListener('mousemove', this.lfMouse);
-    if (this.lfIO) this.lfIO.disconnect();
+
     this.workDragEnd();
     if (this.workSnapTimer) clearTimeout(this.workSnapTimer);
     if (this.workNudgeTimer) clearTimeout(this.workNudgeTimer);
@@ -2686,202 +2738,6 @@ This project was an incredible learning experience—both behind the camera and 
   onWorkPrev() { this.workPage(-1); }
   onWorkNext() { this.workPage(1); }
 
-  // ---------------------------------------------------------------- lightfall
-  // Canvas-2D port of the reference WebGL component, carrying its parameters
-  // across. Streaks fall from a bloom above the top edge, fanning out from a
-  // vanishing point; `zoom` sets how far above the frame that point sits, so a
-  // higher value spreads the fan wider.
-  LIGHTFALL = {
-    // Crimson build of the reference palette, keeping its pale / saturated /
-    // warm-accent roles. The base is deliberately deep rather than a direct
-    // red translation of #0A29FF: red reads far brighter than blue at the same
-    // saturation, and the section's CTA is itself brand red, so a hot backdrop
-    // would flatten the button against it. Brightness comes from the bloom.
-    colors: ['#FFC9C2', '#E50914', '#FF6B8A'],
-    backgroundColor: '#6E0812',
-    speed: 0.5, streakWidth: 1, streakLength: 1, glow: 1,
-    density: 0.6, twinkle: 1, zoom: 3, backgroundGlow: 0.5, opacity: 1,
-    mouseStrength: 0.5, mouseRadius: 1
-  };
-
-  setupLightfall() {
-    const cv = this.lightfallRef.current
-      || (this.rootRef.current && this.rootRef.current.querySelector('.lightfall-canvas'));
-    if (!cv) return;
-    this.lfCanvas = cv;
-    this.lfCtx = cv.getContext('2d', { alpha: false });
-    if (!this.lfCtx) return;
-
-    const P = this.LIGHTFALL;
-    // density scales the count with area, so a wide desktop hero is not sparse
-    // and a phone is not needlessly dense.
-    const area = Math.max(1, (cv.clientWidth * cv.clientHeight) / (1280 * 600));
-    const base = this.isCoarse ? 80 : 165;
-    this.lfCount = Math.round(base * P.density * Math.min(1.6, Math.max(0.5, area)));
-    this.lfStreaks = Array.from({ length: this.lfCount }, () => this.lfMakeStreak(true));
-
-    this.lfResize();
-    window.addEventListener('resize', this.lfResize);
-    if (!this.isCoarse) window.addEventListener('mousemove', this.lfMouse, { passive: true });
-
-    // Only run while the section is actually on screen — this is the most
-    // expensive thing on the page and it lives at the very bottom of it.
-    this.lfIO = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        this.lfVisible = en.isIntersecting;
-        if (this.lfVisible) this.lfStart(); else this.lfStop();
-      });
-    }, { threshold: 0.01 });
-    this.lfIO.observe(cv);
-
-    if (this.reduceMotion) { this.lfDraw(0); return; }   // one static frame
-  }
-
-  lfMakeStreak(seeded) {
-    const P = this.LIGHTFALL;
-    return {
-      // fan spread, biased toward straight down
-      a: (Math.random() - 0.5) * 1.95,
-      p: seeded ? Math.random() : -Math.random() * 0.25,
-      v: (0.06 + Math.random() * 0.16) * P.speed,
-      len: (0.10 + Math.random() * 0.24) * P.streakLength,
-      w: (0.35 + Math.random() * 1.05) * P.streakWidth,
-      c: P.colors[(Math.random() * P.colors.length) | 0],
-      tw: Math.random() * Math.PI * 2,
-      curve: (Math.random() - 0.5) * 0.32
-    };
-  }
-
-  lfResize() {
-    const cv = this.lfCanvas;
-    if (!cv) return;
-    // Cap DPR: at 3x this canvas would be rasterising ~4x the pixels for no
-    // visible gain on a soft, blurred effect.
-    const dpr = Math.min(window.devicePixelRatio || 1, this.isCoarse ? 1.5 : 2);
-    const w = cv.clientWidth, h = cv.clientHeight;
-    if (!w || !h) return;
-    cv.width = Math.round(w * dpr);
-    cv.height = Math.round(h * dpr);
-    this.lfDpr = dpr;
-    if (!this.lfRaf) this.lfDraw(performance.now());
-  }
-
-  lfMouse(e) {
-    const cv = this.lfCanvas;
-    if (!cv) return;
-    const r = cv.getBoundingClientRect();
-    if (r.bottom < 0 || r.top > window.innerHeight) return;
-    this.lfMx = ((e.clientX - r.left) / r.width - 0.5) * 2;
-    this.lfMy = ((e.clientY - r.top) / r.height - 0.5) * 2;
-  }
-
-  lfStart() {
-    if (this.lfRaf || this.reduceMotion) return;
-    this.lfLast = performance.now();
-    const loop = (now) => {
-      this.lfRaf = requestAnimationFrame(loop);
-      this.lfDraw(now);
-    };
-    this.lfRaf = requestAnimationFrame(loop);
-  }
-
-  lfStop() {
-    if (!this.lfRaf) return;
-    cancelAnimationFrame(this.lfRaf);
-    this.lfRaf = 0;
-  }
-
-  lfDraw(now) {
-    const ctx = this.lfCtx, cv = this.lfCanvas;
-    if (!ctx || !cv || !cv.width) return;
-    const P = this.LIGHTFALL, dpr = this.lfDpr || 1;
-    const w = cv.width, h = cv.height;
-    const dt = Math.min(0.05, (now - (this.lfLast || now)) / 1000);
-    this.lfLast = now;
-
-    // ---- background plate + bloom
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = P.backgroundColor;
-    ctx.fillRect(0, 0, w, h);
-
-    const mx = (this.lfMx || 0) * P.mouseStrength;
-    const my = (this.lfMy || 0) * P.mouseStrength;
-    // vanishing point: above the top edge, pushed further out by `zoom`
-    const ox = w * (0.5 + mx * 0.06 * P.mouseRadius);
-    const oy = -h * (0.12 * P.zoom) + my * h * 0.03;
-
-    const bloom = ctx.createRadialGradient(ox, oy, 0, ox, oy, h * (0.55 + 0.5 * P.zoom * 0.25));
-    bloom.addColorStop(0, 'rgba(255,255,255,' + (0.55 * P.backgroundGlow * 2) + ')');
-    bloom.addColorStop(0.22, this.lfRgba(P.colors[0], 0.34 * P.backgroundGlow * 2));
-    bloom.addColorStop(0.62, this.lfRgba(P.colors[1], 0.30 * P.backgroundGlow * 2));
-    bloom.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = bloom;
-    ctx.fillRect(0, 0, w, h);
-
-    // Deepen the base of the frame so the plate sinks toward the page. Derived
-    // from backgroundColor rather than hardcoded: these two stops used to be
-    // fixed navy, which was invisible under a blue palette but would have left
-    // a blue cast at the bottom of any other one.
-    const sink = ctx.createLinearGradient(0, h * 0.35, 0, h);
-    sink.addColorStop(0, this.lfShade(P.backgroundColor, 0.16, 0));
-    sink.addColorStop(1, this.lfShade(P.backgroundColor, 0.11, 0.92));
-    ctx.fillStyle = sink;
-    ctx.fillRect(0, 0, w, h);
-
-    // ---- streaks
-    ctx.globalCompositeOperation = 'lighter';
-    const rMax = h * 2.05;
-    for (let i = 0; i < this.lfStreaks.length; i++) {
-      const s = this.lfStreaks[i];
-      if (!this.reduceMotion) s.p += s.v * dt;
-      if (s.p > 1.15) Object.assign(s, this.lfMakeStreak(false));
-      if (s.p < 0) continue;
-
-      const r0 = s.p * rMax;
-      const r1 = Math.max(0, r0 - s.len * rMax);
-      const a0 = s.a + s.curve * (r0 / rMax);
-      const a1 = s.a + s.curve * (r1 / rMax);
-      const x0 = ox + Math.sin(a0) * r0, y0 = oy + Math.cos(a0) * r0;
-      const x1 = ox + Math.sin(a1) * r1, y1 = oy + Math.cos(a1) * r1;
-
-      // fade in near the bloom and out at the bottom, plus per-streak twinkle
-      let alpha = Math.min(1, s.p * 4) * Math.max(0, 1 - Math.pow(s.p, 3));
-      if (P.twinkle) alpha *= 0.55 + 0.45 * Math.sin(now * 0.004 + s.tw) * P.twinkle;
-      alpha *= P.opacity;
-      if (alpha <= 0.01) continue;
-
-      const g = ctx.createLinearGradient(x1, y1, x0, y0);
-      g.addColorStop(0, this.lfRgba(s.c, 0));
-      g.addColorStop(1, this.lfRgba(s.c, alpha));
-      ctx.strokeStyle = g;
-      ctx.lineWidth = s.w * dpr;
-      ctx.lineCap = 'round';
-      if (P.glow) {
-        ctx.shadowBlur = 12 * P.glow * dpr;
-        ctx.shadowColor = this.lfRgba(s.c, alpha * 0.8);
-      }
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x0, y0);
-      ctx.stroke();
-    }
-    ctx.shadowBlur = 0;
-    ctx.globalCompositeOperation = 'source-over';
-  }
-
-  // `hex` darkened toward black by `k`, at alpha `a`.
-  lfShade(hex, k, a) {
-    const n = parseInt(hex.slice(1), 16);
-    const r = Math.round(((n >> 16) & 255) * k);
-    const g = Math.round(((n >> 8) & 255) * k);
-    const b = Math.round((n & 255) * k);
-    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
-  }
-
-  lfRgba(hex, a) {
-    const n = parseInt(hex.slice(1), 16);
-    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + Math.max(0, Math.min(1, a)) + ')';
-  }
 
   workDragStart(e) {
     // Touch already pans natively, and letting both run fights the momentum.
@@ -3428,7 +3284,7 @@ This project was an incredible learning experience—both behind the camera and 
       showreelExpanded: this.state.showreelExpanded,
       showreelCollapsed: !this.state.showreelExpanded,
       toggleShowreelExpand: () => this.setState((s) => ({ showreelExpanded: !s.showreelExpanded })),
-      lightfallRef: this.lightfallRef,
+
       filterTabs, galleryFiltered,
       videoOpen: !!this.state.video,
       videoSrc: this.state.video ? this.state.video.src : '',
