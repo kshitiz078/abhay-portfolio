@@ -715,33 +715,6 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 </div>
 </section>
 
-<!-- ============ PANEL 2 — SHOWREEL ============
-     Sits directly after the hero: the reel is the proof, so it lands before
-     anyone has to scroll past the About copy. Click-to-play rather than an
-     autoplaying background loop — it reuses the lightbox the rest of the page
-     already uses, and costs nothing until someone actually asks for it. -->
-<section class="panel" data-panel="reel">
-<div class="panel-inner" data-panel-inner>
-  <section id="showreel" class="reel-section">
-    <div class="reel-head reveal">
-      <div class="eyebrow">SHOWREEL</div>
-      <p class="display" style="font-size:clamp(30px,5.2vw,68px);line-height:1.02">{{showreel.heading}}</p>
-      <p class="reel-sub">{{showreel.blurb}}</p>
-    </div>
-
-    <button onClick="{{showreel.onClick}}" data-cursor="play" class="reel-stage reveal" aria-label="{{showreel.aria}}">
-      <img src="{{showreel.thumb}}" alt="" decoding="async" class="reel-thumb">
-      <span class="reel-scrim"></span>
-      <span class="reel-play" aria-hidden="true">
-        <span class="reel-play-ring"></span>
-        <span class="reel-play-tri">▶</span>
-      </span>
-      <span class="reel-meta">Watch the reel</span>
-    </button>
-  </section>
-  <div class="panel-scrim" data-panel-scrim></div>
-</div>
-</section>
 
 <!-- ============ PANEL 3 — ABOUT / STATS ============ -->
 <section class="panel" data-panel="2">
@@ -865,7 +838,31 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 </div>
 </section>
 
-<!-- ============ PANEL 5 — PROCESS ============ -->
+<!-- ============ PANEL 5 — SHOWREEL ============ -->
+<section class="panel" data-panel="reel">
+<div class="panel-inner" data-panel-inner>
+  <section id="showreel" class="reel-section">
+    <div class="reel-head reveal">
+      <div class="eyebrow">SHOWREEL</div>
+      <p class="display" style="font-size:clamp(30px,5.2vw,68px);line-height:1.02">{{showreel.heading}}</p>
+      <p class="reel-sub">{{showreel.blurb}}</p>
+    </div>
+
+    <button onClick="{{showreel.onClick}}" data-cursor="play" class="reel-stage reveal" aria-label="{{showreel.aria}}">
+      <img src="{{showreel.thumb}}" alt="" decoding="async" class="reel-thumb">
+      <span class="reel-scrim"></span>
+      <span class="reel-play" aria-hidden="true">
+        <span class="reel-play-ring"></span>
+        <span class="reel-play-tri">▶</span>
+      </span>
+      <span class="reel-meta">Watch the reel</span>
+    </button>
+  </section>
+  <div class="panel-scrim" data-panel-scrim></div>
+</div>
+</section>
+
+<!-- ============ PANEL 6 — PROCESS ============ -->
 <section class="panel" data-panel="5">
 <div class="panel-inner" data-panel-inner>
   <section id="process" style="padding:clamp(115px,15vw,190px) clamp(20px,4vw,56px);max-width:1100px;margin:0 auto">
@@ -1061,8 +1058,8 @@ class Component extends DCLogic {
   };
 
   navLinksData = [
-    {label:'Showreel',href:'#showreel'},{label:'Work',href:'#work'},
-    {label:'Gallery',href:'#gallery'},{label:'Process',href:'#process'},
+    {label:'Work',href:'#work'},{label:'Gallery',href:'#gallery'},
+    {label:'Showreel',href:'#showreel'},{label:'Process',href:'#process'},
     {label:'Contact',href:'#contact'}
   ];
 
